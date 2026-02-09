@@ -192,6 +192,71 @@ When hosting on a web server, you may need the CORS proxy for API calls. Deploy 
 - **Drag** nodes to rearrange
 - **Toggle Physics** to freeze/unfreeze the layout
 
+## Example Graphs
+
+Notable kitties that make interesting demo graphs:
+
+| Kitty | ID | Description |
+|-------|-----|-------------|
+| Dragon | 896775 | Sold for 600 ETH - the most expensive CryptoKitty |
+| Genesis | 1 | The first CryptoKitty |
+| Founder Cat #4 | 4 | Early founder cat |
+| Founder Cat #18 | 18 | Early founder cat |
+| Kitty #100,000 | 100000 | Ecosystem milestone |
+| Cathena | 500000 | Exclusive special edition |
+| First Mistletoe | 174756 | First holiday Fancy |
+| First SantaClaws | 275808 | First holiday Fancy |
+
+**Quick-start presets** (paste into the Kitty ID field or use as `?kitties=...`):
+
+| Preset | IDs |
+|--------|-----|
+| Most expensive | `896775` |
+| Origin story | `1,4,18` |
+| Milestones | `100000,500000` |
+| Holiday Fancies | `174756,275808` |
+| All-in showcase | `896775,1,4,18,100000,174756,275808,500000` |
+
+### Generating Example Data
+
+From the `tools/` folder:
+
+**Dragon (most expensive):**
+```bash
+python3 ck_fetch.py --ids 896775 --parents 1 --children 0 -v \
+  --out ../dist/example/dragon/dragon.json
+python3 download_svgs.py ../dist/example/dragon/dragon.json \
+  -o ../dist/example/dragon/svg/ --skip-existing
+```
+Load: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
+
+**Founders (origin story):**
+```bash
+python3 ck_fetch.py --ids "1,4,18" --embedded-only -v \
+  --out ../dist/example/founders/founders.json
+python3 download_svgs.py ../dist/example/founders/founders.json \
+  -o ../dist/example/founders/svg/ --skip-existing
+```
+Load: `?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/`
+
+**Milestones:**
+```bash
+python3 ck_fetch.py --ids "100000,500000" --parents 1 --children 1 --embedded-only -v \
+  --out ../dist/example/milestones/milestones.json
+python3 download_svgs.py ../dist/example/milestones/milestones.json \
+  -o ../dist/example/milestones/svg/ --skip-existing
+```
+Load: `?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/`
+
+**Holiday Fancies:**
+```bash
+python3 ck_fetch.py --ids "174756,275808" --embedded-only -v \
+  --out ../dist/example/holidays/holidays.json
+python3 download_svgs.py ../dist/example/holidays/holidays.json \
+  -o ../dist/example/holidays/svg/ --skip-existing
+```
+Load: `?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
+
 ## License
 
 MIT License - see [LICENSE](LICENSE)
@@ -201,59 +266,3 @@ MIT License - see [LICENSE](LICENSE)
 - [CryptoKitties](https://www.cryptokitties.co/) for the awesome game and API
 - [vis-network](https://visjs.github.io/vis-network/docs/network/) for the graph library
 
-
-
----
-
-additional examples:
-
-```
-Good “example graphs” to showcase CryptoKitties
-
-Here are good, recognizable anchors that produce interesting expansions.
-
-1) “Most expensive” headline example
-
-Dragon (sold for 600 ETH): 896775
-
-This is the classic “look how crazy it got” anchor, and its ancestry can be fun to explore.
-
-2) “Early history / provenance” examples (low IDs, Gen 0 era)
-
-Genesis: 1
-
-Founder Cat #4: 4
-
-Founder Cat #18: 18
-
-Low IDs are explicitly called out by CryptoKitties as historically notable.
-
-3) “Milestone” example (nice storytelling anchor)
-
-Kitty #100,000: 100000
-
-This is a great “ecosystem growth” snapshot, and it typically has a reasonable family expansion depth.
-
-4) “First holiday Fancy” examples (recognizable and visually distinct)
-
-First SantaClaws: 275808
-
-First Mistletoe: 174756
-
-Fancies are perfect demo material because they create immediate “goal breeding” context.
-
-5) “Exclusive / special drop” example
-
-Cathena (Exclusive): 500000
-
-This is a strong anchor if you want “special edition / exclusive lore” in the demo set.
-```
-
-1. dragon
-# from tools folder
-python3 ck_fetch.py --ids 896775 -vv --parents 1 --children 0 --out ../dist/example/dragon/dragon.json
-python3 download_svgs.py ../dist/example/dragon/dragon.json -o ../dist/example/dragon/svg/ --skip-existing
-
-browse to
-http://localhost:8001/index.html?kitties=896775
-http://localhost:8001/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/

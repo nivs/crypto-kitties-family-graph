@@ -2193,20 +2193,21 @@
     const kittyParam = params.get("kitty") || params.get("kitties");
     const kittyIds = parseKittyIds(kittyParam);
 
-    // Check for ?owner= (address) or ?ownerNick= (nickname) to pin owner highlight
+    // Check for ?owner= to pin owner highlight (detects address vs nickname)
     const ownerParam = params.get("owner");
-    const ownerNickParam = params.get("ownerNick");
 
     // Helper to apply owner highlight after graph loads
     const applyOwnerHighlight = () => {
-      if (ownerParam || ownerNickParam) {
+      if (ownerParam) {
         // Wait a bit for the graph to stabilize
         setTimeout(() => {
+          // Detect if it's an address (0x...) or nickname
+          const isAddress = ownerParam.startsWith("0x");
           ownerHighlightLocked = true;
-          lockedOwnerAddr = ownerParam || null;
-          lockedOwnerNick = ownerNickParam || null;
+          lockedOwnerAddr = isAddress ? ownerParam : null;
+          lockedOwnerNick = isAddress ? null : ownerParam;
           highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
-          log("Owner highlight from query param:", { owner: ownerParam, ownerNick: ownerNickParam });
+          log("Owner highlight from query param:", { owner: ownerParam, isAddress });
         }, 500);
       }
     };

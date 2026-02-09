@@ -40,8 +40,7 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 | `dataUrl` | URL to a JSON file with kitty data | `?dataUrl=./my_kitties.json` |
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
-| `owner` | Pin owner highlight by wallet address | `?owner=0x1234...` |
-| `ownerNick` | Pin owner highlight by nickname | `?ownerNick=CryptoKittyFan` |
+| `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
 
 **Examples:**
 ```

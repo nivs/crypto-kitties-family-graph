@@ -116,6 +116,20 @@
     .nav-btn:hover{border-color:rgba(255,255,255,0.28);background:rgba(30,36,54,0.95);}
     .nav-btn.hidden{visibility:hidden;}
 
+    .floating-logo{
+      position:absolute;
+      bottom:16px;
+      left:16px;
+      z-index:4;
+      opacity:0.7;
+      transition:opacity 0.2s;
+    }
+    .floating-logo:hover{opacity:1;}
+    .floating-logo img{
+      height:40px;
+      width:auto;
+    }
+
     .separator{margin-left:16px;opacity:0.5;}
     .input-narrow{width:140px;margin-left:8px;}
     .input-full{width:100%;}
@@ -178,6 +192,9 @@
       <div id="banner"></div>
       <div id="network"></div>
       <div id="tooltip" class="tooltip"></div>
+      <a href="https://www.innerlogics.com" target="_blank" class="floating-logo" title="innerlogics.com">
+        <img src="./images/innerlogics-logo.png" alt="innerlogics" />
+      </a>
       <div class="nav-controls">
         <div class="nav-row">
           <button class="nav-btn hidden"></button>

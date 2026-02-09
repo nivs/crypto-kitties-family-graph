@@ -4,6 +4,8 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 
 ![Screenshot](images/screenshot.png)
 
+**[Try the live demo →](https://ck.innerlogics.com/?kitties=896775,1,4,18,100000,174756,275808,500000)**
+
 ## Features
 
 - **Interactive Graph**: Physics-based layout with drag, zoom, and pan

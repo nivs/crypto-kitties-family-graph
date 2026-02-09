@@ -1502,10 +1502,22 @@
       displayOwnerNick = seller.nickname || seller.username || seller.name || null;
       showAuctionStatus = true;
     } else if (ownerIsContract) {
-      // Owner is auction contract but no seller info - show as "On Auction"
-      displayOwnerAddr = null;
-      displayOwnerNick = null;
-      showAuctionStatus = true;
+      // Owner is auction contract - try to get seller info from owner_profile or owner object
+      // The API sometimes puts seller info there even when technical owner is the contract
+      const ownerNick = normalizeOwnerNickname(k);
+      const ownerObj = k.owner || k.owner_profile || k.raw?.owner || k.raw?.owner_profile;
+      const ownerAddr = ownerObj && typeof ownerObj === "object" ? (ownerObj.address || ownerObj.wallet_address) : null;
+
+      if (ownerNick || ownerAddr) {
+        displayOwnerAddr = ownerAddr || null;
+        displayOwnerNick = ownerNick || null;
+        showAuctionStatus = true;
+      } else {
+        // No seller info available - show as "On Auction"
+        displayOwnerAddr = null;
+        displayOwnerNick = null;
+        showAuctionStatus = true;
+      }
     } else {
       displayOwnerAddr = rawOwnerAddr;
       displayOwnerNick = k.owner_nickname || normalizeOwnerNickname(k) || null;

@@ -454,6 +454,9 @@
   let lockedOwnerAddr = null;
   let lockedOwnerNick = null;
 
+  // Selected node state
+  let selectedNodeId = null;
+
   const resolvedImgUrl = new Map();
   const nodeBaseStyle = new Map();
 
@@ -1254,14 +1257,22 @@
 
     log("highlightOwnerKitties:", { ownerAddr, ownerNick, count: ownedIds.size, ids: Array.from(ownedIds) });
 
-    // Highlight owned nodes, dim others
+    // Highlight owned nodes, dim others (but preserve selection styling)
     const nodeUpdates = [];
     for (const id of nodes.getIds()) {
       const nid = Number(id);
       const base = nodeBaseStyle.get(nid);
       if (!base) continue;
 
-      if (ownedIds.has(nid)) {
+      // Selected node keeps selection styling
+      if (nid === selectedNodeId) {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size + 6,
+          color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else if (ownedIds.has(nid)) {
         nodeUpdates.push({
           id: nid,
           size: 56,
@@ -1271,6 +1282,7 @@
       } else {
         nodeUpdates.push({
           id: nid,
+          size: base.size,
           color: { background: base.bg, border: "rgba(255,255,255,0.1)" },
           borderWidth: 1
         });
@@ -1323,15 +1335,48 @@
       const nid = Number(id);
       const base = nodeBaseStyle.get(nid);
       if (!base) continue;
-      nodeUpdates.push({
-        id: nid,
-        size: base.size,
-        color: { background: base.bg, border: base.border },
-        borderWidth: base.borderWidth
-      });
+      // Preserve selection styling
+      if (nid === selectedNodeId) {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size + 6,
+          color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size,
+          color: { background: base.bg, border: base.border },
+          borderWidth: base.borderWidth
+        });
+      }
     }
     if (nodeUpdates.length) nodes.update(nodeUpdates);
     restoreEdgeColors();
+  }
+
+  function applySelectionStyle(id) {
+    const base = nodeBaseStyle.get(id);
+    if (!base) return;
+    nodes.update({
+      id,
+      size: base.size + 6,
+      color: { background: base.bg, border: "#ffffff" },
+      borderWidth: 3
+    });
+  }
+
+  function clearSelectionStyle(id) {
+    if (!id) return;
+    const base = nodeBaseStyle.get(id);
+    if (!base) return;
+    nodes.update({
+      id,
+      size: base.size,
+      color: { background: base.bg, border: base.border },
+      borderWidth: base.borderWidth
+    });
   }
 
   const tooltipEl = $("tooltip");
@@ -1719,8 +1764,25 @@
 
     network.on("click", (params) => {
       const id = params.nodes && params.nodes[0];
-      if (id) showSelected(Number(id));
-      else if (selectedBox) selectedBox.textContent = "None";
+      const prevSelected = selectedNodeId;
+
+      if (id) {
+        selectedNodeId = Number(id);
+        // Clear previous selection styling
+        if (prevSelected && prevSelected !== selectedNodeId) {
+          clearSelectionStyle(prevSelected);
+        }
+        // Apply selection styling to newly selected node
+        applySelectionStyle(selectedNodeId);
+        showSelected(selectedNodeId);
+      } else {
+        // Clicked on empty space - clear selection
+        selectedNodeId = null;
+        if (prevSelected) {
+          clearSelectionStyle(prevSelected);
+        }
+        if (selectedBox) selectedBox.textContent = "None";
+      }
     });
 
     network.on("doubleClick", async (params) => {
@@ -1752,8 +1814,12 @@
       // Hide tooltip
       hideTooltip();
 
-      // Restore state - respect owner highlight if pinned
-      if (ownerHighlightLocked) {
+      // Restore state - check selection first, then owner highlight
+      if (id === selectedNodeId) {
+        // This node is selected - restore to selection style
+        applySelectionStyle(id);
+        restoreEdgeColors();
+      } else if (ownerHighlightLocked) {
         // Restore node to base size first, then reapply owner highlighting
         nodes.update({ id, size: base.size });
         highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
@@ -1779,6 +1845,7 @@
     expandedIds = new Set();
     resolvedImgUrl.clear();
     nodeBaseStyle.clear();
+    selectedNodeId = null;
 
     const roots = Array.isArray(obj.root_ids) ? obj.root_ids.map(Number) : [];
     myKittyIds = new Set(roots);

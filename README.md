@@ -11,7 +11,7 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 - **Interactive Graph**: Physics-based layout with drag, zoom, and pan
 - **Family Visualization**: Pink edges for matron (mother), blue edges for sire (father)
 - **Mewtation Gems**: Diamond, Gold, Silver, and Bronze gem badges for trait discoverers
-- **Owner Highlighting**: Hover over owner names to highlight all their kitties
+- **Owner Highlighting**: Hover over owner names to highlight all their kitties (pin with 📍 or `?owner=` param)
 - **Smart Merging**: Loading connected kitties merges into existing graph
 - **Local SVG Support**: Use locally cached SVG images for faster loading
 - **Live API**: Fetch kitty data directly from CryptoKitties API
@@ -106,19 +106,27 @@ window.CK_GRAPH_DEFAULTS = {
 
 ```
 crypto-kitties-family-graph/
-├── dist/                   # Deploy this folder to web server
-│   ├── index.html          # Main HTML page
+├── dist/                       # Deploy this folder to web server
+│   ├── index.html              # Main HTML page with embedded CSS
 │   ├── js/
 │   │   └── ck-family-graph.js  # Graph visualization logic
-│   ├── images/             # Logos, mewtation gems, favicons
-│   └── example/            # Example kitty data and SVGs
-│       └── nivs/
-├── assets/                 # Source assets (not deployed)
-├── proxy/                  # CORS proxy (deploy separately if needed)
-│   └── ckproxy.php         # PHP proxy script
-└── tools/                  # Development utilities (not deployed)
-    ├── ck_fetch.py         # Fetch kitty data from API
-    └── download_svgs.py    # Download SVG images from JSON
+│   ├── images/                 # Logos, mewtation gem badges
+│   ├── example/                # Pre-generated kitty data with SVGs
+│   │   ├── nivs/               # Sample collection
+│   │   ├── dragon/             # Most expensive kitty
+│   │   ├── founders/           # Genesis + early founders
+│   │   ├── milestones/         # Kitty #100k and #500k
+│   │   └── holidays/           # Holiday Fancy cats
+│   └── (favicons, manifest)
+├── images/                     # README assets
+│   └── screenshot.png
+├── assets/                     # Source assets (not deployed)
+│   └── favicon/                # Favicon source files
+├── proxy/                      # CORS proxy (deploy separately if needed)
+│   └── ckproxy.php             # PHP proxy script
+└── tools/                      # Development utilities (not deployed)
+    ├── ck_fetch.py             # Fetch kitty data from API
+    └── download_svgs.py        # Download SVG/PNG images from JSON
 ```
 
 ## Generating Kitty Data

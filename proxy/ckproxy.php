@@ -57,12 +57,12 @@ if (!in_array($host, $allowHosts, true)) {
   exit;
 }
 
-// Fetch
+// Fetch (FOLLOWLOCATION disabled to prevent open redirect bypass of host allowlist)
 $ch = curl_init();
 curl_setopt_array($ch, [
   CURLOPT_URL => $url,
   CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_FOLLOWLOCATION => false,
   CURLOPT_HEADER => true,
   CURLOPT_CONNECTTIMEOUT => 8,
   CURLOPT_TIMEOUT => 15,

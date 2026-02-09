@@ -79,7 +79,6 @@ The graph can be embedded in other pages using an iframe with embed mode enabled
 ```javascript
 window.CK_GRAPH_DEFAULTS = {
   // ... other options ...
-  standaloneUrl: "https://ck.innerlogics.com",  // (unused - uses current host)
   githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
 };
 ```
@@ -97,7 +96,6 @@ window.CK_GRAPH_DEFAULTS = {
   svgFromApi: true,           // Load images from API (fallback if local not found)
   siteBaseUrl: "https://www.cryptokitties.co",
   dataUrl: "",                // Default JSON to load on startup
-  standaloneUrl: "https://ck.innerlogics.com",  // (unused - "Open in viewer" uses current host)
   githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
 };
 ```

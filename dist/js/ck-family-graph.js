@@ -1344,7 +1344,7 @@
       // Compact version for tooltip - just show icons and count
       return sortedGems.map(g =>
         `<span class="gem-badge gem-${g.gem}" title="${safeText(g.description)} #${g.position}">
-          <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" style="width:14px;height:14px;vertical-align:middle;" />
+          <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-md" />
         </span>`
       ).join("");
     }
@@ -1352,7 +1352,7 @@
     // Full version for right pane
     return sortedGems.map(g =>
       `<div class="gem-item">
-        <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;" />
+        <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-lg" />
         <span class="gem-label">${gemDisplayName(g.gem)}</span>
         <span class="gem-detail">${safeText(g.type)}: ${safeText(g.description)} (#${g.position})</span>
       </div>`
@@ -1380,7 +1380,7 @@
       const gem = gems.find(g => g.type === t);
       if (gem) {
         return `<span class="tag tag-mewtation" title="${gemDisplayName(gem.gem)} #${gem.position}">
-          <img src="${GEM_IMAGES[gem.gem]}" alt="" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;" />
+          <img src="${GEM_IMAGES[gem.gem]}" alt="" class="gem-icon gem-icon-sm" />
           ${t}: ${safeText(traits[t])}
         </span>`;
       }
@@ -1470,10 +1470,10 @@
          (lockedOwnerNick && displayOwnerNick && lockedOwnerNick.toLowerCase() === displayOwnerNick.toLowerCase()));
       const pinTitle = isLocked ? "Unpin owner highlight" : "Pin owner highlight";
       const pinOpacity = isLocked ? "1" : "0.4";
-      ownerHtml = `<a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick} style="color:var(--accent);text-decoration:none;">${safeText(ownerText)}</a>
-        <button class="owner-pin-btn" ${dataOwner} ${dataNick} title="${pinTitle}" style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:12px;opacity:${pinOpacity};vertical-align:baseline;line-height:1;">📍</button>`;
+      ownerHtml = `<a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick}>${safeText(ownerText)}</a>
+        <button class="owner-pin-btn" ${dataOwner} ${dataNick} title="${pinTitle}" style="opacity:${pinOpacity}">📍</button>`;
     } else if (showAuctionStatus) {
-      ownerHtml = `<span class="small" style="color:rgba(255,200,100,0.8);">On Auction</span>`;
+      ownerHtml = `<span class="small auction-warning">On Auction</span>`;
     } else {
       ownerHtml = "";
     }
@@ -1484,15 +1484,15 @@
       const statusLabel = auctionType === "sire" ? "For Siring" : "For Sale";
       const currentPrice = formatEth(auction.current_price);
       const priceHtml = currentPrice ? ` · ${currentPrice}` : "";
-      statusHtml = `<div class="k">Status</div><div class="v"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" class="tag" style="background:rgba(255,90,165,0.25);color:#ff5aa5;text-decoration:none;">${statusLabel}${priceHtml}</a></div>`;
+      statusHtml = `<div class="k">Status</div><div class="v"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" class="tag auction-tag">${statusLabel}${priceHtml}</a></div>`;
     }
 
     // Background color display
     const colors = getKittyColors(k);
     const colorName = k.color || null;
     const bgColorHtml = colors.isUnknown
-      ? `<span class="small" style="color:rgba(255,200,100,0.8);">Unknown</span>`
-      : `<span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${colors.background};vertical-align:middle;margin-right:6px;border:1px solid rgba(255,255,255,0.2);"></span>${colorName ? safeText(colorName) : colors.background}`;
+      ? `<span class="small auction-warning">Unknown</span>`
+      : `<span class="color-swatch" style="background:${colors.background}"></span>${colorName ? safeText(colorName) : colors.background}`;
 
     const traits = k.traits || {};
     const traitKeys = Object.keys(traits).slice(0, 12);
@@ -1507,11 +1507,11 @@
     // Build traits HTML with highlighting for mewtation-earning traits and links to cattribute pages
     const traitsHtml = traitKeys.map(t => {
       const traitValue = traits[t];
-      const traitLink = `<a href="${cattributeUrl(traitValue)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">${safeText(traitValue)}</a>`;
+      const traitLink = `<a href="${cattributeUrl(traitValue)}" target="_blank" rel="noopener" class="trait-link">${safeText(traitValue)}</a>`;
       const gem = gems.find(g => g.type === t);
       if (gem) {
         return `<span class="tag tag-mewtation" title="${gemDisplayName(gem.gem)} #${gem.position}">
-          <img src="${GEM_IMAGES[gem.gem]}" alt="" style="width:12px;height:12px;vertical-align:middle;margin-right:2px;" />
+          <img src="${GEM_IMAGES[gem.gem]}" alt="" class="gem-icon gem-icon-sm" />
           ${t}: ${traitLink}
         </span>`;
       }
@@ -1521,13 +1521,13 @@
     const kittyImg = k.image_url || "";
 
     selectedBox.innerHTML = `
-      <div class="selected-header" style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">
+      <div class="selected-header">
         <div class="selected-thumb" style="background:${colors.background};--shadow-color:${colors.shadow};">
           ${kittyImg ? `<img src="${kittyImg}" alt="" />` : ""}
         </div>
         <div>
-          <div style="font-weight:600;font-size:14px;"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">${safeText(k.name || `Kitty ${k.id}`)}</a></div>
-          <div style="color:var(--muted);font-size:12px;">#${k.id} · Gen ${safeText(k.generation)}</div>
+          <div class="kitty-name"><a href="${kittyUrl(id)}" target="_blank" rel="noopener">${safeText(k.name || `Kitty ${k.id}`)}</a></div>
+          <div class="kitty-meta">#${k.id} · Gen ${safeText(k.generation)}</div>
         </div>
       </div>
       <div class="kv">

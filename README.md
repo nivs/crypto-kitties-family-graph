@@ -243,6 +243,7 @@ python3 download_svgs.py ../dist/example/dragon/dragon.json \
   -o ../dist/example/dragon/svg/ --skip-existing
 ```
 - [Live](https://ck.innerlogics.com/?kitties=896775) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/)
+- Local test: API: `?kitties=896775` ・ JSON: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
 
 **Founders (origin story):**
 ```bash
@@ -252,6 +253,7 @@ python3 download_svgs.py ../dist/example/founders/founders.json \
   -o ../dist/example/founders/svg/ --skip-existing
 ```
 - [Live](https://ck.innerlogics.com/?kitties=1,4,18) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/)
+- Local test: API: `?kitties=1,4,18` ・ JSON: `?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/`
 
 **Milestones:**
 ```bash
@@ -261,6 +263,7 @@ python3 download_svgs.py ../dist/example/milestones/milestones.json \
   -o ../dist/example/milestones/svg/ --skip-existing
 ```
 - [Live](https://ck.innerlogics.com/?kitties=100000,500000) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/)
+- Local test: API: `?kitties=100000,500000` ・ JSON: `?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/`
 
 **Holiday Fancies:**
 ```bash
@@ -270,6 +273,7 @@ python3 download_svgs.py ../dist/example/holidays/holidays.json \
   -o ../dist/example/holidays/svg/ --skip-existing
 ```
 - [Live](https://ck.innerlogics.com/?kitties=174756,275808) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/)
+- Local test: API: `?kitties=174756,275808` ・ JSON: `?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
 
 ## License
 

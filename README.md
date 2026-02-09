@@ -40,6 +40,8 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 | `dataUrl` | URL to a JSON file with kitty data | `?dataUrl=./my_kitties.json` |
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
+| `owner` | Pin owner highlight by wallet address | `?owner=0x1234...` |
+| `ownerNick` | Pin owner highlight by nickname | `?ownerNick=CryptoKittyFan` |
 
 **Examples:**
 ```
@@ -47,7 +49,7 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 http://localhost:8001/?kitties=124653,129868,148439
 
 # Load from local JSON with local SVGs
-http://localhost:8001/?dataUrl=./example/nivs/nivs_kitties.json&svgBaseUrl=./example/nivs/svg/
+http://localhost:8001/?dataUrl=./example/nivs/nivs.json&svgBaseUrl=./example/nivs/svg/
 
 # Embed mode with specific kitties
 http://localhost:8001/?embed=true&kitties=124653,129868

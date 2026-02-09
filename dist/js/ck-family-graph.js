@@ -2193,10 +2193,30 @@
     const kittyParam = params.get("kitty") || params.get("kitties");
     const kittyIds = parseKittyIds(kittyParam);
 
+    // Check for ?owner= (address) or ?ownerNick= (nickname) to pin owner highlight
+    const ownerParam = params.get("owner");
+    const ownerNickParam = params.get("ownerNick");
+
+    // Helper to apply owner highlight after graph loads
+    const applyOwnerHighlight = () => {
+      if (ownerParam || ownerNickParam) {
+        // Wait a bit for the graph to stabilize
+        setTimeout(() => {
+          ownerHighlightLocked = true;
+          lockedOwnerAddr = ownerParam || null;
+          lockedOwnerNick = ownerNickParam || null;
+          highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+          log("Owner highlight from query param:", { owner: ownerParam, ownerNick: ownerNickParam });
+        }, 500);
+      }
+    };
+
     if (kittyIds.length > 0) {
       // Query param takes precedence - load from API
       log("Loading from query param:", kittyIds);
-      loadKittiesById(kittyIds).catch((e) => {
+      loadKittiesById(kittyIds).then(() => {
+        applyOwnerHighlight();
+      }).catch((e) => {
         console.error(e);
         setStatus("Failed to load kitties from query param", true);
       });
@@ -2205,7 +2225,9 @@
       const urlEl = $("jsonUrl");
       const url = (urlEl && urlEl.value ? urlEl.value : "").trim();
       if (url) {
-        loadJsonFromUrl(url).catch((e) => {
+        loadJsonFromUrl(url).then(() => {
+          applyOwnerHighlight();
+        }).catch((e) => {
           console.error(e);
           setStatus("Failed to load default JSON", true);
         });

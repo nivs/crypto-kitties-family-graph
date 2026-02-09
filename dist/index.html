@@ -147,6 +147,11 @@
     .tip{margin-top:10px;}
     .noscript-msg{padding:14px;color:#ffb3b3;}
 
+    .examples-list{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:baseline;}
+    .example-link{color:var(--accent);text-decoration:none;font-size:13px;font-weight:500;}
+    .example-link:hover{text-decoration:underline;}
+    .example-desc{color:var(--muted);font-size:11px;}
+
     /* Embed mode */
     body.embed-mode header,
     body.embed-mode aside{display:none;}
@@ -373,6 +378,28 @@
 
           <div class="small tip">
             Tip: run with <code>python3 -m http.server</code>. Local SVG fetch often fails on <code>file://</code>.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="collapsible" id="examplesToggle">Examples</h3>
+        <div class="card-body" id="examplesBody">
+          <div class="examples-list">
+            <a href="?kitties=896775" class="example-link">Dragon</a>
+            <span class="example-desc">600 ETH (~$170k)</span>
+
+            <a href="?kitties=1,4,18" class="example-link">Founders</a>
+            <span class="example-desc">Genesis + Gen 0</span>
+
+            <a href="?kitties=100000,500000" class="example-link">Milestones</a>
+            <span class="example-desc">100k & 500k</span>
+
+            <a href="?kitties=174756,275808" class="example-link">Holiday Fancies</a>
+            <span class="example-desc">Mistletoe & SantaClaws</span>
+
+            <a href="?kitties=896775,1,4,18,100000,174756,275808,500000" class="example-link">All Notable</a>
+            <span class="example-desc">Full showcase</span>
           </div>
         </div>
       </div>

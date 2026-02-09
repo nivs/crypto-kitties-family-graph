@@ -2043,6 +2043,16 @@
       });
     }
 
+    // Examples panel collapse toggle
+    const examplesToggle = $("examplesToggle");
+    const examplesBody = $("examplesBody");
+    if (examplesToggle && examplesBody) {
+      examplesToggle.addEventListener("click", () => {
+        examplesToggle.classList.toggle("collapsed");
+        examplesBody.classList.toggle("collapsed");
+      });
+    }
+
     // Check for query params
     const params = new URLSearchParams(location.search);
 
@@ -2197,6 +2207,22 @@
     // Check for ?kitty= or ?kitties= (comma-separated IDs)
     const kittyParam = params.get("kitty") || params.get("kitties");
     const kittyIds = parseKittyIds(kittyParam);
+
+    // Check if we have data to load (kitty IDs, dataUrl param, or default dataUrl)
+    const jsonUrlEl = $("jsonUrl");
+    const defaultUrl = (jsonUrlEl && jsonUrlEl.value ? jsonUrlEl.value : "").trim();
+    const hasDataToLoad = kittyIds.length > 0 || dataUrlParam || defaultUrl;
+
+    // Collapse examples panel if loading data, expand if no data
+    if (examplesToggle && examplesBody) {
+      if (hasDataToLoad) {
+        examplesToggle.classList.add("collapsed");
+        examplesBody.classList.add("collapsed");
+      } else {
+        examplesToggle.classList.remove("collapsed");
+        examplesBody.classList.remove("collapsed");
+      }
+    }
 
     // Check for ?owner= to pin owner highlight (detects address vs nickname)
     const ownerParam = params.get("owner");

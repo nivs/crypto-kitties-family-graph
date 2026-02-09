@@ -208,6 +208,17 @@ Notable kitties that make interesting demo graphs:
 | First Mistletoe | 174756 | First holiday Fancy |
 | First SantaClaws | 275808 | First holiday Fancy |
 
+### Live Demo Links
+
+Try these examples on [ck.innerlogics.com](https://ck.innerlogics.com):
+
+- [Dragon (most expensive)](https://ck.innerlogics.com/?kitties=896775)
+- [Founders (origin story)](https://ck.innerlogics.com/?kitties=1,4,18)
+- [Milestones](https://ck.innerlogics.com/?kitties=100000,500000)
+- [Holiday Fancies](https://ck.innerlogics.com/?kitties=174756,275808)
+- [All-in showcase](https://ck.innerlogics.com/?kitties=896775,1,4,18,100000,174756,275808,500000)
+- [Embed mode with owner highlight](https://ck.innerlogics.com/?embed=true&dataUrl=./example/nivs/nivs.json&svgBaseUrl=./example/nivs/svg/&owner=nivs)
+
 **Quick-start presets** (paste into the Kitty ID field or use as `?kitties=...`):
 
 | Preset | IDs |
@@ -229,8 +240,7 @@ python3 ck_fetch.py --ids 896775 --parents 1 --children 0 -v \
 python3 download_svgs.py ../dist/example/dragon/dragon.json \
   -o ../dist/example/dragon/svg/ --skip-existing
 ```
-- Live: `?kitties=896775`
-- Local: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
+- [Live](https://ck.innerlogics.com/?kitties=896775) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/)
 
 **Founders (origin story):**
 ```bash
@@ -239,8 +249,7 @@ python3 ck_fetch.py --ids "1,4,18" --embedded-only -v \
 python3 download_svgs.py ../dist/example/founders/founders.json \
   -o ../dist/example/founders/svg/ --skip-existing
 ```
-- Live: `?kitties=1,4,18`
-- Local: `?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/`
+- [Live](https://ck.innerlogics.com/?kitties=1,4,18) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/)
 
 **Milestones:**
 ```bash
@@ -249,8 +258,7 @@ python3 ck_fetch.py --ids "100000,500000" --parents 1 --children 1 --embedded-on
 python3 download_svgs.py ../dist/example/milestones/milestones.json \
   -o ../dist/example/milestones/svg/ --skip-existing
 ```
-- Live: `?kitties=100000,500000`
-- Local: `?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/`
+- [Live](https://ck.innerlogics.com/?kitties=100000,500000) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/)
 
 **Holiday Fancies:**
 ```bash
@@ -259,8 +267,7 @@ python3 ck_fetch.py --ids "174756,275808" --embedded-only -v \
 python3 download_svgs.py ../dist/example/holidays/holidays.json \
   -o ../dist/example/holidays/svg/ --skip-existing
 ```
-- Live: `?kitties=174756,275808`
-- Local: `?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
+- [Live](https://ck.innerlogics.com/?kitties=174756,275808) ・ [Local with SVGs](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/)
 
 ## License
 

@@ -1740,14 +1740,19 @@
       const base = nodeBaseStyle.get(id);
       if (!base) return;
 
-      // Restore node size
-      nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border } });
-
       // Hide tooltip
       hideTooltip();
 
-      // Restore all edges
-      restoreEdgeColors();
+      // Restore state - respect owner highlight if pinned
+      if (ownerHighlightLocked) {
+        // Restore node to base size first, then reapply owner highlighting
+        nodes.update({ id, size: base.size });
+        highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+      } else {
+        // Restore node to base state
+        nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border } });
+        restoreEdgeColors();
+      }
     });
 
     setStats();

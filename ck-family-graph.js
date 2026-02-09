@@ -818,30 +818,48 @@
         nodes: mainExisting,
         animation: { duration: 600, easingFunction: "easeInOutQuad" }
       });
+
+      // After fit completes, zoom in slightly and shift view up for visual balance
+      setTimeout(() => {
+        try {
+          const s = network.getScale();
+          const pos = network.getViewPosition();
+          network.moveTo({
+            scale: s * 1.15,
+            position: { x: pos.x, y: pos.y - 40 },
+            animation: { duration: 250 }
+          });
+        } catch {}
+      }, 620);
     } catch (e) {
       log("fitMainCluster fit error:", e);
       return;
     }
-
-    // Clamp scale so it does not become a tiny dot.
-    setTimeout(() => {
-      try {
-        const s = network.getScale();
-        const clamped = Math.max(0.55, Math.min(1.25, s));
-        network.moveTo({ scale: clamped, animation: { duration: 250 } });
-      } catch {}
-    }, 80);
   }
 
   function focusOnRoots() {
     if (!network) return;
     const ids = Array.from(myKittyIds);
-    if (!ids.length) { fitMainCluster(); return; }
+    if (!ids.length) { return; }
+
     try {
-      network.focus(ids[0], { scale: 0.95, animation: { duration: 350 } });
+      // Calculate center of all root kitties and move there without changing zoom
+      const positions = ids.map(id => network.getPosition(id)).filter(p => p);
+      if (!positions.length) return;
+
+      const centerX = positions.reduce((sum, p) => sum + p.x, 0) / positions.length;
+      const centerY = positions.reduce((sum, p) => sum + p.y, 0) / positions.length;
+
+      // Offset Y upward to account for visual balance
+      const offsetY = centerY - 80;
+
+      network.moveTo({
+        position: { x: centerX, y: offsetY },
+        animation: { duration: 400, easingFunction: "easeInOutQuad" }
+      });
       network.selectNodes(ids);
-    } catch {
-      fitMainCluster();
+    } catch (e) {
+      log("focusOnRoots error:", e);
     }
   }
 
@@ -1420,13 +1438,13 @@
       ownerHtml = "";
     }
 
-    // Auction status badge with price
+    // Auction status badge with price (links to kitty page where auction is displayed)
     let statusHtml = "";
     if (isOnAuction) {
       const statusLabel = auctionType === "sire" ? "For Siring" : "For Sale";
       const currentPrice = formatEth(auction.current_price);
       const priceHtml = currentPrice ? ` · ${currentPrice}` : "";
-      statusHtml = `<div class="k">Status</div><div class="v"><span class="tag" style="background:rgba(255,90,165,0.25);color:#ff5aa5;">${statusLabel}${priceHtml}</span></div>`;
+      statusHtml = `<div class="k">Status</div><div class="v"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" class="tag" style="background:rgba(255,90,165,0.25);color:#ff5aa5;text-decoration:none;">${statusLabel}${priceHtml}</a></div>`;
     }
 
     // Background color display
@@ -1832,6 +1850,50 @@
     const physBtn = $("togglePhysicsBtn");
     if (physBtn) physBtn.addEventListener("click", () => setPhysics(!physicsOn));
 
+    // Navigation controls (zoom, pan)
+    const zoomInBtn = $("zoomInBtn");
+    if (zoomInBtn) zoomInBtn.addEventListener("click", () => {
+      if (!network) return;
+      const scale = network.getScale();
+      network.moveTo({ scale: scale * 1.3, animation: { duration: 200 } });
+    });
+
+    const zoomOutBtn = $("zoomOutBtn");
+    if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => {
+      if (!network) return;
+      const scale = network.getScale();
+      network.moveTo({ scale: scale / 1.3, animation: { duration: 200 } });
+    });
+
+    const panAmount = 150;
+    const moveUpBtn = $("moveUpBtn");
+    if (moveUpBtn) moveUpBtn.addEventListener("click", () => {
+      if (!network) return;
+      const pos = network.getViewPosition();
+      network.moveTo({ position: { x: pos.x, y: pos.y - panAmount }, animation: { duration: 200 } });
+    });
+
+    const moveDownBtn = $("moveDownBtn");
+    if (moveDownBtn) moveDownBtn.addEventListener("click", () => {
+      if (!network) return;
+      const pos = network.getViewPosition();
+      network.moveTo({ position: { x: pos.x, y: pos.y + panAmount }, animation: { duration: 200 } });
+    });
+
+    const moveLeftBtn = $("moveLeftBtn");
+    if (moveLeftBtn) moveLeftBtn.addEventListener("click", () => {
+      if (!network) return;
+      const pos = network.getViewPosition();
+      network.moveTo({ position: { x: pos.x - panAmount, y: pos.y }, animation: { duration: 200 } });
+    });
+
+    const moveRightBtn = $("moveRightBtn");
+    if (moveRightBtn) moveRightBtn.addEventListener("click", () => {
+      if (!network) return;
+      const pos = network.getViewPosition();
+      network.moveTo({ position: { x: pos.x + panAmount, y: pos.y }, animation: { duration: 200 } });
+    });
+
     // Load kitty by ID(s)
     const kittyIdInput = $("kittyIdInput");
     const loadKittyBtn = $("loadKittyBtn");
@@ -1863,6 +1925,16 @@
     applyDefaultsToUI();
     wireControls();
     preloadGemImages(); // Load mewtation gem images
+
+    // Settings panel collapse toggle
+    const settingsToggle = $("settingsToggle");
+    const settingsBody = $("settingsBody");
+    if (settingsToggle && settingsBody) {
+      settingsToggle.addEventListener("click", () => {
+        settingsToggle.classList.toggle("collapsed");
+        settingsBody.classList.toggle("collapsed");
+      });
+    }
 
     // Check for query params
     const params = new URLSearchParams(location.search);

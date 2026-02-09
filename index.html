@@ -49,10 +49,15 @@
     aside{height:calc(100vh - 74px);min-height:560px;display:flex;flex-direction:column;gap:12px;}
     .card{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:12px;}
     .card h3{margin:0 0 8px 0;font-size:13px;font-weight:650;letter-spacing:0.2px;color:var(--text);}
+    .card h3.collapsible{cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:0;}
+    .card h3.collapsible::after{content:"";display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--muted);transition:transform 0.2s;}
+    .card h3.collapsible.collapsed::after{transform:rotate(-90deg);}
+    .card .card-body{overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;max-height:500px;margin-top:8px;}
+    .card .card-body.collapsed{max-height:0;margin-top:0;}
     .small{color:var(--muted);font-size:12px;line-height:1.45;}
-    .kv{display:grid;grid-template-columns:140px 1fr;gap:6px 10px;font-size:12px;}
+    .kv{display:grid;grid-template-columns:140px 1fr;gap:6px 10px;font-size:12px;align-items:center;}
     .kv .k{color:var(--muted);}
-    .kv .v{color:var(--text);word-break:break-word;}
+    .kv .v{color:var(--text);word-break:break-word;display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
     .tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.14);color:var(--muted);font-size:11px;line-height:1.6;margin-right:6px;margin-top:4px;background:rgba(255,255,255,0.04);}
 
     .tooltip{position:absolute;min-width:220px;max-width:320px;pointer-events:none;z-index:10;background:rgba(18,22,34,0.96);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:10px;box-shadow:0 12px 40px rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:none;}
@@ -77,6 +82,47 @@
     .gem-bronze .gem-label{color:#cd7f32;}
 
     .tag-mewtation{background:rgba(255,215,0,0.12);border-color:rgba(255,215,0,0.3);color:var(--text);}
+
+    .nav-controls{
+      position:absolute;
+      bottom:16px;
+      right:16px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      z-index:4;
+    }
+    .nav-controls .nav-row{
+      display:flex;
+      justify-content:center;
+      gap:6px;
+    }
+    .nav-btn{
+      width:36px;
+      height:36px;
+      border:1px solid var(--border);
+      background:rgba(18,22,34,0.92);
+      color:var(--text);
+      border-radius:10px;
+      cursor:pointer;
+      font-size:18px;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+      backdrop-filter:blur(8px);
+    }
+    .nav-btn:hover{border-color:rgba(255,255,255,0.28);background:rgba(30,36,54,0.95);}
+    .nav-btn.hidden{visibility:hidden;}
+
+    .separator{margin-left:16px;opacity:0.5;}
+    .input-narrow{width:140px;margin-left:8px;}
+    .input-full{width:100%;}
+    .hidden{display:none;}
+    .label-muted{opacity:0.7;font-size:12px;}
+    .tip{margin-top:10px;}
+    .noscript-msg{padding:14px;color:#ffb3b3;}
 
     @media (max-width:1020px){
       main{grid-template-columns:1fr;}
@@ -116,14 +162,12 @@
     <div class="controls">
       <input id="jsonUrl" class="input" placeholder="JSON URL (or leave blank and use file picker)" />
       <button class="btn primary" id="loadFromUrlBtn">Load JSON URL</button>
-      <input id="filePicker" type="file" accept="application/json" style="display:none" />
+      <input id="filePicker" class="hidden" type="file" accept="application/json" />
       <button class="btn" id="loadFileBtn">Load JSON File</button>
-      <span style="margin-left:16px;opacity:0.5;">|</span>
-      <input id="kittyIdInput" class="input" placeholder="Kitty ID(s)" style="width:140px;margin-left:8px;" />
+      <span class="separator">|</span>
+      <input id="kittyIdInput" class="input input-narrow" placeholder="Kitty ID(s)" />
       <button class="btn" id="loadKittyBtn">Load Kitty(s)</button>
-      <span style="margin-left:16px;opacity:0.5;">|</span>
-      <button class="btn" id="centerMineBtn">Center on my kitties</button>
-      <button class="btn" id="fitBtn">Fit</button>
+      <span class="separator">|</span>
       <button class="btn" id="togglePhysicsBtn">Physics: on</button>
       <span class="pill" id="statsPill">No data loaded</span>
     </div>
@@ -134,8 +178,46 @@
       <div id="banner"></div>
       <div id="network"></div>
       <div id="tooltip" class="tooltip"></div>
+      <div class="nav-controls">
+        <div class="nav-row">
+          <button class="nav-btn hidden"></button>
+          <button class="nav-btn" id="moveUpBtn" title="Pan up">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+          </button>
+          <button class="nav-btn hidden"></button>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" id="moveLeftBtn" title="Pan left">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button class="nav-btn" id="centerMineBtn" title="Center on my kitties">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path></svg>
+          </button>
+          <button class="nav-btn" id="moveRightBtn" title="Pan right">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn hidden"></button>
+          <button class="nav-btn" id="moveDownBtn" title="Pan down">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <button class="nav-btn hidden"></button>
+        </div>
+        <div class="nav-row">
+          <button class="nav-btn" id="zoomInBtn" title="Zoom in">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <button class="nav-btn" id="fitBtn" title="Fit all nodes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          </button>
+          <button class="nav-btn" id="zoomOutBtn" title="Zoom out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
+      </div>
       <noscript>
-        <div style="padding:14px;color:#ffb3b3">JavaScript is disabled or blocked. This viewer requires JS.</div>
+        <div class="noscript-msg">JavaScript is disabled or blocked. This viewer requires JS.</div>
       </noscript>
     </div>
 
@@ -151,34 +233,36 @@
       </div>
 
       <div class="card">
-        <h3>Settings</h3>
-        <div class="kv">
-          <div class="k">Use Proxy</div>
-          <div class="v"><input type="checkbox" id="useProxy" /> <label for="useProxy" style="opacity:0.7;font-size:12px;">Enable CORS proxy for API calls</label></div>
+        <h3 class="collapsible collapsed" id="settingsToggle">Settings</h3>
+        <div class="card-body collapsed" id="settingsBody">
+          <div class="kv">
+            <div class="k">Use Proxy</div>
+            <div class="v"><input type="checkbox" id="useProxy" /> <label for="useProxy" class="label-muted" title="Route API calls through a CORS proxy">Enable CORS proxy for API calls</label></div>
 
-          <div class="k">Proxy URL</div>
-          <div class="v"><input id="apiProxyUrl" class="input" style="width:100%" /></div>
+            <div class="k">Proxy URL</div>
+            <div class="v"><input id="apiProxyUrl" class="input input-full" /></div>
 
-          <div class="k">Local SVG base</div>
-          <div class="v"><input id="svgBaseUrl" class="input" style="width:100%" /></div>
+            <div class="k">Local SVG base</div>
+            <div class="v"><input id="svgBaseUrl" class="input input-full" /></div>
 
-          <div class="k">Local SVG probe</div>
-          <div class="v">
-            <select id="svgProbe" class="input" style="width:100%">
-              <option value="off">off</option>
-              <option value="on">on (try local, fallback)</option>
-            </select>
+            <div class="k">Local SVG probe</div>
+            <div class="v">
+              <select id="svgProbe" class="input input-full">
+                <option value="off">off</option>
+                <option value="on">on (try local, fallback)</option>
+              </select>
+            </div>
+
+            <div class="k">Load from API</div>
+            <div class="v" title="Fallback to API images if local SVG not found"><input type="checkbox" id="svgFromApi" checked /> <label for="svgFromApi" class="label-muted">Load images from CK API</label></div>
+
+            <div class="k">CK site base</div>
+            <div class="v"><input id="siteBaseUrl" class="input input-full" /></div>
           </div>
 
-          <div class="k">Load from API</div>
-          <div class="v"><input type="checkbox" id="svgFromApi" checked /> <label for="svgFromApi" style="opacity:0.7;font-size:12px;">Load images from CK API (fallback if local not found)</label></div>
-
-          <div class="k">CK site base</div>
-          <div class="v"><input id="siteBaseUrl" class="input" style="width:100%" /></div>
-        </div>
-
-        <div class="small" style="margin-top:10px;">
-          Tip: run with <code>python3 -m http.server</code>. Local SVG fetch often fails on <code>file://</code>.
+          <div class="small tip">
+            Tip: run with <code>python3 -m http.server</code>. Local SVG fetch often fails on <code>file://</code>.
+          </div>
         </div>
       </div>
     </aside>

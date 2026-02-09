@@ -2,7 +2,7 @@
 
 An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitties.co/). Explore breeding relationships, discover mewtation gems, and visualize your kitty lineage.
 
-![Screenshot](images/screenshot.png)
+![Screenshot](dist/images/screenshot.png)
 
 ## Features
 
@@ -13,12 +13,13 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 - **Smart Merging**: Loading connected kitties merges into existing graph
 - **Local SVG Support**: Use locally cached SVG images for faster loading
 - **Live API**: Fetch kitty data directly from CryptoKitties API
+- **Embed Mode**: Embeddable graph with floating panel for use in iframes
 
 ## Quick Start
 
-1. Start a local server:
+1. Start a local server from the `dist` folder:
    ```bash
-   python3 -m http.server 8001
+   cd dist && python3 -m http.server 8001
    ```
 
 2. Open in browser:
@@ -38,6 +39,7 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 | `kitty` or `kitties` | Comma-separated kitty IDs to load from API | `?kitties=124653,129868` |
 | `dataUrl` | URL to a JSON file with kitty data | `?dataUrl=./my_kitties.json` |
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
+| `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
 
 **Examples:**
 ```
@@ -45,12 +47,43 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 http://localhost:8001/?kitties=124653,129868,148439
 
 # Load from local JSON with local SVGs
-http://localhost:8001/?dataUrl=./nivs/nivs_kitties.json&svgBaseUrl=./nivs/svg/
+http://localhost:8001/?dataUrl=./example/nivs/nivs_kitties.json&svgBaseUrl=./example/nivs/svg/
+
+# Embed mode with specific kitties
+http://localhost:8001/?embed=true&kitties=124653,129868
+```
+
+## Embedding
+
+The graph can be embedded in other pages using an iframe with embed mode enabled.
+
+**Embed mode features:**
+- Full viewport graph (no header or sidebar)
+- Floating panel for selected kitty details (draggable, collapsible, closable)
+- Links to GitHub and standalone viewer
+
+**Basic iframe embed:**
+```html
+<iframe
+  src="https://ck.innerlogics.com/?embed=true&kitties=124653,129868"
+  width="100%"
+  height="600"
+  frameborder="0">
+</iframe>
+```
+
+**Configuration for embeds:**
+```javascript
+window.CK_GRAPH_DEFAULTS = {
+  // ... other options ...
+  standaloneUrl: "https://ck.innerlogics.com",  // "Open in viewer" link target
+  githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
+};
 ```
 
 ## Configuration
 
-Edit `CK_GRAPH_DEFAULTS` in `index.html`:
+Edit `CK_GRAPH_DEFAULTS` in `dist/index.html`:
 
 ```javascript
 window.CK_GRAPH_DEFAULTS = {
@@ -61,7 +94,9 @@ window.CK_GRAPH_DEFAULTS = {
   svgProbe: "on",             // "on" to try local SVGs first
   svgFromApi: true,           // Load images from API (fallback if local not found)
   siteBaseUrl: "https://www.cryptokitties.co",
-  dataUrl: ""                 // Default JSON to load on startup
+  dataUrl: "",                // Default JSON to load on startup
+  standaloneUrl: "https://ck.innerlogics.com",  // Full viewer URL (for embed mode)
+  githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
 };
 ```
 
@@ -69,25 +104,30 @@ window.CK_GRAPH_DEFAULTS = {
 
 ```
 crypto-kitties-family-graph/
-├── index.html          # Main HTML page
-├── ck-family-graph.js  # Graph visualization logic
-├── images/             # Mewtation gem images
-├── proxy/              # CORS proxy for hosting on your server
-│   └── ckproxy.php     # PHP proxy script
-└── scripts/            # Data generation tools
-    └── ck_fetch.py     # Fetch kitty data from API
+├── dist/                   # Deploy this folder to web server
+│   ├── index.html          # Main HTML page
+│   ├── js/
+│   │   └── ck-family-graph.js  # Graph visualization logic
+│   ├── images/             # Logos, mewtation gems, favicons
+│   └── example/            # Example kitty data and SVGs
+│       └── nivs/
+├── assets/                 # Source assets (not deployed)
+├── proxy/                  # CORS proxy (deploy separately if needed)
+│   └── ckproxy.php         # PHP proxy script
+└── tools/                  # Development utilities (not deployed)
+    └── ck_fetch.py         # Fetch kitty data from API
 ```
 
 ## Generating Kitty Data
 
-Use `scripts/ck_fetch.py` to generate a JSON file with your kitties:
+Use `tools/ck_fetch.py` to generate a JSON file with your kitties:
 
 ```bash
 # Install dependencies
 pip install requests
 
 # Fetch kitties with their parents and children
-python3 scripts/ck_fetch.py \
+python3 tools/ck_fetch.py \
   --ids "124653,129868,148439" \
   --parents 2 \
   --children 1 \
@@ -95,7 +135,7 @@ python3 scripts/ck_fetch.py \
   -v
 ```
 
-See `python3 scripts/ck_fetch.py --help` for all options.
+See `python3 tools/ck_fetch.py --help` for all options.
 
 ## CORS Proxy
 

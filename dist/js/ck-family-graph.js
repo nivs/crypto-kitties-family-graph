@@ -3,55 +3,62 @@
   const $ = (id) => document.getElementById(id);
 
   // CryptoKitties official color mappings (extracted from CK CSS)
-  // Format: colorName -> [backgroundColor, accentColor]
+  // Format: colorName -> [backgroundColor, accentColor, shadowColor]
   const CK_COLORS = {
     // Primary colors
-    mintgreen:       ["#cdf5d4", "#43edac"],
-    sizzurp:         ["#dfdffa", "#7c40ff"],
-    chestnut:        ["#efe1da", "#a56429"],
-    strawberry:      ["#ffe0e5", "#ef4b62"],
-    sapphire:        ["#d3e8ff", "#4c7aef"],
-    forgetmenot:     ["#dcebfc", "#4eb4f9"],
-    dahlia:          ["#e6eafd", "#b8bdff"],
-    coralsunrise:    ["#fde9e4", "#ff9088"],
-    olive:           ["#ecf4e0", "#729100"],
-    pinefresh:       ["#dbf0d0", "#177a25"],
-    oasis:           ["#e6faf3", "#ccffef"],
-    dioscuri:        ["#e5e7ef", "#484c5b"],
-    palejade:        ["#e7f1ed", "#c3d8cf"],
-    parakeet:        ["#e5f3e2", "#49b749"],
-    cyan:            ["#c5eefa", "#45f0f4"],
-    topaz:           ["#d1eeeb", "#0ba09c"],
-    limegreen:       ["#d9f5cb", "#aef72f"],
-    isotope:         ["#effdca", "#e4ff73"],
-    babypuke:        ["#eff1e0", "#bcba5e"],
-    bubblegum:       ["#fadff4", "#ef52d1"],
-    twilightsparkle: ["#ede2f5", "#ba8aff"],
-    doridnudibranch: ["#faeefa", "#fa9fff"],
-    pumpkin:         ["#fae1ca", "#ffa039"],
-    autumnmoon:      ["#fdf3e0", "#ffe8bb"],
-    bridesmaid:      ["#ffd5e5", "#ffc2df"],
-    thundergrey:     ["#eee9e8", "#828282"],
-    greymatter:      ["#e5e7ef", "#828282"],
+    mintgreen:       ["#cdf5d4", "#43edac", "#9ad7a5"],
+    sizzurp:         ["#dfdffa", "#7c40ff", "#c1c1ea"],
+    chestnut:        ["#efe1da", "#a56429", "#d4beb3"],
+    strawberry:      ["#ffe0e5", "#ef4b62", "#efbaba"],
+    sapphire:        ["#d3e8ff", "#4c7aef", "#a2c2eb"],
+    forgetmenot:     ["#dcebfc", "#4eb4f9", "#a7caea"],
+    dahlia:          ["#e6eafd", "#b8bdff", "#bec5e7"],
+    coralsunrise:    ["#fde9e4", "#ff9088", "#e7c3bb"],
+    olive:           ["#ecf4e0", "#729100", "#c8d6b4"],
+    pinefresh:       ["#dbf0d0", "#177a25", "#adcf9b"],
+    oasis:           ["#e6faf3", "#ccffef", "#bee1d4"],
+    dioscuri:        ["#e5e7ef", "#484c5b", "#cdd1e0"],
+    palejade:        ["#e7f1ed", "#c3d8cf", "#c0d1ca"],
+    parakeet:        ["#e5f3e2", "#49b749", "#bcd4b8"],
+    cyan:            ["#c5eefa", "#45f0f4", "#83cbe0"],
+    topaz:           ["#d1eeeb", "#0ba09c", "#a8d5d1"],
+    limegreen:       ["#d9f5cb", "#aef72f", "#b4d9a2"],
+    isotope:         ["#effdca", "#e4ff73", "#cde793"],
+    babypuke:        ["#eff1e0", "#bcba5e", "#cfd4b0"],
+    bubblegum:       ["#fadff4", "#ef52d1", "#eebce3"],
+    twilightsparkle: ["#ede2f5", "#ba8aff", "#dcc7ec"],
+    doridnudibranch: ["#faeefa", "#fa9fff", "#e1cce1"],
+    pumpkin:         ["#fae1ca", "#ffa039", "#efc8a4"],
+    autumnmoon:      ["#fdf3e0", "#ffe8bb", "#e7d4b4"],
+    bridesmaid:      ["#ffd5e5", "#ffc2df", "#eba3bc"],
+    thundergrey:     ["#eee9e8", "#828282", "#dbccc7"],
+    greymatter:      ["#e5e7ef", "#828282", "#cdd1e0"],
+    // Additional colors from CK CSS
+    downbythebay:    ["#cde5d1", "#4e8b57", "#97bc9c"],
+    eclipse:         ["#e5e7ef", "#484c5b", "#cdd1e0"],
     // Neutrals
-    gold:            ["#faf4cf", "#fcdf35"],
-    shadowgrey:      ["#b1aeb9", "#575553"],
-    salmon:          ["#fde9e4", "#ef4b62"],
-    cottoncandy:     ["#ffd5e5", "#ffc2df"],
-    cloudwhite:      ["#f9f8f6", "#e7e6e4"],
-    mauveover:       ["#ede2f5", "#ba8aff"],
-    hintomint:       ["#cdf5d4", "#43edac"],
-    bananacream:     ["#fdf3e0", "#ffe8bb"],
+    gold:            ["#faf4cf", "#fcdf35", "#e3daa1"],
+    shadowgrey:      ["#b1aeb9", "#575553", "#8a8792"],
+    salmon:          ["#fde9e4", "#ef4b62", "#efbaba"],
+    cottoncandy:     ["#ffd5e5", "#ffc2df", "#eba3bc"],
+    cloudwhite:      ["#f9f8f6", "#e7e6e4", "#d5d4d2"],
+    mauveover:       ["#ede2f5", "#ba8aff", "#dcc7ec"],
+    hintomint:       ["#cdf5d4", "#43edac", "#9ad7a5"],
+    bananacream:     ["#fdf3e0", "#ffe8bb", "#e7d4b4"],
     // Fallback
-    default:         ["#23283b", "#000000"]
+    default:         ["#23283b", "#000000", "#1a1d2a"]
   };
 
   function getKittyColors(kitty) {
     const colorName = (kitty.color || "").toLowerCase();
     const hasKnownColor = colorName && CK_COLORS[colorName];
     const colors = CK_COLORS[colorName] || CK_COLORS.default;
+    const background = kitty.background_color || kitty.kitty_color || colors[0];
+    // Shadow color: use kitty's shadow_color if available, or from CK_COLORS, or darken background
+    const shadow = kitty.shadow_color || colors[2] || darkenColor(background, 0.35);
     return {
-      background: kitty.background_color || kitty.kitty_color || colors[0],
+      background,
+      shadow,
       isUnknown: !kitty.background_color && !kitty.kitty_color && !hasKnownColor
     };
   }
@@ -186,7 +193,9 @@
       svgProbe: d.svgProbe || "off",
       svgFromApi: (typeof d.svgFromApi === "boolean") ? d.svgFromApi : true,
       siteBaseUrl: d.siteBaseUrl || "https://www.cryptokitties.co",
-      dataUrl: d.dataUrl || ""
+      dataUrl: d.dataUrl || "",
+      standaloneUrl: d.standaloneUrl || "",
+      githubUrl: d.githubUrl || "https://github.com/nivs/crypto-kitties-family-graph"
     };
   }
 
@@ -439,6 +448,11 @@
 
   let physicsOn = true;
   let network = null;
+
+  // Owner highlight lock state
+  let ownerHighlightLocked = false;
+  let lockedOwnerAddr = null;
+  let lockedOwnerNick = null;
 
   const resolvedImgUrl = new Map();
   const nodeBaseStyle = new Map();
@@ -1340,6 +1354,7 @@
     const traitKeys = Object.keys(traits).slice(0, 4);
     const gems = getMewtationGems(k);
     const gemsCompact = gemsHtml(gems, true);
+    const colors = getKittyColors(k);
 
     // Build traits with mewtation highlighting
     const traitsHtml = traitKeys.map(t => {
@@ -1355,7 +1370,7 @@
 
     tooltipEl.innerHTML = `
       <div class="tt-head">
-        <div class="tt-thumb" style="background:${safeText(k.kitty_color || k.background_color || "rgba(255,255,255,0.06)")};">
+        <div class="tt-thumb" style="background:${colors.background};--shadow-color:${colors.shadow};">
           ${img ? `<img src="${img}" alt="" />` : ""}
         </div>
         <div>
@@ -1431,7 +1446,13 @@
       const dataOwner = displayOwnerAddr ? `data-owner="${safeText(displayOwnerAddr)}"` : "";
       const dataNick = displayOwnerNick ? `data-owner-nick="${safeText(displayOwnerNick)}"` : "";
       const linkHref = displayOwnerAddr ? ownerUrl(displayOwnerAddr) : "#";
-      ownerHtml = `<a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick} style="color:var(--accent);text-decoration:none;">${safeText(ownerText)}</a>`;
+      const isLocked = ownerHighlightLocked &&
+        ((lockedOwnerAddr && displayOwnerAddr && lockedOwnerAddr.toLowerCase() === displayOwnerAddr.toLowerCase()) ||
+         (lockedOwnerNick && displayOwnerNick && lockedOwnerNick.toLowerCase() === displayOwnerNick.toLowerCase()));
+      const pinTitle = isLocked ? "Unpin owner highlight" : "Pin owner highlight";
+      const pinOpacity = isLocked ? "1" : "0.4";
+      ownerHtml = `<a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick} style="color:var(--accent);text-decoration:none;">${safeText(ownerText)}</a>
+        <button class="owner-pin-btn" ${dataOwner} ${dataNick} title="${pinTitle}" style="background:none;border:none;cursor:pointer;padding:0 4px;font-size:12px;opacity:${pinOpacity};vertical-align:baseline;line-height:1;">📍</button>`;
     } else if (showAuctionStatus) {
       ownerHtml = `<span class="small" style="color:rgba(255,200,100,0.8);">On Auction</span>`;
     } else {
@@ -1478,10 +1499,19 @@
       return `<span class="tag">${t}: ${traitLink}</span>`;
     }).join("");
 
+    const kittyImg = k.image_url || "";
+
     selectedBox.innerHTML = `
+      <div class="selected-header" style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">
+        <div class="selected-thumb" style="background:${colors.background};--shadow-color:${colors.shadow};">
+          ${kittyImg ? `<img src="${kittyImg}" alt="" />` : ""}
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:14px;"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">${safeText(k.name || `Kitty ${k.id}`)}</a></div>
+          <div style="color:var(--muted);font-size:12px;">#${k.id} · Gen ${safeText(k.generation)}</div>
+        </div>
+      </div>
       <div class="kv">
-        <div class="k">Name</div><div class="v"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">${safeText(k.name || `Kitty ${k.id}`)}</a> <span style="color:var(--muted);">#${k.id}</span></div>
-        <div class="k">Gen</div><div class="v">${safeText(k.generation)}</div>
         <div class="k">Color</div><div class="v">${bgColorHtml}</div>
         <div class="k">Born</div><div class="v">${formatDatePretty(k.created_at || k.birthday || "")}</div>
         <div class="k">Owner</div><div class="v">${ownerHtml}</div>
@@ -1492,17 +1522,70 @@
       </div>
     `;
 
-    // Add hover handlers for owner highlight
-    const ownerLink = selectedBox.querySelector(".owner-link");
-    if (ownerLink) {
-      ownerLink.addEventListener("mouseenter", () => {
-        const addr = ownerLink.dataset.owner || null;
-        const nick = ownerLink.dataset.ownerNick || null;
-        highlightOwnerKitties(addr, nick);
-      });
-      ownerLink.addEventListener("mouseleave", () => {
-        restoreAllNodes();
-      });
+    // Helper to set up owner highlight handlers on a container
+    function setupOwnerHighlightHandlers(container) {
+      const ownerLink = container.querySelector(".owner-link");
+      const pinBtn = container.querySelector(".owner-pin-btn");
+
+      if (ownerLink) {
+        ownerLink.addEventListener("mouseenter", () => {
+          if (ownerHighlightLocked) return; // Don't change highlight if locked
+          const addr = ownerLink.dataset.owner || null;
+          const nick = ownerLink.dataset.ownerNick || null;
+          highlightOwnerKitties(addr, nick);
+        });
+        ownerLink.addEventListener("mouseleave", () => {
+          if (ownerHighlightLocked) return; // Keep highlight if locked
+          restoreAllNodes();
+        });
+      }
+
+      if (pinBtn) {
+        pinBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const addr = pinBtn.dataset.owner || null;
+          const nick = pinBtn.dataset.ownerNick || null;
+
+          // Check if clicking the same owner that's already locked
+          const isSameOwner = ownerHighlightLocked &&
+            ((lockedOwnerAddr && addr && lockedOwnerAddr.toLowerCase() === addr.toLowerCase()) ||
+             (lockedOwnerNick && nick && lockedOwnerNick.toLowerCase() === nick.toLowerCase()));
+
+          if (isSameOwner) {
+            // Unlock
+            ownerHighlightLocked = false;
+            lockedOwnerAddr = null;
+            lockedOwnerNick = null;
+            restoreAllNodes();
+            log("Owner highlight unlocked");
+          } else {
+            // Lock to this owner
+            ownerHighlightLocked = true;
+            lockedOwnerAddr = addr;
+            lockedOwnerNick = nick;
+            highlightOwnerKitties(addr, nick);
+            log("Owner highlight locked:", { addr, nick });
+          }
+
+          // Re-render to update pin button state
+          showSelected(id);
+        });
+      }
+    }
+
+    // Set up handlers for sidebar
+    setupOwnerHighlightHandlers(selectedBox);
+
+    // Also update floating panel (for embed mode)
+    const floatingBox = $("floatingSelectedBox");
+    if (floatingBox) {
+      floatingBox.innerHTML = selectedBox.innerHTML;
+      // Set up handlers for floating panel
+      setupOwnerHighlightHandlers(floatingBox);
+      // Show floating panel if hidden
+      const floatingPanel = $("floatingPanel");
+      if (floatingPanel) floatingPanel.classList.remove("panel-hidden");
     }
 
     logv("showSelected:", { id, owner_addr: displayOwnerAddr, owner_nick: displayOwnerNick, isOnAuction, auctionType, gems });
@@ -1938,6 +2021,138 @@
 
     // Check for query params
     const params = new URLSearchParams(location.search);
+
+    // Embed mode
+    const isEmbedMode = params.get("embed") === "true" || params.get("embed") === "1";
+    if (isEmbedMode) {
+      document.body.classList.add("embed-mode");
+      log("Embed mode enabled");
+    }
+
+    // Floating panel controls (for embed mode)
+    const floatingPanel = $("floatingPanel");
+    const floatingPanelHeader = $("floatingPanelHeader");
+    const floatingPanelCollapse = $("floatingPanelCollapse");
+    const floatingPanelClose = $("floatingPanelClose");
+    const floatingGithubLink = $("floatingGithubLink");
+    const floatingViewerLink = $("floatingViewerLink");
+
+    // Set up GitHub link
+    if (floatingGithubLink) {
+      floatingGithubLink.href = defaults().githubUrl;
+    }
+
+    // Collapse toggle
+    if (floatingPanelCollapse && floatingPanel) {
+      floatingPanelCollapse.addEventListener("click", (e) => {
+        e.stopPropagation();
+        floatingPanel.classList.toggle("collapsed");
+        // Rotate the chevron icon
+        const svg = floatingPanelCollapse.querySelector("svg");
+        if (svg) {
+          svg.style.transform = floatingPanel.classList.contains("collapsed") ? "rotate(180deg)" : "";
+        }
+      });
+    }
+
+    // Close button
+    if (floatingPanelClose && floatingPanel) {
+      floatingPanelClose.addEventListener("click", (e) => {
+        e.stopPropagation();
+        floatingPanel.classList.add("panel-hidden");
+      });
+    }
+
+    // Drag functionality
+    if (floatingPanelHeader && floatingPanel) {
+      let isDragging = false;
+      let dragOffsetX = 0;
+      let dragOffsetY = 0;
+
+      floatingPanelHeader.addEventListener("mousedown", (e) => {
+        if (e.target.closest(".panel-btn")) return; // Don't drag when clicking buttons
+        isDragging = true;
+        const rect = floatingPanel.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+        floatingPanel.style.transition = "none";
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const x = e.clientX - dragOffsetX;
+        const y = e.clientY - dragOffsetY;
+        // Keep within viewport
+        const maxX = window.innerWidth - floatingPanel.offsetWidth;
+        const maxY = window.innerHeight - floatingPanel.offsetHeight;
+        floatingPanel.style.left = Math.max(0, Math.min(x, maxX)) + "px";
+        floatingPanel.style.top = Math.max(0, Math.min(y, maxY)) + "px";
+        floatingPanel.style.right = "auto";
+      });
+
+      document.addEventListener("mouseup", () => {
+        if (isDragging) {
+          isDragging = false;
+          floatingPanel.style.transition = "";
+        }
+      });
+
+      // Keep panel within viewport on window resize
+      window.addEventListener("resize", () => {
+        if (floatingPanel.style.right !== "auto") return; // Only adjust if manually positioned
+        const rect = floatingPanel.getBoundingClientRect();
+        const maxX = window.innerWidth - floatingPanel.offsetWidth;
+        const maxY = window.innerHeight - floatingPanel.offsetHeight;
+        let needsUpdate = false;
+        let newX = rect.left;
+        let newY = rect.top;
+
+        if (rect.left > maxX) {
+          newX = Math.max(0, maxX);
+          needsUpdate = true;
+        }
+        if (rect.top > maxY) {
+          newY = Math.max(0, maxY);
+          needsUpdate = true;
+        }
+        if (rect.right > window.innerWidth) {
+          newX = Math.max(0, window.innerWidth - floatingPanel.offsetWidth);
+          needsUpdate = true;
+        }
+        if (rect.bottom > window.innerHeight) {
+          newY = Math.max(0, window.innerHeight - floatingPanel.offsetHeight);
+          needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+          floatingPanel.style.left = newX + "px";
+          floatingPanel.style.top = newY + "px";
+        }
+      });
+    }
+
+    // Viewer link - opens standalone viewer with root kitty IDs (not expanded family)
+    if (floatingViewerLink) {
+      floatingViewerLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        const standaloneUrl = defaults().standaloneUrl;
+        if (!standaloneUrl) {
+          log("No standaloneUrl configured");
+          return;
+        }
+        // Get root kitty IDs (not expanded family members)
+        const rootIds = Array.from(myKittyIds);
+        if (rootIds.length === 0) {
+          log("No root kitties to open in viewer");
+          window.open(standaloneUrl, "_blank");
+          return;
+        }
+        // Open viewer with kitty IDs as query param
+        const url = `${standaloneUrl}?kitties=${rootIds.join(",")}`;
+        window.open(url, "_blank");
+        log("Opened viewer with root kitties:", rootIds);
+      });
+    }
 
     // Apply svgBaseUrl from query param if provided
     const svgBaseUrlParam = params.get("svgBaseUrl");

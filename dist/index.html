@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <title>CryptoKitties Family Graph</title>
 
   <script src="https://cdn.jsdelivr.net/npm/vis-network@10.0.2/standalone/umd/vis-network.min.js"></script>
@@ -62,8 +66,12 @@
 
     .tooltip{position:absolute;min-width:220px;max-width:320px;pointer-events:none;z-index:10;background:rgba(18,22,34,0.96);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:10px;box-shadow:0 12px 40px rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:none;}
     .tt-head{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
-    .tt-thumb{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,0.14);overflow:hidden;flex:0 0 auto;display:grid;place-items:center;background:rgba(255,255,255,0.06);}
-    .tt-thumb img{width:52px;height:52px;object-fit:cover;display:block;}
+    .tt-thumb{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,0.14);flex:0 0 auto;display:grid;place-items:center;background:rgba(255,255,255,0.06);position:relative;}
+    .tt-thumb::before{content:"";position:absolute;top:73%;left:-1.5%;right:0;width:53%;height:6.2%;margin:auto;background-color:var(--shadow-color, rgba(0,0,0,0.3));border-radius:50%;z-index:1;}
+    .tt-thumb img{width:52px;height:52px;object-fit:cover;display:block;border-radius:50%;position:relative;z-index:2;}
+    .selected-thumb{position:relative;width:64px;height:64px;border-radius:50%;border:1px solid var(--border);flex-shrink:0;}
+    .selected-thumb::before{content:"";position:absolute;top:73%;left:-1.5%;right:0;width:53%;height:6.2%;margin:auto;background-color:var(--shadow-color, rgba(0,0,0,0.3));border-radius:50%;z-index:1;}
+    .selected-thumb img{width:100%;height:100%;object-fit:cover;border-radius:50%;position:relative;z-index:2;}
     .tt-title{font-weight:700;font-size:13px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
     .tt-sub{color:var(--muted);font-size:11px;margin-top:2px;}
     .tt-body{font-size:12px;color:var(--text);display:grid;gap:4px;}
@@ -123,6 +131,7 @@
       z-index:4;
       opacity:0.7;
       transition:opacity 0.2s;
+      cursor:pointer;
     }
     .floating-logo:hover{opacity:1;}
     .floating-logo img{
@@ -137,6 +146,73 @@
     .label-muted{opacity:0.7;font-size:12px;}
     .tip{margin-top:10px;}
     .noscript-msg{padding:14px;color:#ffb3b3;}
+
+    /* Embed mode */
+    body.embed-mode header,
+    body.embed-mode aside{display:none;}
+    body.embed-mode main{grid-template-columns:1fr;padding:0;}
+    body.embed-mode #networkWrap{height:100vh;min-height:100vh;border:none;border-radius:0;}
+
+    /* Floating panel (embed mode) */
+    .floating-panel{
+      position:absolute;
+      top:16px;
+      right:16px;
+      width:340px;
+      max-width:calc(100vw - 32px);
+      max-height:calc(100vh - 32px);
+      background:rgba(18,22,34,0.96);
+      border:1px solid var(--border);
+      border-radius:14px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.5);
+      backdrop-filter:blur(12px);
+      z-index:20;
+      display:none;
+      overflow:hidden;
+    }
+    body.embed-mode .floating-panel{display:flex;flex-direction:column;}
+    .floating-panel.panel-hidden{display:none !important;}
+    .floating-panel-header{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      background:rgba(255,255,255,0.04);
+      border-bottom:1px solid var(--border);
+      cursor:move;
+      user-select:none;
+    }
+    .floating-panel-header .panel-title{flex:1;font-size:13px;font-weight:600;}
+    .floating-panel-header .panel-btn{
+      width:24px;
+      height:24px;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+    }
+    .floating-panel-header .panel-btn:hover{background:rgba(255,255,255,0.1);color:var(--text);}
+    .floating-panel-body{
+      padding:12px;
+      overflow-y:auto;
+      flex:1;
+      transition:max-height 0.3s ease, padding 0.3s ease;
+    }
+    .floating-panel.collapsed .floating-panel-body{max-height:0;padding:0 12px;overflow:hidden;}
+    .floating-panel-footer{
+      padding:10px 12px;
+      border-top:1px solid var(--border);
+      display:flex;
+      gap:12px;
+      font-size:11px;
+    }
+    .floating-panel.collapsed .floating-panel-footer{display:none;}
+    .floating-panel-footer a{color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px;}
+    .floating-panel-footer a:hover{color:var(--text);}
 
     @media (max-width:1020px){
       main{grid-template-columns:1fr;}
@@ -161,6 +237,10 @@
       svgProbe: "off",           // "off" or "on" - when "on" and svgBaseUrl is set, tries local SVGs first
       svgFromApi: true,         // Load images from CK API. If svgProbe is on, this is the fallback when local not found.
       siteBaseUrl: "https://www.cryptokitties.co",
+
+      // Embed mode links
+      standaloneUrl: "https://ck.innerlogics.com",  // Full viewer URL for "Open in viewer" link
+      githubUrl: "https://github.com/nivs/crypto-kitties-family-graph",
 
       // Default JSON to load
       //svgBaseUrl: "./nivs/svg/",
@@ -233,6 +313,30 @@
           </button>
         </div>
       </div>
+      <div id="floatingPanel" class="floating-panel">
+        <div class="floating-panel-header" id="floatingPanelHeader">
+          <span class="panel-title">Selected Kitty</span>
+          <button class="panel-btn" id="floatingPanelCollapse" title="Collapse">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+          </button>
+          <button class="panel-btn" id="floatingPanelClose" title="Close">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="floating-panel-body">
+          <div id="floatingSelectedBox" class="small">Click a kitty to select</div>
+        </div>
+        <div class="floating-panel-footer">
+          <a href="#" id="floatingGithubLink" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a href="#" id="floatingViewerLink" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            Open in viewer
+          </a>
+        </div>
+      </div>
       <noscript>
         <div class="noscript-msg">JavaScript is disabled or blocked. This viewer requires JS.</div>
       </noscript>
@@ -245,7 +349,7 @@
       </div>
 
       <div class="card">
-        <h3>Selected</h3>
+        <h3>Selected Kitty</h3>
         <div id="selectedBox" class="small">None</div>
       </div>
 
@@ -282,9 +386,16 @@
           </div>
         </div>
       </div>
+
+      <div class="card" style="margin-top:auto;">
+        <a href="https://github.com/nivs/crypto-kitties-family-graph" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:12px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
     </aside>
   </main>
 
-  <script src="./ck-family-graph.js"></script>
+  <script src="./js/ck-family-graph.js"></script>
 </body>
 </html>

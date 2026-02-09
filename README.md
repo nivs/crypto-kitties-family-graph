@@ -126,14 +126,26 @@ Use `tools/ck_fetch.py` to generate a JSON file with your kitties:
 # Install dependencies
 pip install requests
 
-# Fetch kitties with their parents and children
+# Fetch kitties with their parents and children (recursive mode)
 python3 tools/ck_fetch.py \
   --ids "124653,129868,148439" \
   --parents 2 \
   --children 1 \
   --out my_kitties.json \
   -v
+
+# Embedded-only mode (matches JS viewer behavior)
+# Only extracts parents/children embedded in API response, no extra API calls
+python3 tools/ck_fetch.py \
+  --ids "1,4,18" \
+  --embedded-only \
+  --out founders.json \
+  -v
 ```
+
+**Modes:**
+- **Default (recursive)**: Makes separate API calls to fetch all parents/children up to specified depth
+- **`--embedded-only`**: Only extracts data embedded in each kitty's API response (faster, matches `?kitties=...` URL behavior)
 
 See `python3 tools/ck_fetch.py --help` for all options.
 

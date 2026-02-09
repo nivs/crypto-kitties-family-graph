@@ -2,7 +2,7 @@
 
 An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitties.co/). Explore breeding relationships, discover mewtation gems, and visualize your kitty lineage.
 
-![Screenshot](dist/images/screenshot.png)
+![Screenshot](images/screenshot.png)
 
 ## Features
 

@@ -542,7 +542,7 @@
       bg,
       shadowColor,
       isUnknownColor,
-      size: 32,
+      size: 48,
       border: isMine ? "#7aa2ff" : (isUnknownColor ? "rgba(255,200,100,0.5)" : "rgba(255,255,255,0.22)"),
       borderWidth: isMine ? 2 : (isUnknownColor ? 2 : 1),
       gems: gems // Store gems for drawing
@@ -1264,7 +1264,7 @@
       if (ownedIds.has(nid)) {
         nodeUpdates.push({
           id: nid,
-          size: 38,
+          size: 56,
           color: { background: brightenHex(base.bg, 0.25), border: "#7aa2ff" },
           borderWidth: 3
         });
@@ -1689,8 +1689,8 @@
 
         // Get actual node size from the node data (accounts for hover enlargement)
         const node = nodes.get(Number(id));
-        const nodeSize = node && node.size ? node.size : (base.size || 32);
-        const gemSize = nodeSize > 36 ? 20 : 16; // Larger gems when node is enlarged
+        const nodeSize = node && node.size ? node.size : (base.size || 48);
+        const gemSize = nodeSize > 52 ? 22 : 18; // Larger gems when node is enlarged
 
         // Sort gems by priority (diamond > gold > silver > bronze)
         const gemPriority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
@@ -1735,7 +1735,7 @@
       if (!base) return;
 
       // Enlarge hovered node
-      nodes.update({ id, size: 42, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
+      nodes.update({ id, size: 58, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
 
       // Show tooltip
       showTooltip(id, params.event);

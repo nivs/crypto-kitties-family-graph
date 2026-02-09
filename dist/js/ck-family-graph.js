@@ -2165,26 +2165,29 @@
       });
     }
 
-    // Viewer link - opens standalone viewer with root kitty IDs (not expanded family)
+    // Viewer link - opens standalone viewer with kitties needed to reconstruct this graph
     if (floatingViewerLink) {
-      floatingViewerLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        const standaloneUrl = defaults().standaloneUrl;
-        if (!standaloneUrl) {
-          log("No standaloneUrl configured");
+      floatingViewerLink.addEventListener("click", () => {
+        // Include only:
+        // - myKittyIds: the original root kitties that were explicitly loaded
+        // - expandedIds: kitties that were double-clicked to expand
+        // Everything else (embedded parents/children) will be auto-fetched
+        const idsToInclude = new Set([...myKittyIds, ...expandedIds]);
+        const minimalIds = Array.from(idsToInclude);
+
+        if (minimalIds.length === 0) {
+          log("No kitties to open in viewer");
+          window.open(window.location.origin, "_blank");
           return;
         }
-        // Get root kitty IDs (not expanded family members)
-        const rootIds = Array.from(myKittyIds);
-        if (rootIds.length === 0) {
-          log("No root kitties to open in viewer");
-          window.open(standaloneUrl, "_blank");
-          return;
+        // Build URL on same host with kitty IDs and optional owner highlight
+        let url = `${window.location.origin}?kitties=${minimalIds.join(",")}`;
+        if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
+          const ownerParam = lockedOwnerAddr || lockedOwnerNick;
+          url += `&owner=${encodeURIComponent(ownerParam)}`;
         }
-        // Open viewer with kitty IDs as query param
-        const url = `${standaloneUrl}?kitties=${rootIds.join(",")}`;
         window.open(url, "_blank");
-        log("Opened viewer with root kitties:", rootIds);
+        log("Opened viewer with kitties:", minimalIds.length, "(roots:", myKittyIds.size, "expanded:", expandedIds.size, ")");
       });
     }
 

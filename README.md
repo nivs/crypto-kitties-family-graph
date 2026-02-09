@@ -228,7 +228,8 @@ python3 ck_fetch.py --ids 896775 --parents 1 --children 0 -v \
 python3 download_svgs.py ../dist/example/dragon/dragon.json \
   -o ../dist/example/dragon/svg/ --skip-existing
 ```
-Load: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
+- Live: `?kitties=896775`
+- Local: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
 
 **Founders (origin story):**
 ```bash
@@ -237,7 +238,8 @@ python3 ck_fetch.py --ids "1,4,18" --embedded-only -v \
 python3 download_svgs.py ../dist/example/founders/founders.json \
   -o ../dist/example/founders/svg/ --skip-existing
 ```
-Load: `?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/`
+- Live: `?kitties=1,4,18`
+- Local: `?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/`
 
 **Milestones:**
 ```bash
@@ -246,7 +248,8 @@ python3 ck_fetch.py --ids "100000,500000" --parents 1 --children 1 --embedded-on
 python3 download_svgs.py ../dist/example/milestones/milestones.json \
   -o ../dist/example/milestones/svg/ --skip-existing
 ```
-Load: `?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/`
+- Live: `?kitties=100000,500000`
+- Local: `?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/`
 
 **Holiday Fancies:**
 ```bash
@@ -255,7 +258,8 @@ python3 ck_fetch.py --ids "174756,275808" --embedded-only -v \
 python3 download_svgs.py ../dist/example/holidays/holidays.json \
   -o ../dist/example/holidays/svg/ --skip-existing
 ```
-Load: `?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
+- Live: `?kitties=174756,275808`
+- Local: `?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
 
 ## License
 

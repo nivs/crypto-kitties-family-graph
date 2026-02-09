@@ -1,0 +1,1089 @@
+{
+  "source": "CryptoKitties public API v3",
+  "generated_at_utc": "2026-02-09T17:38:26Z",
+  "config": {
+    "parent_levels": 1,
+    "child_levels": 0,
+    "child_parent_levels": 0,
+    "child_page_limit": 100,
+    "request_timeout_s": 30,
+    "sleep_s": 0.15,
+    "max_total_kitties": 5000,
+    "user_agent": "ck-tree-json-generator/1.3",
+    "max_retries": 4,
+    "backoff_base_s": 0.75,
+    "shadow_mode": "darken",
+    "shadow_factor": 0.18,
+    "css_url": "https://www.cryptokitties.co/index.b4a978279e40ce1b7fbb.css",
+    "css_palette_enabled": true
+  },
+  "root_ids": [
+    1,
+    4,
+    18
+  ],
+  "included_by": {
+    "1": [
+      "root"
+    ],
+    "4": [
+      "root"
+    ],
+    "18": [
+      "root"
+    ]
+  },
+  "kitties": [
+    {
+      "id": 1,
+      "name": "Genesis",
+      "generation": 0,
+      "created_at": "2017-11-23T06:19:59.000Z",
+      "birthday": "2017-11-23T00:00:00.000Z",
+      "genes": "626837621154801616088980922659877168609154386318304496692374110716999053",
+      "color": "sizzurp",
+      "background_color": "#dfdffa",
+      "kitty_color": "#dfdffa",
+      "shadow_color": "#b7b7cd",
+      "owner": {
+        "address": "0x88207b431510dbe0addbdae3bd53013813fc8c71",
+        "hasDapper": false,
+        "twitter_id": null,
+        "twitter_image_url": null,
+        "twitter_handle": null,
+        "image": "19",
+        "nickname": "Stimpson J. Cat"
+      },
+      "owner_address": "0x88207b431510dbe0addbdae3bd53013813fc8c71",
+      "owner_nickname": "Stimpson J. Cat",
+      "matron_id": null,
+      "sire_id": null,
+      "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/1.png",
+      "traits": {},
+      "enhanced_cattributes": [],
+      "raw": {
+        "id": 1,
+        "name": "Genesis",
+        "generation": 0,
+        "genes": "626837621154801616088980922659877168609154386318304496692374110716999053",
+        "created_at": "2017-11-23T06:19:59.000Z",
+        "birthday": "2017-11-23T00:00:00.000Z",
+        "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/1.png",
+        "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/1.png",
+        "color": "sizzurp",
+        "background_color": "#dfdffa",
+        "bio": "Greetings, human. I am Genesis. The dogs know me as alpha; the cats know me as omega. To your kind, I am a riddle wrapped in an enigma, first found by a user in Mystery, Alaska. I looked into the void and the void looked back. Then I lost interest. I can’t wait to be your new owner!",
+        "kitty_type": "exclusive",
+        "is_fancy": true,
+        "is_exclusive": true,
+        "is_special_edition": false,
+        "fancy_type": "Genesis",
+        "language": "en",
+        "is_prestige": false,
+        "prestige_type": null,
+        "prestige_ranking": null,
+        "prestige_time_limit": null,
+        "status": {
+          "is_ready": true,
+          "is_gestating": false,
+          "cooldown": 1408971663578,
+          "dynamic_cooldown": 1476730847121,
+          "cooldown_index": 0,
+          "cooldown_end_block": 0,
+          "pending_tx_type": null,
+          "pending_tx_since": null
+        },
+        "purrs": {
+          "count": 1947,
+          "is_purred": false
+        },
+        "watchlist": {
+          "count": 0,
+          "is_watchlisted": false
+        },
+        "hatcher": {
+          "address": "0xba52c75764d6f594735dc735be7f1830cdf58ddf",
+          "image": "2",
+          "nickname": "COO",
+          "hasDapper": false,
+          "twitter_id": null,
+          "twitter_image_url": null,
+          "twitter_handle": null
+        },
+        "auction": {},
+        "offer": {},
+        "owner": {
+          "address": "0x88207b431510dbe0addbdae3bd53013813fc8c71",
+          "hasDapper": false,
+          "twitter_id": null,
+          "twitter_image_url": null,
+          "twitter_handle": null,
+          "image": "19",
+          "nickname": "Stimpson J. Cat"
+        },
+        "matron": {},
+        "sire": {},
+        "children": [],
+        "hatched": true,
+        "wrapped": true,
+        "enhanced_cattributes": [],
+        "variation": null,
+        "variation_ranking": null,
+        "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/1.png",
+        "fancy_ranking": 1
+      }
+    },
+    {
+      "id": 4,
+      "name": "Fluffy Founder",
+      "generation": 0,
+      "created_at": "2017-11-23T06:19:59.000Z",
+      "birthday": "2017-11-23T00:00:00.000Z",
+      "genes": "626837514194733471931671628842075756017852396531725903999108783271194062",
+      "color": "chestnut",
+      "background_color": "#efe1da",
+      "kitty_color": "#efe1da",
+      "shadow_color": "#c4b8b3",
+      "owner": {
+        "address": "0x61a4575d63c63f9f05447395760dba3ed602c48c",
+        "hasDapper": false,
+        "twitter_id": null,
+        "twitter_image_url": null,
+        "twitter_handle": null,
+        "image": "15",
+        "nickname": "ColonelKitty"
+      },
+      "owner_address": "0x61a4575d63c63f9f05447395760dba3ed602c48c",
+      "owner_nickname": "ColonelKitty",
+      "matron_id": null,
+      "sire_id": null,
+      "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/4.svg",
+      "traits": {
+        "body": "ragamuffin",
+        "eyes": "thicccbrowz",
+        "pattern": "jaguar",
+        "mouth": "soserious",
+        "colorprimary": "orangesoda",
+        "colorsecondary": "coffee",
+        "colortertiary": "granitegrey",
+        "coloreyes": "chestnut",
+        "purrstige": "pu11",
+        "secret": "se5"
+      },
+      "enhanced_cattributes": [
+        {
+          "type": "body",
+          "description": "ragamuffin",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "eyes",
+          "description": "thicccbrowz",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "pattern",
+          "description": "jaguar",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "mouth",
+          "description": "soserious",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "colorprimary",
+          "description": "orangesoda",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "colorsecondary",
+          "description": "coffee",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "colortertiary",
+          "description": "granitegrey",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "coloreyes",
+          "description": "chestnut",
+          "position": null,
+          "kittyId": 4
+        },
+        {
+          "type": "purrstige",
+          "description": "pu11",
+          "position": -1,
+          "kittyId": 4
+        },
+        {
+          "type": "secret",
+          "description": "se5",
+          "position": -1,
+          "kittyId": 4
+        }
+      ],
+      "raw": {
+        "id": 4,
+        "name": "Fluffy Founder",
+        "generation": 0,
+        "genes": "626837514194733471931671628842075756017852396531725903999108783271194062",
+        "created_at": "2017-11-23T06:19:59.000Z",
+        "birthday": "2017-11-23T00:00:00.000Z",
+        "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/4.svg",
+        "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/4.svg",
+        "color": "chestnut",
+        "background_color": "#efe1da",
+        "bio": "Hey cutie! My name's Fluffy Founder. I once peed on Princess Diana's cat. They had it coming. I once got in a fight with a rooster, and won. Our friendship will be gullible, gorgeous, and full of ice cream.",
+        "kitty_type": null,
+        "is_fancy": false,
+        "is_exclusive": false,
+        "is_special_edition": false,
+        "fancy_type": null,
+        "language": "en",
+        "is_prestige": false,
+        "prestige_type": null,
+        "prestige_ranking": null,
+        "prestige_time_limit": null,
+        "status": {
+          "is_ready": true,
+          "is_gestating": false,
+          "cooldown": 1485892613995,
+          "dynamic_cooldown": 1533001470258,
+          "cooldown_index": 2,
+          "cooldown_end_block": 4675193,
+          "pending_tx_type": null,
+          "pending_tx_since": null
+        },
+        "purrs": {
+          "count": 54,
+          "is_purred": false
+        },
+        "watchlist": {
+          "count": 0,
+          "is_watchlisted": false
+        },
+        "hatcher": {
+          "address": "0xba52c75764d6f594735dc735be7f1830cdf58ddf",
+          "image": "2",
+          "nickname": "COO",
+          "hasDapper": false,
+          "twitter_id": null,
+          "twitter_image_url": null,
+          "twitter_handle": null
+        },
+        "auction": {},
+        "offer": {},
+        "owner": {
+          "address": "0x61a4575d63c63f9f05447395760dba3ed602c48c",
+          "hasDapper": false,
+          "twitter_id": null,
+          "twitter_image_url": null,
+          "twitter_handle": null,
+          "image": "15",
+          "nickname": "ColonelKitty"
+        },
+        "matron": {},
+        "sire": {},
+        "children": [
+          {
+            "id": 52431,
+            "name": "jaguar 4cb 4jaguar 3F 3x9",
+            "generation": 2,
+            "enhanced_cattributes": [
+              {
+                "type": "body",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "himalayan"
+              },
+              {
+                "type": "coloreyes",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "topaz"
+              },
+              {
+                "type": "eyes",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "thicccbrowz"
+              },
+              {
+                "type": "pattern",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "jaguar"
+              },
+              {
+                "type": "mouth",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "beard"
+              },
+              {
+                "type": "colorprimary",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "orangesoda"
+              },
+              {
+                "type": "colorsecondary",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "coffee"
+              },
+              {
+                "type": "colortertiary",
+                "kittyId": 52431,
+                "position": -1,
+                "description": "kittencream"
+              }
+            ],
+            "owner_wallet_address": "0xc5abcc97684a685fad144f808bd5fe894cb85e49",
+            "owner": {
+              "address": "0xc5abcc97684a685fad144f808bd5fe894cb85e49"
+            },
+            "created_at": "2017-12-04T02:52:48.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/52431.svg",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/52431.svg",
+            "color": "topaz",
+            "is_fancy": false,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": null,
+            "fancy_type": null,
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1512475055310
+            },
+            "hatched": true,
+            "wrapped": false,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/52431.png"
+          },
+          {
+            "id": 69060,
+            "name": "Son of Most ExpensiveCatall 4",
+            "generation": 2,
+            "enhanced_cattributes": [
+              {
+                "type": "body",
+                "kittyId": 69060,
+                "position": -1,
+                "description": "ragamuffin"
+              },
+              {
+                "type": "coloreyes",
+                "kittyId": 69060,
+                "position": -1,
+                "description": "topaz"
+              },
+              {
+                "type": "eyes",
+                "kittyId": 69060,
+                "position": -1,
+                "description": "thicccbrowz"
+              },
+              {
+                "type": "pattern",
+                "kittyId": 69060,
+                "position": -1,
+                "description": "luckystripe"
+              },
+              {
+                "type": "mouth",
+                "kittyId": 69060,
+                "position": -1,
+                "description": "beard"
+              },
+              {
+                "type": "colorprimary",
+                "kittyId": 69060,
+                "position": -1,
+                "description": "orangesoda"
+              },
+              {
+                "type": "colorsecondary",
+                "kittyId": 69060,
+                "position": 351,
+                "description": "scarlet"
+              },
+              {
+                "type": "colortertiary",
+                "kittyId": 29333,
+                "position": 151,
+                "description": "emeraldgreen"
+              }
+            ],
+            "owner_wallet_address": "0xc5abcc97684a685fad144f808bd5fe894cb85e49",
+            "owner": {
+              "address": "0xc5abcc97684a685fad144f808bd5fe894cb85e49"
+            },
+            "created_at": "2017-12-04T21:32:06.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/69060.svg",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/69060.svg",
+            "color": "topaz",
+            "is_fancy": false,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": null,
+            "fancy_type": null,
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1512013048670
+            },
+            "hatched": true,
+            "wrapped": true,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/69060.png"
+          }
+        ],
+        "hatched": true,
+        "wrapped": false,
+        "enhanced_cattributes": [
+          {
+            "type": "body",
+            "description": "ragamuffin",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "eyes",
+            "description": "thicccbrowz",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "pattern",
+            "description": "jaguar",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "mouth",
+            "description": "soserious",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "colorprimary",
+            "description": "orangesoda",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "colorsecondary",
+            "description": "coffee",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "colortertiary",
+            "description": "granitegrey",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "coloreyes",
+            "description": "chestnut",
+            "position": null,
+            "kittyId": 4
+          },
+          {
+            "type": "purrstige",
+            "description": "pu11",
+            "position": -1,
+            "kittyId": 4
+          },
+          {
+            "type": "secret",
+            "description": "se5",
+            "position": -1,
+            "kittyId": 4
+          }
+        ],
+        "variation": null,
+        "variation_ranking": null,
+        "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/4.png"
+      }
+    },
+    {
+      "id": 18,
+      "name": "Founder Cat #18",
+      "generation": 0,
+      "created_at": "2017-11-23T06:21:56.000Z",
+      "birthday": "2017-11-23T00:00:00.000Z",
+      "genes": "456019290466566782283211104688056003306070484000980014587948137646012875",
+      "color": "mintgreen",
+      "background_color": "#cdf5d4",
+      "kitty_color": "#cdf5d4",
+      "shadow_color": "#a8c9ae",
+      "owner": {
+        "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+        "hasDapper": false,
+        "twitter_id": null,
+        "twitter_image_url": null,
+        "twitter_handle": null,
+        "image": "18",
+        "nickname": "ouou123"
+      },
+      "owner_address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+      "owner_nickname": "ouou123",
+      "matron_id": null,
+      "sire_id": null,
+      "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/18.svg",
+      "traits": {
+        "body": "himalayan",
+        "eyes": "crazy",
+        "pattern": "jaguar",
+        "mouth": "soserious",
+        "colorprimary": "orangesoda",
+        "colorsecondary": "royalpurple",
+        "colortertiary": "granitegrey",
+        "coloreyes": "mintgreen",
+        "purrstige": "pu11",
+        "secret": "se5"
+      },
+      "enhanced_cattributes": [
+        {
+          "type": "body",
+          "description": "himalayan",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "eyes",
+          "description": "crazy",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "pattern",
+          "description": "jaguar",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "mouth",
+          "description": "soserious",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "colorprimary",
+          "description": "orangesoda",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "colorsecondary",
+          "description": "royalpurple",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "colortertiary",
+          "description": "granitegrey",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "coloreyes",
+          "description": "mintgreen",
+          "position": null,
+          "kittyId": 18
+        },
+        {
+          "type": "purrstige",
+          "description": "pu11",
+          "position": -1,
+          "kittyId": 18
+        },
+        {
+          "type": "secret",
+          "description": "se5",
+          "position": -1,
+          "kittyId": 18
+        }
+      ],
+      "raw": {
+        "id": 18,
+        "name": "Founder Cat #18",
+        "generation": 0,
+        "genes": "456019290466566782283211104688056003306070484000980014587948137646012875",
+        "created_at": "2017-11-23T06:21:56.000Z",
+        "birthday": "2017-11-23T00:00:00.000Z",
+        "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/18.svg",
+        "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/18.svg",
+        "color": "mintgreen",
+        "background_color": "#cdf5d4",
+        "bio": "*hissing noises*! I'm Founder Cat #18. I enjoy tripping my owner, eating until I loathe myself, and reading garfield. When no one's home, I invite my pals over and we listen to Rihanna. I look forward to riding unicorns with you.",
+        "kitty_type": null,
+        "is_fancy": false,
+        "is_exclusive": false,
+        "is_special_edition": false,
+        "fancy_type": null,
+        "language": "en",
+        "is_prestige": false,
+        "prestige_type": null,
+        "prestige_ranking": null,
+        "prestige_time_limit": null,
+        "status": {
+          "is_ready": true,
+          "is_gestating": false,
+          "cooldown": 1486253621728,
+          "dynamic_cooldown": 1533265564365,
+          "cooldown_index": 5,
+          "cooldown_end_block": 4697135,
+          "pending_tx_type": null,
+          "pending_tx_since": null
+        },
+        "purrs": {
+          "count": 49,
+          "is_purred": false
+        },
+        "watchlist": {
+          "count": 0,
+          "is_watchlisted": false
+        },
+        "hatcher": {
+          "address": "0xba52c75764d6f594735dc735be7f1830cdf58ddf",
+          "image": "2",
+          "nickname": "COO",
+          "hasDapper": false,
+          "twitter_id": null,
+          "twitter_image_url": null,
+          "twitter_handle": null
+        },
+        "auction": {},
+        "offer": {},
+        "owner": {
+          "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+          "hasDapper": false,
+          "twitter_id": null,
+          "twitter_image_url": null,
+          "twitter_handle": null,
+          "image": "18",
+          "nickname": "ouou123"
+        },
+        "matron": {},
+        "sire": {},
+        "children": [
+          {
+            "id": 121126,
+            "name": null,
+            "generation": 12,
+            "enhanced_cattributes": [],
+            "owner_wallet_address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+            "owner": {
+              "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22"
+            },
+            "created_at": "2017-12-07T03:49:29.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121126.png",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121126.png",
+            "color": "mintgreen",
+            "is_fancy": true,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": "fancy",
+            "fancy_type": "DuCat",
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1487669225408
+            },
+            "hatched": true,
+            "wrapped": false,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121126.png"
+          },
+          {
+            "id": 121653,
+            "name": null,
+            "generation": 1,
+            "enhanced_cattributes": [
+              {
+                "type": "body",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "himalayan"
+              },
+              {
+                "type": "coloreyes",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "mintgreen"
+              },
+              {
+                "type": "eyes",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "crazy"
+              },
+              {
+                "type": "pattern",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "jaguar"
+              },
+              {
+                "type": "mouth",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "beard"
+              },
+              {
+                "type": "colorprimary",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "orangesoda"
+              },
+              {
+                "type": "colorsecondary",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "royalpurple"
+              },
+              {
+                "type": "colortertiary",
+                "kittyId": 121653,
+                "position": -1,
+                "description": "granitegrey"
+              }
+            ],
+            "owner_wallet_address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+            "owner": {
+              "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22"
+            },
+            "created_at": "2017-12-07T04:34:08.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121653.svg",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121653.svg",
+            "color": "mintgreen",
+            "is_fancy": false,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": null,
+            "fancy_type": null,
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1487654432744
+            },
+            "hatched": true,
+            "wrapped": false,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121653.png"
+          },
+          {
+            "id": 124579,
+            "name": null,
+            "generation": 14,
+            "enhanced_cattributes": [
+              {
+                "type": "body",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "ragamuffin"
+              },
+              {
+                "type": "coloreyes",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "mintgreen"
+              },
+              {
+                "type": "eyes",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "crazy"
+              },
+              {
+                "type": "pattern",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "jaguar"
+              },
+              {
+                "type": "mouth",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "beard"
+              },
+              {
+                "type": "colorprimary",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "orangesoda"
+              },
+              {
+                "type": "colorsecondary",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "royalpurple"
+              },
+              {
+                "type": "colortertiary",
+                "kittyId": 124579,
+                "position": -1,
+                "description": "granitegrey"
+              }
+            ],
+            "owner_wallet_address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+            "owner": {
+              "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22"
+            },
+            "created_at": "2017-12-07T07:58:11.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/124579.svg",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/124579.svg",
+            "color": "mintgreen",
+            "is_fancy": false,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": null,
+            "fancy_type": null,
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1487799548731
+            },
+            "hatched": true,
+            "wrapped": false,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/124579.png"
+          },
+          {
+            "id": 142524,
+            "name": null,
+            "generation": 1,
+            "enhanced_cattributes": [
+              {
+                "type": "body",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "ragamuffin"
+              },
+              {
+                "type": "coloreyes",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "mintgreen"
+              },
+              {
+                "type": "eyes",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "crazy"
+              },
+              {
+                "type": "pattern",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "jaguar"
+              },
+              {
+                "type": "mouth",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "soserious"
+              },
+              {
+                "type": "colorprimary",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "orangesoda"
+              },
+              {
+                "type": "colorsecondary",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "chocolate"
+              },
+              {
+                "type": "colortertiary",
+                "kittyId": 142524,
+                "position": -1,
+                "description": "granitegrey"
+              }
+            ],
+            "owner_wallet_address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+            "owner": {
+              "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22"
+            },
+            "created_at": "2017-12-08T02:44:43.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/142524.svg",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/142524.svg",
+            "color": "mintgreen",
+            "is_fancy": false,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": null,
+            "fancy_type": null,
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1485490109584
+            },
+            "hatched": true,
+            "wrapped": false,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/142524.png"
+          },
+          {
+            "id": 154514,
+            "name": "Dracula2-5",
+            "generation": 13,
+            "enhanced_cattributes": [
+              {
+                "type": "body",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "ragamuffin"
+              },
+              {
+                "type": "coloreyes",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "strawberry"
+              },
+              {
+                "type": "eyes",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "crazy"
+              },
+              {
+                "type": "pattern",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "jaguar"
+              },
+              {
+                "type": "mouth",
+                "kittyId": 3836,
+                "position": 35,
+                "description": "tongue"
+              },
+              {
+                "type": "colorprimary",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "orangesoda"
+              },
+              {
+                "type": "colorsecondary",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "coffee"
+              },
+              {
+                "type": "colortertiary",
+                "kittyId": 154514,
+                "position": -1,
+                "description": "granitegrey"
+              }
+            ],
+            "owner_wallet_address": "0xa6d3fdf423bbc578dd4d41220078475371626b22",
+            "owner": {
+              "address": "0xa6d3fdf423bbc578dd4d41220078475371626b22"
+            },
+            "created_at": "2017-12-08T14:23:36.000Z",
+            "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/154514.svg",
+            "image_url_cdn": "https://img.cn.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/154514.svg",
+            "color": "strawberry",
+            "is_fancy": false,
+            "is_exclusive": false,
+            "is_special_edition": false,
+            "kitty_type": null,
+            "fancy_type": null,
+            "status": {
+              "is_ready": true,
+              "is_gestating": false,
+              "cooldown": 1485899523524
+            },
+            "hatched": true,
+            "wrapped": false,
+            "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/154514.png"
+          }
+        ],
+        "hatched": true,
+        "wrapped": false,
+        "enhanced_cattributes": [
+          {
+            "type": "body",
+            "description": "himalayan",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "eyes",
+            "description": "crazy",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "pattern",
+            "description": "jaguar",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "mouth",
+            "description": "soserious",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "colorprimary",
+            "description": "orangesoda",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "colorsecondary",
+            "description": "royalpurple",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "colortertiary",
+            "description": "granitegrey",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "coloreyes",
+            "description": "mintgreen",
+            "position": null,
+            "kittyId": 18
+          },
+          {
+            "type": "purrstige",
+            "description": "pu11",
+            "position": -1,
+            "kittyId": 18
+          },
+          {
+            "type": "secret",
+            "description": "se5",
+            "position": -1,
+            "kittyId": 18
+          }
+        ],
+        "variation": null,
+        "variation_ranking": null,
+        "image_url_png": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/18.png"
+      }
+    }
+  ],
+  "errors": [],
+  "counts": {
+    "kitties": 3,
+    "errors": 0
+  }
+}

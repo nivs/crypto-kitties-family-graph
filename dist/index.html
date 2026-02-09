@@ -232,10 +232,9 @@
       useProxy: false,          // Enable/disable CORS proxy
       proxyUrl: "https://www.example.com/ckproxy.php?url=",
 
-      svgBaseUrl: "",
+      svgBaseUrl: "",           // If set, tries local SVGs first (probes automatically)
       dataUrl: "",
-      svgProbe: "off",           // "off" or "on" - when "on" and svgBaseUrl is set, tries local SVGs first
-      svgFromApi: true,         // Load images from CK API. If svgProbe is on, this is the fallback when local not found.
+      svgFromApi: true,         // Load images from CK API (fallback when svgBaseUrl fails or not set)
       siteBaseUrl: "https://www.cryptokitties.co",
 
       // Embed mode links
@@ -243,9 +242,8 @@
       githubUrl: "https://github.com/nivs/crypto-kitties-family-graph",
 
       // Default JSON to load
-      //svgBaseUrl: "./nivs/svg/",
-      //dataUrl: "./nivs/nivs_kitties.json"
-      //svgProbe: "on",
+      //svgBaseUrl: "./example/nivs/svg/",
+      //dataUrl: "./example/nivs/nivs_kitties.json"
     };
   </script>
 </head>
@@ -364,15 +362,7 @@
             <div class="v"><input id="apiProxyUrl" class="input input-full" /></div>
 
             <div class="k">Local SVG base</div>
-            <div class="v"><input id="svgBaseUrl" class="input input-full" /></div>
-
-            <div class="k">Local SVG probe</div>
-            <div class="v">
-              <select id="svgProbe" class="input input-full">
-                <option value="off">off</option>
-                <option value="on">on (try local, fallback)</option>
-              </select>
-            </div>
+            <div class="v"><input id="svgBaseUrl" class="input input-full" placeholder="e.g. ./svg/ (probes if set)" /></div>
 
             <div class="k">Load from API</div>
             <div class="v" title="Fallback to API images if local SVG not found"><input type="checkbox" id="svgFromApi" checked /> <label for="svgFromApi" class="label-muted">Load images from CK API</label></div>

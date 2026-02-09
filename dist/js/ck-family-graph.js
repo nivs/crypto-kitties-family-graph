@@ -190,7 +190,6 @@
       proxyUrl: d.proxyUrl || "",
       useProxy: (typeof d.useProxy === "boolean") ? d.useProxy : false,
       svgBaseUrl: d.svgBaseUrl || "",
-      svgProbe: d.svgProbe || "off",
       svgFromApi: (typeof d.svgFromApi === "boolean") ? d.svgFromApi : true,
       siteBaseUrl: d.siteBaseUrl || "https://www.cryptokitties.co",
       dataUrl: d.dataUrl || "",
@@ -211,7 +210,6 @@
     setChecked("useProxy", d.useProxy);
     setVal("apiProxyUrl", d.proxyUrl);
     setVal("svgBaseUrl", d.svgBaseUrl);
-    setVal("svgProbe", d.svgProbe);
     setChecked("svgFromApi", d.svgFromApi);
     setVal("siteBaseUrl", d.siteBaseUrl);
 
@@ -413,12 +411,14 @@
 
   function nodeLabel(k) { return k.name ? k.name : `Kitty ${k.id}`; }
 
-  function localSvgUrl(id) {
+  function localImageUrl(id, imageUrl) {
     const el = $("svgBaseUrl");
     const base = (el && el.value ? el.value : "").trim();
     if (!base) return null; // No base URL configured
     const clean = base.endsWith("/") ? base : (base + "/");
-    return `${clean}${id}.svg`;
+    // Determine extension from the API image URL
+    const ext = (imageUrl && imageUrl.toLowerCase().includes(".png")) ? "png" : "svg";
+    return `${clean}${id}.${ext}`;
   }
 
   async function probeUrlExistsLocal(url) {
@@ -464,17 +464,15 @@
     const id = Number(k.id);
     if (resolvedImgUrl.has(id)) return resolvedImgUrl.get(id);
 
-    const probeEl = $("svgProbe");
     const svgBaseEl = $("svgBaseUrl");
     const svgBaseUrl = (svgBaseEl && svgBaseEl.value ? svgBaseEl.value : "").trim();
-    const probeOn = probeEl ? (probeEl.value === "on") : false;
-    const shouldProbe = probeOn && svgBaseUrl; // Only probe if svgBaseUrl is set
+    const shouldProbe = !!svgBaseUrl; // Probe if svgBaseUrl is set
     const colors = getKittyColors(k);
     const bg = colors.background;
     const shadowColor = colors.shadow;
     const isUnknownColor = colors.isUnknown;
 
-    log("resolveImageUrlForKitty:", { id, probeOn, svgBaseUrl, shouldProbe, bg, shadowColor, isUnknownColor, hasImageUrl: !!k.image_url });
+    log("resolveImageUrlForKitty:", { id, svgBaseUrl, shouldProbe, bg, shadowColor, isUnknownColor, hasImageUrl: !!k.image_url });
 
     const getPlaceholder = () => isUnknownColor ? checkeredPlaceholderDataUri(nodeLabel(k)) : placeholderDataUri(nodeLabel(k), bg);
 
@@ -485,26 +483,34 @@
     };
 
     if (shouldProbe) {
-      const svgUrl = localSvgUrl(id);
-      if (svgUrl) {
-        log("Probing SVG:", svgUrl);
-        const exists = await probeUrlExistsLocal(svgUrl);
-        log("SVG probe result:", { id, svgUrl, exists });
+      const imgUrl = localImageUrl(id, k.image_url);
+      if (imgUrl) {
+        log("Probing local image:", imgUrl);
+        const exists = await probeUrlExistsLocal(imgUrl);
+        log("Probe result:", { id, imgUrl, exists });
         if (exists) {
           try {
-            const res = await fetch(svgUrl, { cache: "no-store" });
-            log("SVG fetch response:", { id, ok: res.ok, status: res.status });
+            const res = await fetch(imgUrl, { cache: "no-store" });
+            log("Fetch response:", { id, ok: res.ok, status: res.status });
             if (res.ok) {
-              const svgText = await res.text();
-              log("SVG loaded, length:", svgText.length);
-              const uri = svgToDataUri(svgText);
-              log("Created data URI, length:", uri.length);
-              resolvedImgUrl.set(id, uri);
-              ensureImageUpdated(uri);
-              return uri;
+              // For SVG, convert to data URI; for PNG, use URL directly
+              if (imgUrl.toLowerCase().endsWith(".svg")) {
+                const svgText = await res.text();
+                log("SVG loaded, length:", svgText.length);
+                const uri = svgToDataUri(svgText);
+                resolvedImgUrl.set(id, uri);
+                ensureImageUpdated(uri);
+                return uri;
+              } else {
+                // PNG or other format - use URL directly
+                log("PNG loaded:", imgUrl);
+                resolvedImgUrl.set(id, imgUrl);
+                ensureImageUpdated(imgUrl);
+                return imgUrl;
+              }
             }
           } catch (e) {
-            log("local svg fetch failed:", svgUrl, e);
+            log("local image fetch failed:", imgUrl, e);
           }
         }
       }
@@ -1992,7 +1998,7 @@
       });
     }
 
-    ["apiProxyUrl", "svgBaseUrl", "svgProbe", "svgFromApi", "siteBaseUrl"].forEach((id) => {
+    ["apiProxyUrl", "svgBaseUrl", "svgFromApi", "siteBaseUrl"].forEach((id) => {
       const el = $(id);
       if (!el) return;
       el.addEventListener("change", () => {

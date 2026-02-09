@@ -90,8 +90,7 @@ window.CK_GRAPH_DEFAULTS = {
   debugLevel: 0,              // 0=off, 1=info, 2=verbose
   useProxy: false,            // Enable CORS proxy for API calls
   proxyUrl: "",               // Your proxy URL (see proxy/ckproxy.php)
-  svgBaseUrl: "",             // Base URL for local SVG files
-  svgProbe: "on",             // "on" to try local SVGs first
+  svgBaseUrl: "",             // Base URL for local SVGs (probes automatically if set)
   svgFromApi: true,           // Load images from API (fallback if local not found)
   siteBaseUrl: "https://www.cryptokitties.co",
   dataUrl: "",                // Default JSON to load on startup
@@ -115,7 +114,8 @@ crypto-kitties-family-graph/
 ├── proxy/                  # CORS proxy (deploy separately if needed)
 │   └── ckproxy.php         # PHP proxy script
 └── tools/                  # Development utilities (not deployed)
-    └── ck_fetch.py         # Fetch kitty data from API
+    ├── ck_fetch.py         # Fetch kitty data from API
+    └── download_svgs.py    # Download SVG images from JSON
 ```
 
 ## Generating Kitty Data
@@ -136,6 +136,36 @@ python3 tools/ck_fetch.py \
 ```
 
 See `python3 tools/ck_fetch.py --help` for all options.
+
+## Downloading SVG Images
+
+Use `tools/download_svgs.py` to download kitty SVG images from a JSON file:
+
+```bash
+# Basic usage
+python3 tools/download_svgs.py kitties.json -o ./svg/
+
+# Skip existing files (for incremental downloads)
+python3 tools/download_svgs.py kitties.json -o ./svg/ --skip-existing
+
+# With custom delay between requests (default: 0.5s)
+python3 tools/download_svgs.py kitties.json -o ./svg/ --delay 1.0
+```
+
+**Example workflow:**
+```bash
+cd tools
+
+# 1. Fetch kitty data
+python3 ck_fetch.py --ids 896775 --parents 2 --children 1 \
+  --out ../dist/example/dragon/dragon.json -v
+
+# 2. Download SVGs
+python3 download_svgs.py ../dist/example/dragon/dragon.json \
+  -o ../dist/example/dragon/svg/ --skip-existing
+```
+
+Then load with: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
 
 ## CORS Proxy
 
@@ -158,3 +188,60 @@ MIT License - see [LICENSE](LICENSE)
 
 - [CryptoKitties](https://www.cryptokitties.co/) for the awesome game and API
 - [vis-network](https://visjs.github.io/vis-network/docs/network/) for the graph library
+
+
+
+---
+
+additional examples:
+
+```
+Good “example graphs” to showcase CryptoKitties
+
+Here are good, recognizable anchors that produce interesting expansions.
+
+1) “Most expensive” headline example
+
+Dragon (sold for 600 ETH): 896775
+
+This is the classic “look how crazy it got” anchor, and its ancestry can be fun to explore.
+
+2) “Early history / provenance” examples (low IDs, Gen 0 era)
+
+Genesis: 1
+
+Founder Cat #4: 4
+
+Founder Cat #18: 18
+
+Low IDs are explicitly called out by CryptoKitties as historically notable.
+
+3) “Milestone” example (nice storytelling anchor)
+
+Kitty #100,000: 100000
+
+This is a great “ecosystem growth” snapshot, and it typically has a reasonable family expansion depth.
+
+4) “First holiday Fancy” examples (recognizable and visually distinct)
+
+First SantaClaws: 275808
+
+First Mistletoe: 174756
+
+Fancies are perfect demo material because they create immediate “goal breeding” context.
+
+5) “Exclusive / special drop” example
+
+Cathena (Exclusive): 500000
+
+This is a strong anchor if you want “special edition / exclusive lore” in the demo set.
+```
+
+1. dragon
+# from tools folder
+python3 ck_fetch.py --ids 896775 -vv --parents 1 --children 0 --out ../dist/example/dragon/dragon.json
+python3 download_svgs.py ../dist/example/dragon/dragon.json -o ../dist/example/dragon/svg/ --skip-existing
+
+browse to
+http://localhost:8001/index.html?kitties=896775
+http://localhost:8001/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/

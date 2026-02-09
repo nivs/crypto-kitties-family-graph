@@ -2206,8 +2206,8 @@
       if (ownerParam) {
         // Wait a bit for the graph to stabilize
         setTimeout(() => {
-          // Detect if it's an address (0x...) or nickname
-          const isAddress = ownerParam.startsWith("0x");
+          // Detect if it's an Ethereum address (0x + 40 hex chars = 42 total)
+          const isAddress = /^0x[0-9a-fA-F]{40}$/.test(ownerParam);
           ownerHighlightLocked = true;
           lockedOwnerAddr = isAddress ? ownerParam : null;
           lockedOwnerNick = isAddress ? null : ownerParam;

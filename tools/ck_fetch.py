@@ -16,6 +16,11 @@ What it does
   - included_by (why each kitty was included)
   - kitties (normalized objects with raw API payload attached)
 
+Modes
+- Default (recursive): Fetches parents/children via separate API calls
+- --embedded-only: Only extract embedded data from API responses (matches JS viewer behavior)
+  This is faster and produces the same output as loading kitties via ?kitties=... in the viewer
+
 Verbosity
 - Default: warnings only
 - -v: INFO
@@ -24,6 +29,8 @@ Verbosity
 Examples
 - From comma list:
   python3 ck_fetch.py --ids "124653,129868,148439" --parents 4 --children 2 -v --out ck.json
+- Embedded-only (matches JS viewer):
+  python3 ck_fetch.py --ids "1,4,18" --embedded-only -v --out founders.json
 - From ids-file:
   python3 ck_fetch.py --ids-file my_kitties_ids.txt --parents 4 --children 2 -vv --out ck.json
 """
@@ -175,6 +182,7 @@ class Config:
     shadow_factor: float
     css_url: str
     css_palette_enabled: bool
+    embedded_only: bool  # If True, only extract embedded parents/children from API response
 
 
 class CKClient:
@@ -257,6 +265,46 @@ class CKClient:
                 deduped.append(cid)
                 seen.add(cid)
         return deduped
+
+
+def extract_embedded_kitties(kitty: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Extract embedded kitty objects from an API response.
+
+    The CK API embeds full matron/sire objects and a children array
+    directly in the kitty response. This extracts them without making
+    additional API calls.
+    """
+    embedded: List[Dict[str, Any]] = []
+    kitty_id = int(kitty.get("id", 0))
+
+    # Extract embedded matron (mother)
+    matron = kitty.get("matron")
+    if isinstance(matron, dict) and is_intlike(matron.get("id")):
+        logging.debug("embedded matron %s from kitty %d", matron.get("id"), kitty_id)
+        embedded.append(matron)
+
+    # Extract embedded sire (father)
+    sire = kitty.get("sire")
+    if isinstance(sire, dict) and is_intlike(sire.get("id")):
+        logging.debug("embedded sire %s from kitty %d", sire.get("id"), kitty_id)
+        embedded.append(sire)
+
+    # Extract embedded children
+    children = kitty.get("children")
+    if isinstance(children, list):
+        for child in children:
+            if isinstance(child, dict) and is_intlike(child.get("id")):
+                logging.debug("embedded child %s from kitty %d", child.get("id"), kitty_id)
+                # Children may not have matron_id/sire_id set, so we add parent reference
+                # We don't know if this kitty is matron or sire, but we set one reference
+                if not child.get("matron_id") and not child.get("matronId"):
+                    child = {**child, "matron_id": kitty_id}
+                elif not child.get("sire_id") and not child.get("sireId"):
+                    child = {**child, "sire_id": kitty_id}
+                embedded.append(child)
+
+    return embedded
 
 
 def extract_relations(kitty: Dict[str, Any]) -> Tuple[Optional[int], Optional[int]]:
@@ -417,75 +465,120 @@ def build_aggregation(root_ids: List[int], cfg: Config) -> Dict[str, Any]:
     kitties_by_id: Dict[int, Dict[str, Any]] = {}
     included_by: Dict[int, Set[str]] = {}
     errors: List[Dict[str, Any]] = []
-    best_depths: Dict[int, Tuple[int, int]] = {}
-
-    # Each queue entry: (kitty_id, remaining_parent_depth, remaining_child_depth, reason)
-    queue: List[Tuple[int, int, int, str]] = [(rid, cfg.parent_levels, cfg.child_levels, "root") for rid in root_ids]
 
     def mark(kid: int, reason: str) -> None:
         included_by.setdefault(kid, set()).add(reason)
 
-    def maybe_enqueue(kid: Optional[int], pdepth: int, cdepth: int, reason: str) -> None:
-        if kid is None:
-            return
-        kid = int(kid)
-        if kid <= 0:
-            return
+    # Embedded-only mode: fetch roots and extract embedded parents/children
+    if cfg.embedded_only:
+        logging.info("embedded-only mode: extracting embedded data from API responses")
+        root_set = set(root_ids)
+        embedded_kitties: Dict[int, Dict[str, Any]] = {}
 
-        pdepth = max(0, pdepth)
-        cdepth = max(0, cdepth)
+        for rid in root_ids:
+            if len(kitties_by_id) >= cfg.max_total_kitties:
+                logging.warning("Reached max total kitties cap: %d", cfg.max_total_kitties)
+                break
 
-        prev = best_depths.get(kid)
-        if prev is not None and prev[0] >= pdepth and prev[1] >= cdepth:
-            mark(kid, reason)
-            return
-
-        best_depths[kid] = (max(prev[0], pdepth) if prev else pdepth, max(prev[1], cdepth) if prev else cdepth)
-        queue.append((kid, pdepth, cdepth, reason))
-        mark(kid, reason)
-        logging.debug("enqueue id=%d pdepth=%d cdepth=%d reason=%s", kid, pdepth, cdepth, reason)
-
-    while queue:
-        if len(kitties_by_id) >= cfg.max_total_kitties:
-            logging.warning("Reached max total kitties cap: %d", cfg.max_total_kitties)
-            break
-
-        kid, pdepth, cdepth, reason = queue.pop(0)
-        mark(kid, reason)
-
-        if kid not in kitties_by_id:
             try:
-                logging.info("fetch kitty=%d (pdepth=%d cdepth=%d) reason=%s", kid, pdepth, cdepth, reason)
-                raw = client.fetch_kitty(kid)
-                kitties_by_id[kid] = normalize_kitty(raw, cfg)
+                logging.info("fetch root kitty=%d", rid)
+                raw = client.fetch_kitty(rid)
+                kitties_by_id[rid] = normalize_kitty(raw, cfg)
+                mark(rid, "root")
+
+                # Extract embedded kitties (parents and children)
+                for emb in extract_embedded_kitties(raw):
+                    emb_id = int(emb["id"])
+                    # Don't overwrite roots with embedded data
+                    if emb_id not in root_set and emb_id not in embedded_kitties:
+                        embedded_kitties[emb_id] = emb
+
             except Exception as e:
-                errors.append({"id": kid, "error": str(e)})
-                logging.warning("failed kitty=%d error=%s", kid, e)
+                errors.append({"id": rid, "error": str(e)})
+                logging.warning("failed kitty=%d error=%s", rid, e)
                 continue
 
             if cfg.sleep_s > 0:
                 time.sleep(cfg.sleep_s)
 
-        kitty = kitties_by_id[kid]
+        # Normalize and add embedded kitties
+        for emb_id, emb_raw in embedded_kitties.items():
+            if len(kitties_by_id) >= cfg.max_total_kitties:
+                break
+            kitties_by_id[emb_id] = normalize_kitty(emb_raw, cfg)
+            mark(emb_id, "embedded")
 
-        # Parents
-        if pdepth > 0:
-            mom = kitty.get("matron_id")
-            dad = kitty.get("sire_id")
-            logging.debug("parents of %d -> matron=%s sire=%s", kid, mom, dad)
-            maybe_enqueue(mom, pdepth - 1, 0, f"parent_of:{kid}")
-            maybe_enqueue(dad, pdepth - 1, 0, f"parent_of:{kid}")
+        logging.info("embedded-only: %d roots + %d embedded = %d total",
+                     len(root_ids), len(embedded_kitties), len(kitties_by_id))
 
-        # Children
-        if cdepth > 0:
-            try:
-                child_ids = client.fetch_children_ids(kid, cfg.child_page_limit)
-                logging.info("children of %d -> %d ids (next depth %d)", kid, len(child_ids), cdepth - 1)
-                for cid in child_ids:
-                    maybe_enqueue(cid, cfg.child_parent_levels, cdepth - 1, f"child_of:{kid}")
-            except Exception as e:
-                errors.append({"id": kid, "error_children_fetch": str(e)})
-                logging.warning("failed children fetch for %d error=%s", kid, e)
+    else:
+        # Original recursive mode
+        best_depths: Dict[int, Tuple[int, int]] = {}
+
+        # Each queue entry: (kitty_id, remaining_parent_depth, remaining_child_depth, reason)
+        queue: List[Tuple[int, int, int, str]] = [(rid, cfg.parent_levels, cfg.child_levels, "root") for rid in root_ids]
+
+        def maybe_enqueue(kid: Optional[int], pdepth: int, cdepth: int, reason: str) -> None:
+            if kid is None:
+                return
+            kid = int(kid)
+            if kid <= 0:
+                return
+
+            pdepth = max(0, pdepth)
+            cdepth = max(0, cdepth)
+
+            prev = best_depths.get(kid)
+            if prev is not None and prev[0] >= pdepth and prev[1] >= cdepth:
+                mark(kid, reason)
+                return
+
+            best_depths[kid] = (max(prev[0], pdepth) if prev else pdepth, max(prev[1], cdepth) if prev else cdepth)
+            queue.append((kid, pdepth, cdepth, reason))
+            mark(kid, reason)
+            logging.debug("enqueue id=%d pdepth=%d cdepth=%d reason=%s", kid, pdepth, cdepth, reason)
+
+        while queue:
+            if len(kitties_by_id) >= cfg.max_total_kitties:
+                logging.warning("Reached max total kitties cap: %d", cfg.max_total_kitties)
+                break
+
+            kid, pdepth, cdepth, reason = queue.pop(0)
+            mark(kid, reason)
+
+            if kid not in kitties_by_id:
+                try:
+                    logging.info("fetch kitty=%d (pdepth=%d cdepth=%d) reason=%s", kid, pdepth, cdepth, reason)
+                    raw = client.fetch_kitty(kid)
+                    kitties_by_id[kid] = normalize_kitty(raw, cfg)
+                except Exception as e:
+                    errors.append({"id": kid, "error": str(e)})
+                    logging.warning("failed kitty=%d error=%s", kid, e)
+                    continue
+
+                if cfg.sleep_s > 0:
+                    time.sleep(cfg.sleep_s)
+
+            kitty = kitties_by_id[kid]
+
+            # Parents
+            if pdepth > 0:
+                mom = kitty.get("matron_id")
+                dad = kitty.get("sire_id")
+                logging.debug("parents of %d -> matron=%s sire=%s", kid, mom, dad)
+                maybe_enqueue(mom, pdepth - 1, 0, f"parent_of:{kid}")
+                maybe_enqueue(dad, pdepth - 1, 0, f"parent_of:{kid}")
+
+            # Children
+            if cdepth > 0:
+                try:
+                    child_ids = client.fetch_children_ids(kid, cfg.child_page_limit)
+                    logging.info("children of %d -> %d ids (next depth %d)", kid, len(child_ids), cdepth - 1)
+                    for cid in child_ids:
+                        maybe_enqueue(cid, cfg.child_parent_levels, cdepth - 1, f"child_of:{kid}")
+                except Exception as e:
+                    errors.append({"id": kid, "error_children_fetch": str(e)})
+                    logging.warning("failed children fetch for %d error=%s", kid, e)
 
     return {
         "source": "CryptoKitties public API v3",
@@ -543,6 +636,13 @@ def main() -> int:
     )
     ap.add_argument("--no-css-palette", action="store_true", help="Disable fetching CSS palette")
 
+    ap.add_argument(
+        "--embedded-only",
+        action="store_true",
+        help="Only extract embedded parents/children from API response (matches JS viewer behavior). "
+             "Ignores --parents and --children levels.",
+    )
+
     ap.add_argument("-v", "--verbose", action="count", default=0, help="Increase verbosity. -v=INFO, -vv=DEBUG")
 
     ns = ap.parse_args()
@@ -574,6 +674,7 @@ def main() -> int:
         shadow_factor=max(0.0, min(1.0, ns.shadow_factor)),
         css_url=ns.css_url,
         css_palette_enabled=not ns.no_css_palette,
+        embedded_only=ns.embedded_only,
     )
 
     logging.info("roots=%s", root_ids)

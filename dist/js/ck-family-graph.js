@@ -550,19 +550,28 @@
     nodeBaseStyle.set(id, base);
 
     // Determine initial image:
-    // - If svgBaseUrl is set, we'll probe for local images, so use placeholder to avoid loading API image
+    // - If node already exists with a resolved image, keep it
+    // - If svgBaseUrl is set, use placeholder (resolveImageUrlForKitty will update)
     // - Otherwise, use API image_url if available, else placeholder
-    const svgBaseEl = $("svgBaseUrl");
-    const svgBaseUrl = (svgBaseEl && svgBaseEl.value ? svgBaseEl.value : "").trim();
-    const willProbeLocal = !!svgBaseUrl;
+    const existingNode = nodes.get(id);
+    const cachedImg = resolvedImgUrl.get(id);
 
     let initialImg;
-    if (willProbeLocal) {
-      // Use placeholder - resolveImageUrlForKitty will update with local or API image
-      initialImg = isUnknownColor ? checkeredPlaceholderDataUri(nodeLabel(k)) : placeholderDataUri(nodeLabel(k), bg);
+    if (existingNode && cachedImg) {
+      // Node already exists with resolved image - keep it
+      initialImg = cachedImg;
     } else {
-      // No local probing, use API image directly if available
-      initialImg = k.image_url || (isUnknownColor ? checkeredPlaceholderDataUri(nodeLabel(k)) : placeholderDataUri(nodeLabel(k), bg));
+      const svgBaseEl = $("svgBaseUrl");
+      const svgBaseUrl = (svgBaseEl && svgBaseEl.value ? svgBaseEl.value : "").trim();
+      const willProbeLocal = !!svgBaseUrl;
+
+      if (willProbeLocal) {
+        // Use placeholder - resolveImageUrlForKitty will update with local or API image
+        initialImg = isUnknownColor ? checkeredPlaceholderDataUri(nodeLabel(k)) : placeholderDataUri(nodeLabel(k), bg);
+      } else {
+        // No local probing, use API image directly if available
+        initialImg = k.image_url || (isUnknownColor ? checkeredPlaceholderDataUri(nodeLabel(k)) : placeholderDataUri(nodeLabel(k), bg));
+      }
     }
 
     // Compute level from generation

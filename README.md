@@ -13,10 +13,11 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 - **Mewtation Gems**: Diamond, Gold, Silver, and Bronze gem badges for trait discoverers
 - **Owner Highlighting**: Hover over owner names to highlight all their kitties (pin with 📍 or `?owner=` param)
 - **Smart Expansion**: Double-click to expand family with pre-fetched accurate parent data
+- **Auto-connect Discovery**: Automatically adds relatives that bridge to existing nodes when expanding
 - **Smart Merging**: Loading connected kitties merges into existing graph
 - **Local SVG Support**: Use locally cached SVG images for faster loading
 - **Live API**: Fetch kitty data directly from CryptoKitties API
-- **Embed Mode**: Embeddable graph with floating panel and "Open in viewer" link
+- **Embed Mode**: Embeddable graph with responsive floating panel and "Open in viewer" link
 
 ## Quick Start
 
@@ -65,6 +66,7 @@ The graph can be embedded in other pages using an iframe with embed mode enabled
 **Embed mode features:**
 - Full viewport graph (no header or sidebar)
 - Floating panel for selected kitty details (draggable, collapsible, closable)
+- Responsive compact mode for small viewports (panel and nav buttons shrink automatically)
 - "Open in viewer" link to open current graph in standalone viewer
 - Links to GitHub repo
 
@@ -105,6 +107,7 @@ window.CK_GRAPH_DEFAULTS = {
 
 **Runtime Settings** (in the Settings panel):
 - **Pre-fetch**: When enabled (default), expanding a kitty fetches full details for each child from the API. This ensures accurate parent edges (matron vs sire) but is slower. Disable for faster expansion with potentially incorrect edge colors.
+- **Auto-connect**: When enabled (default), expanding a kitty also discovers and adds relatives that would connect to existing nodes in the graph. This helps build more complete family trees automatically.
 
 ## Project Structure
 
@@ -115,22 +118,11 @@ crypto-kitties-family-graph/
 │   ├── js/
 │   │   └── ck-family-graph.js  # Graph visualization logic
 │   ├── images/                 # Logos, mewtation gem badges
-│   ├── example/                # Pre-generated kitty data with SVGs
-│   │   ├── nivs/               # Sample collection
-│   │   ├── dragon/             # Most expensive kitty
-│   │   ├── founders/           # Genesis + early founders
-│   │   ├── milestones/         # Kitty #100k and #500k
-│   │   └── holidays/           # Holiday Fancy cats
-│   └── (favicons, manifest)
+│   └── example/                # Pre-generated kitty data with SVGs (most expensive, fancy cats)
 ├── images/                     # README assets
-│   └── screenshot.png
 ├── assets/                     # Source assets (not deployed)
-│   └── favicon/                # Favicon source files
 ├── proxy/                      # CORS proxy (deploy separately if needed)
-│   └── ckproxy.php             # PHP proxy script
-└── tools/                      # Development utilities (not deployed)
-    ├── ck_fetch.py             # Fetch kitty data from API
-    └── download_svgs.py        # Download SVG/PNG images from JSON
+└── tools/                      # Dev utils (e.g. fetch kitty data from API)
 ```
 
 ## Generating Kitty Data

@@ -11,7 +11,8 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 - **Interactive Graph**: Physics-based layout with drag, zoom, and pan
 - **Family Visualization**: Pink edges for matron (mother), blue edges for sire (father)
 - **Mewtation Gems**: Diamond, Gold, Silver, and Bronze gem badges for trait discoverers
-- **Owner Highlighting**: Hover over owner names to highlight all their kitties (pin with 📍 or `?owner=` param)
+- **Owner Highlighting**: Hover over owner names to highlight all their kitties (pin with highlight button or `?owner=` param)
+- **Context Menu**: Right-click nodes for quick actions (expand, highlight owner, open pages, etc.)
 - **Smart Expansion**: Double-click to expand family with pre-fetched accurate parent data
 - **Auto-connect Discovery**: Automatically adds relatives that bridge to existing nodes when expanding
 - **Smart Merging**: Loading connected kitties merges into existing graph
@@ -106,7 +107,7 @@ window.CK_GRAPH_DEFAULTS = {
 ```
 
 **Runtime Settings** (in the Settings panel):
-- **Pre-fetch**: When enabled (default), expanding a kitty fetches full details for each child from the API. This ensures accurate parent edges (matron vs sire) but is slower. Disable for faster expansion with potentially incorrect edge colors.
+- **Pre-fetch**: When enabled (default), fetches full details for embedded kitties. On initial load, this runs lazily in the background after the graph renders. On expand (double-click), fetches each child individually. Ensures accurate parent edges and complete owner data.
 - **Auto-connect**: When enabled (default), expanding a kitty also discovers and adds relatives that would connect to existing nodes in the graph. This helps build more complete family trees automatically.
 
 ## Project Structure
@@ -194,9 +195,10 @@ When hosting on a web server, you may need the CORS proxy for API calls. Deploy 
 
 - **Click** a kitty to see details in the sidebar
 - **Double-click** to expand family (fetches parents and children from API)
+- **Right-click** for context menu (expand, highlight owner, open pages, copy ID, etc.)
 - **Hover** over a kitty to highlight family connections (edges dim for non-family)
 - **Hover** over owner name to highlight all their kitties in the graph
-- **Pin** owner highlight by clicking the 📍 button (persists while navigating)
+- **Pin** owner highlight by clicking the user icon button (persists while navigating)
 - **Drag** nodes to rearrange
 - **Toggle Physics** to freeze/unfreeze the layout
 

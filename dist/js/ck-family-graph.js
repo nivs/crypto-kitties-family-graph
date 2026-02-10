@@ -494,6 +494,9 @@
   // Selected node state
   let selectedNodeId = null;
 
+  // Track original dataUrl for permalink (null if loaded via kitty IDs)
+  let loadedFromDataUrl = null;
+
   const resolvedImgUrl = new Map();
   const nodeBaseStyle = new Map();
   const cachedApiResponses = new Map(); // Cache full API responses for later expansion
@@ -1857,6 +1860,7 @@
         ownerHighlightLocked = false;
         lockedOwnerAddr = null;
         lockedOwnerNick = null;
+        loadedFromDataUrl = null;
         loadKittiesById([nodeId]);
         break;
 
@@ -2574,6 +2578,39 @@
     }
   }
 
+  function generatePermalinkUrl() {
+    const svgBaseEl = $("svgBaseUrl");
+    const svgBase = svgBaseEl && svgBaseEl.value ? svgBaseEl.value.trim() : "";
+
+    let url;
+
+    // If loaded from dataUrl and no expansion happened, use dataUrl
+    if (loadedFromDataUrl && expandedIds.size === 0) {
+      url = `${window.location.origin}?dataUrl=${encodeURIComponent(loadedFromDataUrl)}`;
+      if (svgBase) url += `&svgBaseUrl=${encodeURIComponent(svgBase)}`;
+      log("Permalink: using dataUrl (no expansion)", loadedFromDataUrl);
+    } else {
+      // Otherwise pass all kitty IDs with noExpand
+      const allIds = Array.from(kittyById.keys()).sort((a, b) => a - b);
+
+      if (allIds.length === 0) {
+        return window.location.origin;
+      }
+
+      url = `${window.location.origin}?kitties=${allIds.join(",")}&noExpand=true`;
+      if (svgBase) url += `&svgBaseUrl=${encodeURIComponent(svgBase)}`;
+      log("Permalink:", allIds.length, "IDs with noExpand");
+    }
+
+    // Add owner highlight if pinned
+    if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
+      const ownerParam = lockedOwnerAddr || lockedOwnerNick;
+      url += `&owner=${encodeURIComponent(ownerParam)}`;
+    }
+
+    return url;
+  }
+
   function parseKittyIds(str) {
     if (!str) return [];
     return str.split(/[,\s]+/).map(s => parseInt(s.trim(), 10)).filter(n => n && !isNaN(n));
@@ -2588,6 +2625,7 @@
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         log("load from file:", file.name, file.size);
+        loadedFromDataUrl = null; // Local files can't be shared via URL
         const text = await file.text();
         loadJsonObject(JSON.parse(text));
       });
@@ -2599,6 +2637,7 @@
       urlBtn.addEventListener("click", async () => {
         const url = urlInput.value.trim();
         if (!url) { setStatus("Enter a JSON URL or use Load JSON File", true); return; }
+        loadedFromDataUrl = url;
         try { await loadJsonFromUrl(url); }
         catch (e) { console.error(e); setStatus("Failed to load JSON URL", true); }
       });
@@ -2612,6 +2651,19 @@
 
     const physBtn = $("togglePhysicsBtn");
     if (physBtn) physBtn.addEventListener("click", () => setPhysics(!physicsOn));
+
+    const permalinkBtn = $("permalinkBtn");
+    if (permalinkBtn) {
+      permalinkBtn.addEventListener("click", () => {
+        const url = generatePermalinkUrl();
+        navigator.clipboard.writeText(url).then(() => {
+          setStatus("Permalink copied to clipboard", false);
+        }).catch(() => {
+          // Fallback: show URL in prompt
+          window.prompt("Copy this permalink:", url);
+        });
+      });
+    }
 
     // Navigation controls (zoom, pan)
     const zoomInBtn = $("zoomInBtn");
@@ -2664,6 +2716,7 @@
       const doLoadKitties = async () => {
         const ids = parseKittyIds(kittyIdInput.value);
         if (!ids.length) { setStatus("Enter valid kitty ID(s)", true); return; }
+        loadedFromDataUrl = null;
         await loadKittiesById(ids);
       };
       loadKittyBtn.addEventListener("click", doLoadKitties);
@@ -2822,31 +2875,9 @@
     }
 
     // Viewer link - opens standalone viewer to reconstruct this graph
-    // Pass roots + expanded IDs; embedded extraction recreates the rest
     if (floatingViewerLink) {
       floatingViewerLink.addEventListener("click", () => {
-        const svgBaseEl = $("svgBaseUrl");
-        const svgBase = svgBaseEl && svgBaseEl.value ? svgBaseEl.value.trim() : "";
-
-        // Pass only originally requested IDs (roots) + manually expanded IDs
-        // Their embedded parents/children will be recreated via API fetch
-        const coreIds = [...new Set([...myKittyIds, ...expandedIds])];
-
-        if (coreIds.length === 0) {
-          window.open(window.location.origin, "_blank");
-          return;
-        }
-
-        let url = `${window.location.origin}?kitties=${coreIds.join(",")}`;
-        if (svgBase) url += `&svgBaseUrl=${encodeURIComponent(svgBase)}`;
-
-        // Add owner highlight if pinned
-        if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
-          const ownerParam = lockedOwnerAddr || lockedOwnerNick;
-          url += `&owner=${encodeURIComponent(ownerParam)}`;
-        }
-
-        log("Viewer link:", coreIds.length, "IDs (roots:", myKittyIds.size, "+ expanded:", expandedIds.size, ")");
+        const url = generatePermalinkUrl();
         window.open(url, "_blank");
       });
     }
@@ -2912,6 +2943,7 @@
     if (kittyIds.length > 0) {
       // Query param takes precedence - load from API
       log("Loading from query param:", kittyIds, "noExpand:", noExpand);
+      loadedFromDataUrl = null;
       loadKittiesById(kittyIds, noExpand).then(() => {
         applyOwnerHighlight();
       }).catch((e) => {
@@ -2923,6 +2955,7 @@
       const urlEl = $("jsonUrl");
       const url = (urlEl && urlEl.value ? urlEl.value : "").trim();
       if (url) {
+        loadedFromDataUrl = url;
         loadJsonFromUrl(url).then(() => {
           applyOwnerHighlight();
         }).catch((e) => {

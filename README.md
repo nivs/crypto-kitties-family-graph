@@ -290,9 +290,13 @@ python3 download_svgs.py ../dist/example/holidays/holidays.json \
   - API: `http://localhost:8001/?kitties=174756,275808`
   - JSON: `http://localhost:8001/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
 
-## Screen Recording
+## Screen Recordings
 
-![](images/screen-recording.webm) - we need to fix this URL
+[](https://github.com/user-attachments/assets/440fe402-258d-43b2-8880-b0c41b04b3fb)
+
+[](https://github.com/user-attachments/assets/081cad80-3425-4f89-99e4-888ac96600c6)
+
+---
 
 ## License
 

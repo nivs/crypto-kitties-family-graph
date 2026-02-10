@@ -1,6 +1,6 @@
 # CryptoKitties Family Graph
 
-An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitties.co/). Explore breeding relationships, discover mewtation gems, and visualize your kitty lineage.
+An interactive family graph visualizer for [CryptoKitties](https://www.cryptokitties.co/). Explore breeding relationships, discover mewtation gems, and visualize your kitty lineage.
 
 [![Screenshot](images/screenshot.png)](https://ck.innerlogics.com/?kitties=896775,1,4,18,100000,174756,275808,500000)
 
@@ -289,6 +289,10 @@ python3 download_svgs.py ../dist/example/holidays/holidays.json \
 - Local test:
   - API: `http://localhost:8001/?kitties=174756,275808`
   - JSON: `http://localhost:8001/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
+
+## Screen Recording
+
+![](images/screen-recording.webm)
 
 ## License
 

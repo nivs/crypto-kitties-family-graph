@@ -12,10 +12,11 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 - **Family Visualization**: Pink edges for matron (mother), blue edges for sire (father)
 - **Mewtation Gems**: Diamond, Gold, Silver, and Bronze gem badges for trait discoverers
 - **Owner Highlighting**: Hover over owner names to highlight all their kitties (pin with 📍 or `?owner=` param)
+- **Smart Expansion**: Double-click to expand family with pre-fetched accurate parent data
 - **Smart Merging**: Loading connected kitties merges into existing graph
 - **Local SVG Support**: Use locally cached SVG images for faster loading
 - **Live API**: Fetch kitty data directly from CryptoKitties API
-- **Embed Mode**: Embeddable graph with floating panel for use in iframes
+- **Embed Mode**: Embeddable graph with floating panel and "Open in viewer" link
 
 ## Quick Start
 
@@ -43,6 +44,7 @@ An interactive family tree visualizer for [CryptoKitties](https://www.cryptokitt
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
 | `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
+| `noExpand` | Skip embedded parent/child extraction (faster, exact IDs only) | `?noExpand=true` |
 
 **Examples:**
 ```
@@ -63,7 +65,8 @@ The graph can be embedded in other pages using an iframe with embed mode enabled
 **Embed mode features:**
 - Full viewport graph (no header or sidebar)
 - Floating panel for selected kitty details (draggable, collapsible, closable)
-- Links to GitHub and standalone viewer
+- "Open in viewer" link to open current graph in standalone viewer
+- Links to GitHub repo
 
 **Basic iframe embed:**
 ```html
@@ -99,6 +102,9 @@ window.CK_GRAPH_DEFAULTS = {
   githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
 };
 ```
+
+**Runtime Settings** (in the Settings panel):
+- **Pre-fetch**: When enabled (default), expanding a kitty fetches full details for each child from the API. This ensures accurate parent edges (matron vs sire) but is slower. Disable for faster expansion with potentially incorrect edge colors.
 
 ## Project Structure
 
@@ -195,9 +201,10 @@ When hosting on a web server, you may need the CORS proxy for API calls. Deploy 
 ## Interactions
 
 - **Click** a kitty to see details in the sidebar
-- **Double-click** to expand family (fetch parents and children)
-- **Hover** over a kitty to highlight family connections
-- **Hover** over owner name to highlight all their kitties
+- **Double-click** to expand family (fetches parents and children from API)
+- **Hover** over a kitty to highlight family connections (edges dim for non-family)
+- **Hover** over owner name to highlight all their kitties in the graph
+- **Pin** owner highlight by clicking the 📍 button (persists while navigating)
 - **Drag** nodes to rearrange
 - **Toggle Physics** to freeze/unfreeze the layout
 

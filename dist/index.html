@@ -59,10 +59,10 @@
     .card .card-body{overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;max-height:500px;margin-top:8px;}
     .card .card-body.collapsed{max-height:0;margin-top:0;}
     .small{color:var(--muted);font-size:12px;line-height:1.45;}
-    .kv{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;font-size:12px;align-items:baseline;}
-    .kv .k{color:var(--muted);}
-    .kv .v{color:var(--text);word-break:break-word;display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
-    .tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.14);color:var(--muted);font-size:11px;line-height:1.6;margin-right:6px;margin-top:4px;background:rgba(255,255,255,0.04);}
+    .kv{display:grid;grid-template-columns:90px 1fr;gap:6px 10px;font-size:12px;align-items:start;}
+    .kv .k{color:var(--muted);padding-top:4px;}
+    .kv .v{color:var(--text);word-break:break-word;display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.14);color:var(--muted);font-size:11px;line-height:1.6;background:rgba(255,255,255,0.04);}
 
     .tooltip{position:absolute;min-width:220px;max-width:320px;pointer-events:none;z-index:10;background:rgba(18,22,34,0.96);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:10px;box-shadow:0 12px 40px rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:none;}
     .tt-head{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
@@ -80,7 +80,7 @@
     .tt-links a:hover{text-decoration:underline;}
 
     .gem-badge{display:inline-flex;align-items:center;margin-left:2px;}
-    .gems-list{display:flex;flex-direction:column;gap:4px;}
+    .gems-list{display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
     .gem-item{display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 6px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px solid rgba(255,255,255,0.08);}
     .gem-label{font-weight:600;color:var(--text);min-width:55px;}
     .gem-detail{color:var(--muted);}
@@ -116,6 +116,12 @@
       flex-direction:column;
       gap:6px;
       z-index:4;
+      background:rgba(18,22,34,0.85);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:8px;
+      backdrop-filter:blur(12px);
+      box-shadow:0 8px 24px rgba(0,0,0,0.3);
     }
     .nav-controls .nav-row{
       display:flex;
@@ -126,7 +132,7 @@
       width:36px;
       height:36px;
       border:1px solid var(--border);
-      background:rgba(18,22,34,0.92);
+      background:rgba(255,255,255,0.06);
       color:var(--text);
       border-radius:10px;
       cursor:pointer;
@@ -136,9 +142,8 @@
       align-items:center;
       justify-content:center;
       user-select:none;
-      backdrop-filter:blur(8px);
     }
-    .nav-btn:hover{border-color:rgba(255,255,255,0.28);background:rgba(30,36,54,0.95);}
+    .nav-btn:hover{border-color:rgba(255,255,255,0.28);background:rgba(255,255,255,0.12);}
     .nav-btn.hidden{visibility:hidden;}
 
     .floating-logo{
@@ -241,6 +246,33 @@
       #networkWrap{height:70vh;}
       header .controls{justify-content:flex-start;}
       .input{width:280px;}
+    }
+
+    /* Compact mode for small viewports (embeds) */
+    @media (max-width:800px){
+      .floating-panel{width:260px;font-size:11px;}
+      .floating-panel .selected-header{gap:8px;margin-bottom:8px;}
+      .floating-panel .selected-thumb{width:48px;height:48px;}
+      .floating-panel .kitty-name{font-size:13px;}
+      .floating-panel .kitty-meta{font-size:11px;}
+      .floating-panel .kv{grid-template-columns:70px 1fr;gap:4px 8px;}
+      .floating-panel .kv .k{padding-top:2px;}
+      .floating-panel .tag{padding:1px 6px;font-size:10px;}
+      .floating-panel-body{padding:10px;}
+      .floating-panel-footer{padding:8px 10px;font-size:10px;}
+      .nav-controls{padding:6px;gap:4px;border-radius:10px;}
+      .nav-controls .nav-row{gap:4px;}
+      .nav-btn{width:30px;height:30px;border-radius:8px;}
+      .nav-btn svg{width:14px;height:14px;}
+    }
+    @media (max-width:500px){
+      .floating-panel{width:200px;}
+      .floating-panel .selected-thumb{width:40px;height:40px;}
+      .floating-panel .kv{grid-template-columns:60px 1fr;}
+      .nav-controls{padding:4px;gap:3px;border-radius:8px;}
+      .nav-controls .nav-row{gap:3px;}
+      .nav-btn{width:26px;height:26px;border-radius:6px;}
+      .nav-btn svg{width:12px;height:12px;}
     }
   </style>
 
@@ -389,6 +421,12 @@
 
             <div class="k">CK site base</div>
             <div class="v"><input id="siteBaseUrl" class="input input-full" /></div>
+
+            <div class="k">Pre-fetch</div>
+            <div class="v" title="Fetch full details for new kitties when expanding (slower but accurate parent edges)"><input type="checkbox" id="prefetchChildren" checked /> <label for="prefetchChildren" class="label-muted">Fetch details on expand</label></div>
+
+            <div class="k">Auto-connect</div>
+            <div class="v" title="When expanding, also add relatives that connect to existing nodes"><input type="checkbox" id="autoConnect" checked /> <label for="autoConnect" class="label-muted">Discover connections</label></div>
           </div>
         </div>
       </div>

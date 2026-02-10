@@ -366,6 +366,16 @@
     return el ? el.checked : true;
   }
 
+  function wantPrefetchChildren() {
+    const el = $("prefetchChildren");
+    return el ? el.checked : true;
+  }
+
+  function wantAutoConnect() {
+    const el = $("autoConnect");
+    return el ? el.checked : true;
+  }
+
   function brightenHex(hex, amt = 0.22) {
     const m = /^#?([0-9a-f]{6})$/i.exec(hex || "");
     if (!m) return hex;
@@ -545,7 +555,7 @@
       bg,
       shadowColor,
       isUnknownColor,
-      size: 48,
+      size: 38,
       border: isMine ? "#7aa2ff" : (isUnknownColor ? "rgba(255,200,100,0.5)" : "rgba(255,255,255,0.22)"),
       borderWidth: isMine ? 2 : (isUnknownColor ? 2 : 1),
       gems: gems // Store gems for drawing
@@ -698,6 +708,54 @@
   function rebuildAllEdges() {
     for (const k of kittyById.values()) {
       addParentEdges(k);
+    }
+  }
+
+  // Check if a newly added kitty should connect to existing kitties
+  // (i.e., existing kitties might have this new one as a parent)
+  function checkNewConnections(newIds) {
+    const newIdSet = new Set(newIds.map(Number));
+    let connectionsFound = 0;
+
+    for (const k of kittyById.values()) {
+      // Skip the new kitties themselves
+      if (newIdSet.has(k.id)) continue;
+
+      // Check if this existing kitty has a parent that was just added
+      if (k.matron_id && newIdSet.has(k.matron_id) && nodes.get(k.matron_id)) {
+        const edgeId = `m:${k.matron_id}->${k.id}`;
+        if (!edges.get(edgeId)) {
+          edges.update({
+            id: edgeId,
+            from: k.matron_id,
+            to: k.id,
+            arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } },
+            width: 2,
+            color: EDGE_COLORS.matron
+          });
+          log("New connection found: matron", k.matron_id, "->", k.id);
+          connectionsFound++;
+        }
+      }
+      if (k.sire_id && newIdSet.has(k.sire_id) && nodes.get(k.sire_id)) {
+        const edgeId = `s:${k.sire_id}->${k.id}`;
+        if (!edges.get(edgeId)) {
+          edges.update({
+            id: edgeId,
+            from: k.sire_id,
+            to: k.id,
+            arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } },
+            width: 2,
+            color: EDGE_COLORS.sire
+          });
+          log("New connection found: sire", k.sire_id, "->", k.id);
+          connectionsFound++;
+        }
+      }
+    }
+
+    if (connectionsFound > 0) {
+      log("checkNewConnections: found", connectionsFound, "new connections to existing nodes");
     }
   }
 
@@ -1066,17 +1124,126 @@
       }
 
       // Extract embedded children if present
-      // Note: embedded children don't have matron_id/sire_id fields, so we set them manually
+      // Note: embedded children don't have matron_id/sire_id fields
+      // If pre-fetch is enabled, fetch full details for accurate parent info
       if (Array.isArray(kObj.children) && kObj.children.length > 0) {
-        log("expandFamily: extracting", kObj.children.length, "embedded children");
+        const shouldPrefetch = wantPrefetchChildren();
+        const shouldAutoConnect = wantAutoConnect();
+        log("expandFamily: extracting", kObj.children.length, "embedded children, prefetch:", shouldPrefetch, "autoConnect:", shouldAutoConnect);
+
+        // Track IDs we're adding in this expansion (to check for new connections)
+        const addingIds = new Set(kittiesToAdd.map(k => k.id));
+        // IDs to check for auto-connect (embedded relatives of pre-fetched children)
+        const autoConnectCandidates = new Map(); // id -> embedded data
+
         for (const child of kObj.children) {
           if (child && typeof child === "object" && child.id) {
-            const normalized = normalizeFromApi(child);
-            // Set parent reference since embedded children lack this info
-            // We don't know if expanded kitty is matron or sire, so check which is null
-            if (!normalized.matron_id) normalized.matron_id = id;
-            else if (!normalized.sire_id) normalized.sire_id = id;
+            const childId = Number(child.id);
+
+            // Skip if already in graph with both parents known
+            const existing = kittyById.get(childId);
+            if (existing && existing.matron_id && existing.sire_id) {
+              log("expandFamily: child", childId, "already has both parents, skipping");
+              continue;
+            }
+
+            let normalized;
+            let childObj = null;
+            if (shouldPrefetch) {
+              // Fetch full details from API for accurate parent IDs
+              try {
+                log("expandFamily: pre-fetching child", childId);
+                const childData = await fetchJson(apiUrl(`/kitties/${childId}`));
+                childObj = unwrapKitty(childData);
+                normalized = normalizeFromApi(childObj);
+
+                // If auto-connect enabled, collect embedded relatives for later checking
+                if (shouldAutoConnect && childObj) {
+                  // Check embedded parents - might connect to existing nodes
+                  if (childObj.matron && childObj.matron.id) {
+                    const matronId = Number(childObj.matron.id);
+                    if (!kittyById.has(matronId) && !addingIds.has(matronId)) {
+                      autoConnectCandidates.set(matronId, childObj.matron);
+                    }
+                  }
+                  if (childObj.sire && childObj.sire.id) {
+                    const sireId = Number(childObj.sire.id);
+                    if (!kittyById.has(sireId) && !addingIds.has(sireId)) {
+                      autoConnectCandidates.set(sireId, childObj.sire);
+                    }
+                  }
+                  // Check embedded children - might have parents in existing graph
+                  if (Array.isArray(childObj.children)) {
+                    for (const grandchild of childObj.children) {
+                      if (grandchild && grandchild.id) {
+                        const gcId = Number(grandchild.id);
+                        if (!kittyById.has(gcId) && !addingIds.has(gcId)) {
+                          autoConnectCandidates.set(gcId, grandchild);
+                        }
+                      }
+                    }
+                  }
+                }
+              } catch (e) {
+                log("expandFamily: pre-fetch failed for", childId, e);
+                // Fall back to embedded data with guessed parent
+                normalized = normalizeFromApi(child);
+                if (!normalized.matron_id) normalized.matron_id = id;
+                else if (!normalized.sire_id) normalized.sire_id = id;
+              }
+            } else {
+              // Use embedded data - have to guess which parent the expanded kitty is
+              normalized = normalizeFromApi(child);
+
+              // Only set parent reference for NEW kitties (not already in graph)
+              if (!existing) {
+                if (!normalized.matron_id) normalized.matron_id = id;
+                else if (!normalized.sire_id) normalized.sire_id = id;
+              } else {
+                // Kitty exists - add the OTHER parent if missing
+                if (existing.matron_id && !existing.sire_id) {
+                  normalized.sire_id = id;
+                } else if (existing.sire_id && !existing.matron_id) {
+                  normalized.matron_id = id;
+                }
+                // If both parents known, don't change anything
+              }
+            }
             kittiesToAdd.push(normalized);
+            addingIds.add(normalized.id);
+          }
+        }
+
+        // Process auto-connect candidates - add relatives that connect to existing nodes
+        if (shouldAutoConnect && autoConnectCandidates.size > 0) {
+          log("expandFamily: checking", autoConnectCandidates.size, "auto-connect candidates");
+          const existingIds = new Set(kittyById.keys());
+
+          for (const [candidateId, embeddedData] of autoConnectCandidates) {
+            // Skip if we already added this one
+            if (addingIds.has(candidateId)) continue;
+
+            // Pre-fetch to get accurate parent info
+            try {
+              log("expandFamily: auto-connect pre-fetching", candidateId);
+              const candidateData = await fetchJson(apiUrl(`/kitties/${candidateId}`));
+              const candidateObj = unwrapKitty(candidateData);
+              const normalized = normalizeFromApi(candidateObj);
+
+              // Check if this candidate connects to existing nodes (not ones we're adding)
+              const connectsToMatron = normalized.matron_id && existingIds.has(normalized.matron_id);
+              const connectsToSire = normalized.sire_id && existingIds.has(normalized.sire_id);
+
+              if (connectsToMatron || connectsToSire) {
+                log("expandFamily: auto-connect adding", candidateId, "connects to existing:",
+                    connectsToMatron ? normalized.matron_id : null,
+                    connectsToSire ? normalized.sire_id : null);
+                kittiesToAdd.push(normalized);
+                addingIds.add(normalized.id);
+              }
+            } catch (e) {
+              log("expandFamily: auto-connect pre-fetch failed for", candidateId, e);
+            }
           }
         }
       }
@@ -1275,7 +1442,7 @@
       } else if (ownedIds.has(nid)) {
         nodeUpdates.push({
           id: nid,
-          size: 56,
+          size: 48,
           color: { background: brightenHex(base.bg, 0.25), border: "#7aa2ff" },
           borderWidth: 3
         });
@@ -1408,7 +1575,7 @@
       `<div class="gem-item">
         <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-lg" />
         <span class="gem-label">${gemDisplayName(g.gem)}</span>
-        <span class="gem-detail">${safeText(g.type)}: ${safeText(g.description)} (#${g.position})</span>
+        <span class="gem-detail">${safeText(g.type)}: <a href="${cattributeUrl(g.description)}" target="_blank" rel="noopener" class="trait-link">${safeText(g.description)}</a> (#${g.position})</span>
       </div>`
     ).join("");
   }
@@ -1456,20 +1623,16 @@
       </div>
     `;
 
-    // Position tooltip near cursor
-    const rect = $("networkWrap").getBoundingClientRect();
-    const e = event && event.pointer && event.pointer.DOM ? event.pointer.DOM : { x: 100, y: 100 };
-    let x = e.x + 15;
-    let y = e.y + 15;
-
-    // Keep tooltip within bounds
+    // Position tooltip in top-left area (away from floating panel on right)
     tooltipEl.style.display = "block";
     const ttRect = tooltipEl.getBoundingClientRect();
-    if (x + ttRect.width > rect.width - 10) x = e.x - ttRect.width - 15;
-    if (y + ttRect.height > rect.height - 10) y = e.y - ttRect.height - 15;
 
-    tooltipEl.style.left = `${Math.max(10, x)}px`;
-    tooltipEl.style.top = `${Math.max(10, y)}px`;
+    // Fixed position in top-left with margin
+    const x = 16;
+    const y = 16;
+
+    tooltipEl.style.left = `${x}px`;
+    tooltipEl.style.top = `${y}px`;
   }
 
   function hideTooltip() {
@@ -1506,17 +1669,39 @@
       // The API sometimes puts seller info there even when technical owner is the contract
       const ownerNick = normalizeOwnerNickname(k);
       const ownerObj = k.owner || k.owner_profile || k.raw?.owner || k.raw?.owner_profile;
-      const ownerAddr = ownerObj && typeof ownerObj === "object" ? (ownerObj.address || ownerObj.wallet_address) : null;
+      let ownerAddr = ownerObj && typeof ownerObj === "object" ? (ownerObj.address || ownerObj.wallet_address) : null;
 
-      if (ownerNick || ownerAddr) {
-        displayOwnerAddr = ownerAddr || null;
-        displayOwnerNick = ownerNick || null;
-        showAuctionStatus = true;
-      } else {
-        // No seller info available - show as "On Auction"
-        displayOwnerAddr = null;
-        displayOwnerNick = null;
-        showAuctionStatus = true;
+      // If the address is also the contract, ignore it - we want the human seller
+      if (ownerAddr && isAuctionContract(ownerAddr)) {
+        ownerAddr = null;
+      }
+
+      // Try hatcher as fallback (original creator/owner)
+      if (!ownerNick && !ownerAddr) {
+        const hatcher = k.hatcher || k.raw?.hatcher;
+        if (hatcher && typeof hatcher === "object") {
+          ownerAddr = normalizeOwner(hatcher);
+          const hatcherNick = hatcher.nickname || hatcher.username || hatcher.name || null;
+          if (hatcherNick || ownerAddr) {
+            displayOwnerAddr = ownerAddr || null;
+            displayOwnerNick = hatcherNick || null;
+            showAuctionStatus = true;
+            // Skip the rest of this block
+          }
+        }
+      }
+
+      if (displayOwnerAddr === undefined) {
+        if (ownerNick || ownerAddr) {
+          displayOwnerAddr = ownerAddr || null;
+          displayOwnerNick = ownerNick || null;
+          showAuctionStatus = true;
+        } else {
+          // No seller info available - show as "On Auction"
+          displayOwnerAddr = null;
+          displayOwnerNick = null;
+          showAuctionStatus = true;
+        }
       }
     } else {
       displayOwnerAddr = rawOwnerAddr;
@@ -1746,8 +1931,8 @@
 
         // Get actual node size from the node data (accounts for hover enlargement)
         const node = nodes.get(Number(id));
-        const nodeSize = node && node.size ? node.size : (base.size || 48);
-        const gemSize = nodeSize > 52 ? 22 : 18; // Larger gems when node is enlarged
+        const nodeSize = node && node.size ? node.size : (base.size || 38);
+        const gemSize = nodeSize > 44 ? 20 : 16; // Larger gems when node is enlarged
 
         // Sort gems by priority (diamond > gold > silver > bronze)
         const gemPriority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
@@ -1786,12 +1971,20 @@
         }
         // Apply selection styling to newly selected node
         applySelectionStyle(selectedNodeId);
+        // Show family edges for selected node
+        highlightFamilyEdges(selectedNodeId);
         showSelected(selectedNodeId);
       } else {
         // Clicked on empty space - clear selection
         selectedNodeId = null;
         if (prevSelected) {
           clearSelectionStyle(prevSelected);
+        }
+        // Restore owner highlight if pinned, otherwise restore all nodes
+        if (ownerHighlightLocked) {
+          highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+        } else {
+          restoreAllNodes();
         }
         if (selectedBox) selectedBox.textContent = "None";
       }
@@ -1809,7 +2002,7 @@
       if (!base) return;
 
       // Enlarge hovered node
-      nodes.update({ id, size: 58, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
+      nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
 
       // Show tooltip
       showTooltip(id, params.event);
@@ -1828,17 +2021,24 @@
 
       // Restore state - check selection first, then owner highlight
       if (id === selectedNodeId) {
-        // This node is selected - restore to selection style
+        // This node is selected - keep showing its family edges
         applySelectionStyle(id);
-        restoreEdgeColors();
-      } else if (ownerHighlightLocked) {
-        // Restore node to base size first, then reapply owner highlighting
-        nodes.update({ id, size: base.size });
-        highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+        highlightFamilyEdges(id);
       } else {
-        // Restore node to base state
-        nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border } });
-        restoreEdgeColors();
+        // Restore this node to base size
+        nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border }, borderWidth: base.borderWidth });
+
+        // Restore edge state based on priority: selected node > pinned owner > normal
+        if (selectedNodeId) {
+          // There's a selected node - keep showing its family edges
+          highlightFamilyEdges(selectedNodeId);
+        } else if (ownerHighlightLocked) {
+          // No selection, but owner is pinned - restore owner highlighting
+          highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+        } else {
+          // No selection, no pinned owner - restore normal edges
+          restoreEdgeColors();
+        }
       }
     });
 
@@ -1880,9 +2080,9 @@
     loadJsonObject(data);
   }
 
-  async function loadKittiesById(ids) {
+  async function loadKittiesById(ids, noExpand = false) {
     if (!ids || ids.length === 0) return;
-    log("loadKittiesById:", ids);
+    log("loadKittiesById:", ids, "noExpand:", noExpand);
     setStatus(`Loading ${ids.length} kitty(s)...`, false);
 
     const kittiesToAdd = [];
@@ -1903,31 +2103,33 @@
         const normalized = normalizeFromApi(kObj);
         kittiesToAdd.push(normalized);
 
-        // Collect embedded parents (only if NOT in requested IDs)
-        if (kObj.matron && typeof kObj.matron === "object" && kObj.matron.id) {
-          const matronId = Number(kObj.matron.id);
-          if (!requestedIds.has(matronId) && !embeddedData.has(matronId)) {
-            embeddedData.set(matronId, normalizeFromApi(kObj.matron));
+        // Collect embedded parents/children (skip if noExpand)
+        if (!noExpand) {
+          if (kObj.matron && typeof kObj.matron === "object" && kObj.matron.id) {
+            const matronId = Number(kObj.matron.id);
+            if (!requestedIds.has(matronId) && !embeddedData.has(matronId)) {
+              embeddedData.set(matronId, normalizeFromApi(kObj.matron));
+            }
           }
-        }
-        if (kObj.sire && typeof kObj.sire === "object" && kObj.sire.id) {
-          const sireId = Number(kObj.sire.id);
-          if (!requestedIds.has(sireId) && !embeddedData.has(sireId)) {
-            embeddedData.set(sireId, normalizeFromApi(kObj.sire));
+          if (kObj.sire && typeof kObj.sire === "object" && kObj.sire.id) {
+            const sireId = Number(kObj.sire.id);
+            if (!requestedIds.has(sireId) && !embeddedData.has(sireId)) {
+              embeddedData.set(sireId, normalizeFromApi(kObj.sire));
+            }
           }
-        }
 
-        // Collect embedded children (only if NOT in requested IDs)
-        if (Array.isArray(kObj.children) && kObj.children.length > 0) {
-          for (const child of kObj.children) {
-            if (child && typeof child === "object" && child.id) {
-              const childId = Number(child.id);
-              if (!requestedIds.has(childId) && !embeddedData.has(childId)) {
-                const childNorm = normalizeFromApi(child);
-                // Set parent reference since embedded children may lack this
-                if (!childNorm.matron_id) childNorm.matron_id = numId;
-                else if (!childNorm.sire_id) childNorm.sire_id = numId;
-                embeddedData.set(childId, childNorm);
+          // Collect embedded children (only if NOT in requested IDs)
+          if (Array.isArray(kObj.children) && kObj.children.length > 0) {
+            for (const child of kObj.children) {
+              if (child && typeof child === "object" && child.id) {
+                const childId = Number(child.id);
+                if (!requestedIds.has(childId) && !embeddedData.has(childId)) {
+                  const childNorm = normalizeFromApi(child);
+                  // Set parent reference since embedded children may lack this
+                  if (!childNorm.matron_id) childNorm.matron_id = numId;
+                  else if (!childNorm.sire_id) childNorm.sire_id = numId;
+                  embeddedData.set(childId, childNorm);
+                }
               }
             }
           }
@@ -2253,29 +2455,33 @@
       });
     }
 
-    // Viewer link - opens standalone viewer with kitties needed to reconstruct this graph
+    // Viewer link - opens standalone viewer to reconstruct this graph
+    // Pass roots + expanded IDs; embedded extraction recreates the rest
     if (floatingViewerLink) {
       floatingViewerLink.addEventListener("click", () => {
-        // Include only:
-        // - myKittyIds: the original root kitties that were explicitly loaded
-        // - expandedIds: kitties that were double-clicked to expand
-        // Everything else (embedded parents/children) will be auto-fetched
-        const idsToInclude = new Set([...myKittyIds, ...expandedIds]);
-        const minimalIds = Array.from(idsToInclude);
+        const svgBaseEl = $("svgBaseUrl");
+        const svgBase = svgBaseEl && svgBaseEl.value ? svgBaseEl.value.trim() : "";
 
-        if (minimalIds.length === 0) {
-          log("No kitties to open in viewer");
+        // Pass only originally requested IDs (roots) + manually expanded IDs
+        // Their embedded parents/children will be recreated via API fetch
+        const coreIds = [...new Set([...myKittyIds, ...expandedIds])];
+
+        if (coreIds.length === 0) {
           window.open(window.location.origin, "_blank");
           return;
         }
-        // Build URL on same host with kitty IDs and optional owner highlight
-        let url = `${window.location.origin}?kitties=${minimalIds.join(",")}`;
+
+        let url = `${window.location.origin}?kitties=${coreIds.join(",")}`;
+        if (svgBase) url += `&svgBaseUrl=${encodeURIComponent(svgBase)}`;
+
+        // Add owner highlight if pinned
         if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
           const ownerParam = lockedOwnerAddr || lockedOwnerNick;
           url += `&owner=${encodeURIComponent(ownerParam)}`;
         }
+
+        log("Viewer link:", coreIds.length, "IDs (roots:", myKittyIds.size, "+ expanded:", expandedIds.size, ")");
         window.open(url, "_blank");
-        log("Opened viewer with kitties:", minimalIds.length, "(roots:", myKittyIds.size, "expanded:", expandedIds.size, ")");
       });
     }
 
@@ -2334,10 +2540,13 @@
       }
     };
 
+    // Check for noExpand param (skip embedded parent/child extraction)
+    const noExpand = params.get("noExpand") === "true" || params.get("noExpand") === "1";
+
     if (kittyIds.length > 0) {
       // Query param takes precedence - load from API
-      log("Loading from query param:", kittyIds);
-      loadKittiesById(kittyIds).then(() => {
+      log("Loading from query param:", kittyIds, "noExpand:", noExpand);
+      loadKittiesById(kittyIds, noExpand).then(() => {
         applyOwnerHighlight();
       }).catch((e) => {
         console.error(e);

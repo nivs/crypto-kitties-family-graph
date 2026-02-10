@@ -289,6 +289,18 @@
     }
   }
 
+  function formatDateTimeFull(dateStr) {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      // Show in local time with timezone abbreviation
+      return d.toLocaleString("en-US", { timeZoneName: "short" });
+    } catch {
+      return dateStr;
+    }
+  }
+
   // Known CryptoKitties contract addresses
   const CK_CONTRACTS = {
     "0xb1690c08e213a35ed9bab7b318de14420fb57d8c": "Sale Auction",
@@ -344,6 +356,21 @@
       if (typeof op.nickname === "string" && op.nickname.trim()) return op.nickname.trim();
       if (typeof op.username === "string" && op.username.trim()) return op.username.trim();
       if (typeof op.name === "string" && op.name.trim()) return op.name.trim();
+    }
+    return null;
+  }
+
+  // Look up owner nickname from other kitties in the graph that have the same address
+  function lookupOwnerNickname(addr) {
+    if (!addr) return null;
+    const addrLower = addr.toLowerCase();
+
+    for (const k of kittyById.values()) {
+      const kAddr = k.owner_address || normalizeOwner(k.owner);
+      if (kAddr && kAddr.toLowerCase() === addrLower) {
+        const nick = k.owner_nickname || normalizeOwnerNickname(k);
+        if (nick) return nick;
+      }
     }
     return null;
   }
@@ -469,6 +496,7 @@
 
   const resolvedImgUrl = new Map();
   const nodeBaseStyle = new Map();
+  const cachedApiResponses = new Map(); // Cache full API responses for later expansion
 
   const nodes = new vis.DataSet([]);
   const edges = new vis.DataSet([]);
@@ -1105,8 +1133,16 @@
     log("expandFamily:", id);
 
     try {
-      const kitty = await fetchJson(apiUrl(`/kitties/${id}`));
-      const kObj = unwrapKitty(kitty);
+      // Check cache first before making API call
+      let kObj;
+      if (cachedApiResponses.has(id)) {
+        log("expandFamily: using cached API response for", id);
+        kObj = cachedApiResponses.get(id);
+        cachedApiResponses.delete(id); // Clear from cache after use
+      } else {
+        const kitty = await fetchJson(apiUrl(`/kitties/${id}`));
+        kObj = unwrapKitty(kitty);
+      }
 
       // Collect all kitties to add: the main kitty, plus embedded parents and children
       const kittiesToAdd = [normalizeFromApi(kObj)];
@@ -1156,6 +1192,10 @@
                 const childData = await fetchJson(apiUrl(`/kitties/${childId}`));
                 childObj = unwrapKitty(childData);
                 normalized = normalizeFromApi(childObj);
+
+                // Cache the full API response for later expansion (don't create nodes yet)
+                cachedApiResponses.set(childId, childObj);
+                log("expandFamily: cached API response for child", childId);
 
                 // If auto-connect enabled, collect embedded relatives for later checking
                 if (shouldAutoConnect && childObj) {
@@ -1348,6 +1388,76 @@
     if (updates.length) edges.update(updates);
   }
 
+  // Check if a kitty's owner matches the given address/nickname
+  function doesKittyMatchOwner(k, ownerAddrLower, ownerNickLower) {
+    if (!ownerAddrLower && !ownerNickLower) return false;
+
+    let matched = false;
+
+    // Check address if provided
+    if (ownerAddrLower) {
+      const addrCandidates = [
+        k.owner_address,
+        k.owner_wallet_address,
+        normalizeOwner(k.owner),
+        k.raw?.owner_wallet_address,
+        normalizeOwner(k.raw?.owner),
+        k.raw?.owner?.address,
+        k.owner?.address,
+        k.ownerProfile?.address,
+        k.raw?.ownerProfile?.address
+      ];
+
+      for (const addr of addrCandidates) {
+        if (addr && typeof addr === "string" && addr.toLowerCase() === ownerAddrLower) {
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    // Check nickname if provided (and not already matched)
+    if (!matched && ownerNickLower) {
+      const nickCandidates = [
+        k.owner_nickname,
+        normalizeOwnerNickname(k),
+        k.owner?.nickname,
+        k.owner?.username,
+        k.owner?.name,
+        k.raw?.owner?.nickname,
+        k.raw?.owner?.username,
+        k.raw?.owner?.name,
+        k.owner_profile?.nickname,
+        k.raw?.owner_profile?.nickname
+      ];
+
+      for (const nick of nickCandidates) {
+        if (nick && typeof nick === "string" && nick.toLowerCase() === ownerNickLower) {
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    // Also check seller field for auctioned kitties
+    if (!matched) {
+      const auction = k.auction || k.raw?.auction;
+      const seller = k.seller || auction?.seller;
+      if (seller) {
+        const sellerAddr = normalizeOwner(seller);
+        const sellerNick = seller?.nickname || seller?.username || seller?.name;
+
+        if (ownerAddrLower && sellerAddr && sellerAddr.toLowerCase() === ownerAddrLower) {
+          matched = true;
+        } else if (ownerNickLower && sellerNick && sellerNick.toLowerCase() === ownerNickLower) {
+          matched = true;
+        }
+      }
+    }
+
+    return matched;
+  }
+
   function highlightOwnerKitties(ownerAddr, ownerNick) {
     if (!ownerAddr && !ownerNick) return;
     const ownedIds = new Set();
@@ -1356,70 +1466,9 @@
 
     // Find all kitties owned by this address OR nickname
     for (const [id, k] of kittyById.entries()) {
-      let matched = false;
-
-      // Check address if provided
-      if (ownerAddrLower) {
-        const addrCandidates = [
-          k.owner_address,
-          k.owner_wallet_address,
-          normalizeOwner(k.owner),
-          k.raw?.owner_wallet_address,
-          normalizeOwner(k.raw?.owner),
-          k.raw?.owner?.address,
-          k.owner?.address,
-          k.ownerProfile?.address,
-          k.raw?.ownerProfile?.address
-        ];
-
-        for (const addr of addrCandidates) {
-          if (addr && typeof addr === "string" && addr.toLowerCase() === ownerAddrLower) {
-            matched = true;
-            break;
-          }
-        }
+      if (doesKittyMatchOwner(k, ownerAddrLower, ownerNickLower)) {
+        ownedIds.add(id);
       }
-
-      // Check nickname if provided (and not already matched)
-      if (!matched && ownerNickLower) {
-        const nickCandidates = [
-          k.owner_nickname,
-          normalizeOwnerNickname(k),
-          k.owner?.nickname,
-          k.owner?.username,
-          k.owner?.name,
-          k.raw?.owner?.nickname,
-          k.raw?.owner?.username,
-          k.raw?.owner?.name,
-          k.owner_profile?.nickname,
-          k.raw?.owner_profile?.nickname
-        ];
-
-        for (const nick of nickCandidates) {
-          if (nick && typeof nick === "string" && nick.toLowerCase() === ownerNickLower) {
-            matched = true;
-            break;
-          }
-        }
-      }
-
-      // Also check seller field for auctioned kitties
-      if (!matched) {
-        const auction = k.auction || k.raw?.auction;
-        const seller = k.seller || auction?.seller;
-        if (seller) {
-          const sellerAddr = normalizeOwner(seller);
-          const sellerNick = seller?.nickname || seller?.username || seller?.name;
-
-          if (ownerAddrLower && sellerAddr && sellerAddr.toLowerCase() === ownerAddrLower) {
-            matched = true;
-          } else if (ownerNickLower && sellerNick && sellerNick.toLowerCase() === ownerNickLower) {
-            matched = true;
-          }
-        }
-      }
-
-      if (matched) ownedIds.add(id);
     }
 
     log("highlightOwnerKitties:", { ownerAddr, ownerNick, count: ownedIds.size, ids: Array.from(ownedIds) });
@@ -1639,6 +1688,209 @@
     if (tooltipEl) tooltipEl.style.display = "none";
   }
 
+  // Context menu handling
+  const contextMenuEl = $("contextMenu");
+  let contextMenuNodeId = null;
+
+  function showContextMenu(nodeId, event) {
+    if (!contextMenuEl) return;
+    contextMenuNodeId = nodeId;
+
+    const k = kittyById.get(nodeId);
+    if (!k) return;
+
+    // Update disabled states
+    const expandItem = contextMenuEl.querySelector('[data-action="expand"]');
+    if (expandItem) {
+      if (expandedIds.has(nodeId)) {
+        expandItem.classList.add("disabled");
+      } else {
+        expandItem.classList.remove("disabled");
+      }
+    }
+
+    // Update highlight owner text and icon based on current state
+    const highlightItem = contextMenuEl.querySelector('[data-action="highlightOwner"]');
+    if (highlightItem) {
+      // Use comprehensive matching to check if this kitty's owner is the locked owner
+      const isSameOwner = ownerHighlightLocked && doesKittyMatchOwner(k,
+        lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+        lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+      );
+
+      // Add/remove active class for bright icon
+      if (isSameOwner) {
+        highlightItem.classList.add("active");
+      } else {
+        highlightItem.classList.remove("active");
+      }
+
+      const textSpan = highlightItem.querySelector(".menu-text");
+      if (textSpan) {
+        textSpan.textContent = isSameOwner ? "Unhighlight owner" : "Highlight owner";
+      }
+
+      // Update icon to show highlighted state
+      const iconSpan = highlightItem.querySelector(".menu-icon");
+      if (iconSpan) {
+        iconSpan.innerHTML = isSameOwner
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+              <path d="M12 1v1M17.5 3.5l-.7.7M21 9h-1M3 9h1M6.5 3.5l.7.7" stroke-width="1.5"/>
+            </svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      }
+    }
+
+    // Position menu at click location
+    const container = $("networkWrap");
+    const containerRect = container.getBoundingClientRect();
+    let x = event.pointer.DOM.x;
+    let y = event.pointer.DOM.y;
+
+    // Keep menu within container bounds
+    contextMenuEl.style.display = "block";
+    const menuRect = contextMenuEl.getBoundingClientRect();
+    if (x + menuRect.width > containerRect.width) {
+      x = containerRect.width - menuRect.width - 10;
+    }
+    if (y + menuRect.height > containerRect.height) {
+      y = containerRect.height - menuRect.height - 10;
+    }
+
+    contextMenuEl.style.left = `${x}px`;
+    contextMenuEl.style.top = `${y}px`;
+
+    log("showContextMenu:", nodeId, "at", x, y);
+  }
+
+  function hideContextMenu() {
+    if (contextMenuEl) {
+      contextMenuEl.style.display = "none";
+      contextMenuNodeId = null;
+    }
+  }
+
+  function handleContextMenuAction(action) {
+    const nodeId = contextMenuNodeId;
+    hideContextMenu();
+
+    if (!nodeId) return;
+    const k = kittyById.get(nodeId);
+    if (!k) return;
+
+    log("contextMenuAction:", action, "for node", nodeId);
+
+    switch (action) {
+      case "center":
+        if (network) {
+          const pos = network.getPosition(nodeId);
+          if (pos) {
+            network.moveTo({
+              position: { x: pos.x, y: pos.y - 40 },
+              animation: { duration: 400, easingFunction: "easeInOutQuad" }
+            });
+          }
+        }
+        break;
+
+      case "expand":
+        expandFamily(nodeId);
+        break;
+
+      case "highlightOwner":
+        const ownerAddr = k.owner_address || normalizeOwner(k.owner) || null;
+        const ownerNick = k.owner_nickname || normalizeOwnerNickname(k) || null;
+        if (ownerAddr || ownerNick) {
+          // Check if this kitty's owner is already highlighted - toggle off if so
+          // Use comprehensive matching to handle all owner data formats
+          const isSameOwner = ownerHighlightLocked && doesKittyMatchOwner(k,
+            lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+            lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+          );
+
+          if (isSameOwner) {
+            // Unhighlight
+            ownerHighlightLocked = false;
+            lockedOwnerAddr = null;
+            lockedOwnerNick = null;
+            restoreAllNodes();
+            setStatus("Owner highlight cleared", false);
+          } else {
+            // Highlight and pin
+            ownerHighlightLocked = true;
+            lockedOwnerAddr = ownerAddr;
+            lockedOwnerNick = ownerNick;
+            highlightOwnerKitties(ownerAddr, ownerNick);
+            setStatus(`Highlighted owner: ${ownerNick || shortAddr(ownerAddr)}`, false);
+          }
+          // Refresh sidebar to update pin button state
+          if (selectedNodeId) {
+            showSelected(selectedNodeId);
+          }
+        } else {
+          setStatus("No owner information for this kitty", false);
+        }
+        break;
+
+      case "openOwner":
+        const openOwnerAddr = k.owner_address || normalizeOwner(k.owner) || null;
+        if (openOwnerAddr) {
+          window.open(ownerUrl(openOwnerAddr), "_blank");
+        } else {
+          setStatus("No owner address for this kitty", false);
+        }
+        break;
+
+      case "startFresh":
+        // Clear graph completely and load just this kitty
+        nodes.clear();
+        edges.clear();
+        kittyById.clear();
+        expandedIds.clear();
+        resolvedImgUrl.clear();
+        nodeBaseStyle.clear();
+        cachedApiResponses.clear();
+        myKittyIds.clear();
+        selectedNodeId = null;
+        ownerHighlightLocked = false;
+        lockedOwnerAddr = null;
+        lockedOwnerNick = null;
+        loadKittiesById([nodeId]);
+        break;
+
+      case "copyId":
+        navigator.clipboard.writeText(String(nodeId)).then(() => {
+          setStatus(`Copied kitty ID: ${nodeId}`, false);
+        }).catch(() => {
+          setStatus("Failed to copy to clipboard", true);
+        });
+        break;
+
+      case "openCK":
+        window.open(kittyUrl(nodeId), "_blank");
+        break;
+    }
+  }
+
+  // Wire up context menu click handlers
+  if (contextMenuEl) {
+    contextMenuEl.addEventListener("click", (e) => {
+      const item = e.target.closest(".context-menu-item");
+      if (item && item.dataset.action) {
+        handleContextMenuAction(item.dataset.action);
+      }
+    });
+
+    // Hide menu when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!contextMenuEl.contains(e.target)) {
+        hideContextMenu();
+      }
+    });
+  }
+
   function showSelected(id) {
     const k = kittyById.get(id);
     if (!k) {
@@ -1657,56 +1909,65 @@
     const rawOwnerAddr = normalizeOwner(k.owner) || k.owner_address || k.owner_wallet_address || null;
     const ownerIsContract = isAuctionContract(rawOwnerAddr);
 
-    // Determine display owner: seller if on auction or owner is contract, otherwise owner
+    // Determine display owner
+    // Priority: seller info (if on auction) > owner info > hatcher > nothing
     let displayOwnerAddr, displayOwnerNick, showAuctionStatus;
-    if ((isOnAuction || ownerIsContract) && seller) {
-      // Have seller info from auction data
+
+    if (isOnAuction && seller) {
+      // Actively on auction with seller info
       displayOwnerAddr = normalizeOwner(seller) || null;
       displayOwnerNick = seller.nickname || seller.username || seller.name || null;
       showAuctionStatus = true;
+    } else if (isOnAuction) {
+      // On auction but no seller info - show "On Auction"
+      displayOwnerAddr = null;
+      displayOwnerNick = null;
+      showAuctionStatus = true;
     } else if (ownerIsContract) {
-      // Owner is auction contract - try to get seller info from owner_profile or owner object
-      // The API sometimes puts seller info there even when technical owner is the contract
+      // Owner is auction contract but NOT actively on auction - try to find real owner
       const ownerNick = normalizeOwnerNickname(k);
       const ownerObj = k.owner || k.owner_profile || k.raw?.owner || k.raw?.owner_profile;
       let ownerAddr = ownerObj && typeof ownerObj === "object" ? (ownerObj.address || ownerObj.wallet_address) : null;
 
-      // If the address is also the contract, ignore it - we want the human seller
+      // If the address is also the contract, ignore it
       if (ownerAddr && isAuctionContract(ownerAddr)) {
         ownerAddr = null;
       }
 
-      // Try hatcher as fallback (original creator/owner)
+      // Try hatcher as fallback
       if (!ownerNick && !ownerAddr) {
         const hatcher = k.hatcher || k.raw?.hatcher;
         if (hatcher && typeof hatcher === "object") {
           ownerAddr = normalizeOwner(hatcher);
-          const hatcherNick = hatcher.nickname || hatcher.username || hatcher.name || null;
-          if (hatcherNick || ownerAddr) {
+          displayOwnerNick = hatcher.nickname || hatcher.username || hatcher.name || null;
+          if (!isAuctionContract(ownerAddr)) {
             displayOwnerAddr = ownerAddr || null;
-            displayOwnerNick = hatcherNick || null;
-            showAuctionStatus = true;
-            // Skip the rest of this block
           }
         }
       }
 
+      // Use whatever we found
       if (displayOwnerAddr === undefined) {
-        if (ownerNick || ownerAddr) {
-          displayOwnerAddr = ownerAddr || null;
-          displayOwnerNick = ownerNick || null;
-          showAuctionStatus = true;
-        } else {
-          // No seller info available - show as "On Auction"
-          displayOwnerAddr = null;
-          displayOwnerNick = null;
-          showAuctionStatus = true;
-        }
+        displayOwnerAddr = ownerAddr || null;
+        displayOwnerNick = displayOwnerNick || ownerNick || null;
       }
+
+      // If still no owner info, show the auction contract as owner
+      if (!displayOwnerAddr && !displayOwnerNick) {
+        displayOwnerAddr = rawOwnerAddr; // The auction contract address
+        displayOwnerNick = getContractName(rawOwnerAddr); // "Sale Auction" or "Siring Auction"
+      }
+      showAuctionStatus = false;
     } else {
+      // Normal case - use owner info directly
       displayOwnerAddr = rawOwnerAddr;
       displayOwnerNick = k.owner_nickname || normalizeOwnerNickname(k) || null;
-      showAuctionStatus = isOnAuction;
+      showAuctionStatus = false;
+    }
+
+    // If we have an address but no nickname, look it up from other kitties in the graph
+    if (displayOwnerAddr && !displayOwnerNick) {
+      displayOwnerNick = lookupOwnerNickname(displayOwnerAddr);
     }
 
     const ownerText = displayOwnerNick ? displayOwnerNick : (displayOwnerAddr ? shortAddr(displayOwnerAddr) : null);
@@ -1719,14 +1980,28 @@
       const isLocked = ownerHighlightLocked &&
         ((lockedOwnerAddr && displayOwnerAddr && lockedOwnerAddr.toLowerCase() === displayOwnerAddr.toLowerCase()) ||
          (lockedOwnerNick && displayOwnerNick && lockedOwnerNick.toLowerCase() === displayOwnerNick.toLowerCase()));
-      const pinTitle = isLocked ? "Unpin owner highlight" : "Pin owner highlight";
-      const pinOpacity = isLocked ? "1" : "0.4";
-      ownerHtml = `<a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick}>${safeText(ownerText)}</a>
-        <button class="owner-pin-btn" ${dataOwner} ${dataNick} title="${pinTitle}" style="opacity:${pinOpacity}">📍</button>`;
+      const btnTitle = isLocked ? "Unhighlight owner" : "Highlight owner";
+      const btnClass = isLocked ? "owner-highlight-btn active" : "owner-highlight-btn";
+      // User icon with highlight rays when active
+      const highlightIcon = isLocked
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <path d="M12 1v1M17.5 3.5l-.7.7M21 9h-1M3 9h1M6.5 3.5l.7.7" stroke-width="1.5"/>
+          </svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>`;
+      // Icon on left, then owner link
+      ownerHtml = `<span class="owner-row">
+        <button class="${btnClass}" ${dataOwner} ${dataNick} title="${btnTitle}">${highlightIcon}</button>
+        <a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick}>${safeText(ownerText)}</a>
+      </span>`;
     } else if (showAuctionStatus) {
       ownerHtml = `<span class="small auction-warning">On Auction</span>`;
     } else {
-      ownerHtml = "";
+      ownerHtml = `<span class="small muted">Unknown</span>`;
     }
 
     // Auction status badge with price (links to kitty page where auction is displayed)
@@ -1744,6 +2019,12 @@
     const bgColorHtml = colors.isUnknown
       ? `<span class="small auction-warning">Unknown</span>`
       : `<span class="color-swatch" style="background:${colors.background}"></span>${colorName ? safeText(colorName) : colors.background}`;
+
+    // Birthday with full timestamp tooltip
+    const birthDate = k.created_at || k.birthday || "";
+    const bornHtml = birthDate
+      ? `<span title="${safeText(formatDateTimeFull(birthDate))}">${formatDatePretty(birthDate)}</span>`
+      : "";
 
     const traits = k.traits || {};
     const traitKeys = Object.keys(traits).slice(0, 12);
@@ -1783,7 +2064,7 @@
       </div>
       <div class="kv">
         <div class="k">Color</div><div class="v">${bgColorHtml}</div>
-        <div class="k">Born</div><div class="v">${formatDatePretty(k.created_at || k.birthday || "")}</div>
+        <div class="k">Born</div><div class="v">${bornHtml}</div>
         <div class="k">Owner</div><div class="v">${ownerHtml}</div>
         ${statusHtml}
         ${gems.length ? `<div class="k">Mewtations</div><div class="v gems-list">${gemsFull}</div>` : ""}
@@ -1795,7 +2076,7 @@
     // Helper to set up owner highlight handlers on a container
     function setupOwnerHighlightHandlers(container) {
       const ownerLink = container.querySelector(".owner-link");
-      const pinBtn = container.querySelector(".owner-pin-btn");
+      const highlightBtn = container.querySelector(".owner-highlight-btn");
 
       if (ownerLink) {
         ownerLink.addEventListener("mouseenter", () => {
@@ -1810,12 +2091,12 @@
         });
       }
 
-      if (pinBtn) {
-        pinBtn.addEventListener("click", (e) => {
+      if (highlightBtn) {
+        highlightBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const addr = pinBtn.dataset.owner || null;
-          const nick = pinBtn.dataset.ownerNick || null;
+          const addr = highlightBtn.dataset.owner || null;
+          const nick = highlightBtn.dataset.ownerNick || null;
 
           // Check if clicking the same owner that's already locked
           const isSameOwner = ownerHighlightLocked &&
@@ -1838,7 +2119,7 @@
             log("Owner highlight locked:", { addr, nick });
           }
 
-          // Re-render to update pin button state
+          // Re-render to update button state
           showSelected(id);
         });
       }
@@ -1960,6 +2241,7 @@
     });
 
     network.on("click", (params) => {
+      hideContextMenu(); // Hide context menu on any click
       const id = params.nodes && params.nodes[0];
       const prevSelected = selectedNodeId;
 
@@ -1994,6 +2276,18 @@
       const id = params.nodes && params.nodes[0];
       if (!id) return;
       await expandFamily(Number(id));
+    });
+
+    // Right-click context menu
+    network.on("oncontext", (params) => {
+      params.event.preventDefault();
+      const nodeId = network.getNodeAt(params.pointer.DOM);
+      if (nodeId) {
+        hideTooltip();
+        showContextMenu(Number(nodeId), params);
+      } else {
+        hideContextMenu();
+      }
     });
 
     network.on("hoverNode", (params) => {
@@ -2057,6 +2351,7 @@
     expandedIds = new Set();
     resolvedImgUrl.clear();
     nodeBaseStyle.clear();
+    cachedApiResponses.clear();
     selectedNodeId = null;
 
     const roots = Array.isArray(obj.root_ids) ? obj.root_ids.map(Number) : [];
@@ -2078,6 +2373,69 @@
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
     const data = await res.json();
     loadJsonObject(data);
+  }
+
+  // Lazy pre-fetch: fetch full details for embedded kitties in the background
+  // Updates nodes as data arrives without blocking initial render
+  async function lazyPrefetchEmbedded(embeddedIds) {
+    if (!embeddedIds || embeddedIds.length === 0) return;
+
+    log("lazyPrefetchEmbedded: starting for", embeddedIds.length, "kitties");
+    const delay = 150; // ms between requests to avoid rate limiting
+    let updated = 0;
+
+    for (const id of embeddedIds) {
+      try {
+        // Skip if we already have full data (has raw.children or raw.matron)
+        const existing = kittyById.get(id);
+        if (existing && existing.raw && (existing.raw.children || existing.raw.matron || existing.raw.sire)) {
+          logv("lazyPrefetchEmbedded: skipping", id, "(already has full data)");
+          continue;
+        }
+
+        logv("lazyPrefetchEmbedded: fetching", id);
+        const kitty = await fetchJson(apiUrl(`/kitties/${id}`));
+        const kObj = unwrapKitty(kitty);
+        const normalized = normalizeFromApi(kObj);
+
+        // Merge with existing data (preserve parent refs that may have been set)
+        const merged = existing ? { ...existing, ...normalized } : normalized;
+        if (existing) {
+          // Preserve parent references if the new data doesn't have them
+          if (!merged.matron_id && existing.matron_id) merged.matron_id = existing.matron_id;
+          if (!merged.sire_id && existing.sire_id) merged.sire_id = existing.sire_id;
+        }
+
+        // Update the kitty data
+        kittyById.set(id, merged);
+
+        // Refresh the node to pick up new data (owner, colors, etc.)
+        addOrUpdateKittyNode(merged, false);
+
+        // Cache the full API response for potential later expansion
+        cachedApiResponses.set(id, kObj);
+
+        updated++;
+        logv("lazyPrefetchEmbedded: updated", id);
+
+        // Small delay between requests
+        await new Promise(r => setTimeout(r, delay));
+      } catch (e) {
+        log("lazyPrefetchEmbedded: failed for", id, e.message);
+      }
+    }
+
+    log("lazyPrefetchEmbedded: completed, updated", updated, "of", embeddedIds.length);
+
+    // Refresh the selected node panel if one is selected
+    if (selectedNodeId && embeddedIds.includes(selectedNodeId)) {
+      showSelected(selectedNodeId);
+    }
+
+    // Brief status update
+    if (updated > 0) {
+      setStatus(`Pre-fetched ${updated} kitties`, false);
+    }
   }
 
   async function loadKittiesById(ids, noExpand = false) {
@@ -2201,6 +2559,14 @@
         log("loadKittiesById: loading as new graph (no connection)");
         loadJsonObject({ root_ids: Array.from(requestedIds), kitties: kittiesToAdd });
         setStatus(`Loaded ${ids.length} kitty(s)`, false);
+      }
+
+      // Lazy pre-fetch embedded kitties in background if setting enabled
+      if (!noExpand && wantPrefetchChildren() && embeddedData.size > 0) {
+        const embeddedIds = Array.from(embeddedData.keys());
+        log("loadKittiesById: starting lazy pre-fetch for", embeddedIds.length, "embedded kitties");
+        // Start in background (don't await - let it run asynchronously)
+        setTimeout(() => lazyPrefetchEmbedded(embeddedIds), 500);
       }
     } catch (e) {
       console.error(e);

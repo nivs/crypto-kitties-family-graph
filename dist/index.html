@@ -3,6 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Interactive family tree visualizer for CryptoKitties. Explore breeding relationships, discover mewtation gems, and visualize kitty lineage." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CryptoKitties Family Graph" />
+  <meta property="og:description" content="Interactive family tree visualizer for CryptoKitties. Explore breeding relationships, discover mewtation gems, and visualize kitty lineage." />
+  <meta property="og:image" content="https://ck.innerlogics.com/images/og-image.png" />
+  <meta property="og:url" content="https://ck.innerlogics.com/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CryptoKitties Family Graph" />
+  <meta name="twitter:description" content="Interactive family tree visualizer for CryptoKitties. Explore breeding relationships and mewtation gems." />
+  <meta name="twitter:image" content="https://ck.innerlogics.com/images/og-image.png" />
+
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -43,11 +58,12 @@
     }
     #network{position:absolute;inset:0;}
     #banner{
-      position:absolute;left:12px;right:12px;top:12px;
+      position:absolute;left:80px;right:160px;bottom:16px;
       padding:10px 12px;border-radius:12px;
       border:1px solid rgba(255,255,255,0.14);
       background:rgba(18,22,34,0.92);
       color:var(--muted);font-size:12px;z-index:4;display:none;
+      text-align:center;
     }
 
     aside{height:calc(100vh - 74px);min-height:560px;display:flex;flex-direction:column;gap:12px;}
@@ -59,12 +75,44 @@
     .card .card-body{overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;max-height:500px;margin-top:8px;}
     .card .card-body.collapsed{max-height:0;margin-top:0;}
     .small{color:var(--muted);font-size:12px;line-height:1.45;}
+    .muted{color:var(--muted);}
     .kv{display:grid;grid-template-columns:90px 1fr;gap:6px 10px;font-size:12px;align-items:start;}
     .kv .k{color:var(--muted);padding-top:4px;}
     .kv .v{color:var(--text);word-break:break-word;display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;}
     .tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.14);color:var(--muted);font-size:11px;line-height:1.6;background:rgba(255,255,255,0.04);}
 
     .tooltip{position:absolute;min-width:220px;max-width:320px;pointer-events:none;z-index:10;background:rgba(18,22,34,0.96);border:1px solid rgba(255,255,255,0.14);border-radius:14px;padding:10px;box-shadow:0 12px 40px rgba(0,0,0,0.4);backdrop-filter:blur(8px);display:none;}
+
+    .context-menu{
+      position:absolute;
+      min-width:180px;
+      background:rgba(18,22,34,0.98);
+      border:1px solid rgba(255,255,255,0.18);
+      border-radius:12px;
+      padding:6px 0;
+      box-shadow:0 12px 40px rgba(0,0,0,0.5);
+      backdrop-filter:blur(12px);
+      z-index:30;
+      display:none;
+    }
+    .context-menu-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 14px;
+      color:var(--text);
+      font-size:13px;
+      cursor:pointer;
+      transition:background 0.1s;
+    }
+    .context-menu-item:hover{background:rgba(255,255,255,0.08);}
+    .context-menu-item.disabled{opacity:0.4;cursor:default;pointer-events:none;}
+    .context-menu-item.active .menu-icon svg{color:var(--accent);}
+    .context-menu-item svg{width:16px;height:16px;color:var(--muted);flex-shrink:0;}
+    .context-menu-item .menu-icon{display:flex;align-items:center;}
+    .context-menu-item .menu-icon svg{width:16px;height:16px;color:var(--muted);flex-shrink:0;}
+    .context-menu-separator{height:1px;background:var(--border);margin:6px 0;}
+
     .tt-head{display:flex;gap:10px;align-items:center;margin-bottom:8px;}
     .tt-thumb{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,0.14);flex:0 0 auto;display:grid;place-items:center;background:rgba(255,255,255,0.06);position:relative;}
     .tt-thumb::before{content:"";position:absolute;top:73%;left:-1.5%;right:0;width:53%;height:6.2%;margin:auto;background-color:var(--shadow-color, rgba(0,0,0,0.3));border-radius:50%;z-index:1;}
@@ -96,7 +144,12 @@
     .gem-icon-md{width:14px;height:14px;}
     .gem-icon-lg{width:16px;height:16px;margin-right:4px;}
     .owner-link{color:var(--accent);text-decoration:none;}
-    .owner-pin-btn{background:none;border:none;cursor:pointer;padding:0 4px;font-size:12px;vertical-align:baseline;line-height:1;}
+    .owner-row{display:inline-flex;align-items:center;gap:6px;}
+    .owner-highlight-btn{background:none;border:none;cursor:pointer;padding:0;vertical-align:middle;line-height:1;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;}
+    .owner-highlight-btn svg{width:14px;height:14px;color:var(--muted);transition:color 0.15s, opacity 0.15s;}
+    .owner-highlight-btn:hover svg{color:var(--accent);}
+    .owner-highlight-btn.active svg{color:var(--accent);opacity:1;}
+    .owner-highlight-btn:not(.active) svg{opacity:0.5;}
     .auction-warning{color:rgba(255,200,100,0.8);}
     .auction-tag{background:rgba(255,90,165,0.25);color:#ff5aa5;text-decoration:none;}
     .color-swatch{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:middle;margin-right:6px;border:1px solid rgba(255,255,255,0.2);}
@@ -166,6 +219,9 @@
     .input-full{width:100%;}
     .hidden{display:none;}
     .label-muted{opacity:0.7;font-size:12px;}
+    .settings-kv{align-items:center;}
+    .settings-kv .k{padding-top:0;}
+    .settings-kv input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;}
     .noscript-msg{padding:14px;color:#ffb3b3;}
 
     .examples-list{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:baseline;}
@@ -250,6 +306,7 @@
 
     /* Compact mode for small viewports (embeds) */
     @media (max-width:800px){
+      #banner{left:70px;right:120px;padding:8px 10px;font-size:11px;}
       .floating-panel{width:260px;font-size:11px;}
       .floating-panel .selected-header{gap:8px;margin-bottom:8px;}
       .floating-panel .selected-thumb{width:48px;height:48px;}
@@ -266,6 +323,7 @@
       .nav-btn svg{width:14px;height:14px;}
     }
     @media (max-width:500px){
+      #banner{left:60px;right:90px;padding:6px 8px;font-size:10px;}
       .floating-panel{width:200px;}
       .floating-panel .selected-thumb{width:40px;height:40px;}
       .floating-panel .kv{grid-template-columns:60px 1fr;}
@@ -322,6 +380,39 @@
       <div id="banner"></div>
       <div id="network"></div>
       <div id="tooltip" class="tooltip"></div>
+      <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" data-action="center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+          Center on this kitty
+        </div>
+        <div class="context-menu-item" data-action="expand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Expand family
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="highlightOwner">
+          <span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="menu-text">Highlight owner</span>
+        </div>
+        <div class="context-menu-item" data-action="openOwner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open owner page
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="startFresh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Start fresh with this kitty
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="copyId">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy kitty ID
+        </div>
+        <div class="context-menu-item" data-action="openCK">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open kitty page
+        </div>
+      </div>
       <a href="https://www.innerlogics.com" target="_blank" class="floating-logo" title="innerlogics.com">
         <img src="./images/innerlogics-logo.png" alt="innerlogics" />
       </a>
@@ -406,27 +497,27 @@
       <div class="card">
         <h3 class="collapsible collapsed" id="settingsToggle">Settings</h3>
         <div class="card-body collapsed" id="settingsBody">
-          <div class="kv">
+          <div class="kv settings-kv">
             <div class="k">Use Proxy</div>
-            <div class="v"><input type="checkbox" id="useProxy" /> <label for="useProxy" class="label-muted" title="Route API calls through a CORS proxy">Enable CORS proxy for API calls</label></div>
+            <div class="v"><input type="checkbox" id="useProxy" /></div>
 
             <div class="k">Proxy URL</div>
             <div class="v"><input id="apiProxyUrl" class="input input-full" /></div>
 
             <div class="k">Local SVG base</div>
-            <div class="v"><input id="svgBaseUrl" class="input input-full" placeholder="e.g. ./svg/ (probes if set)" /></div>
+            <div class="v"><input id="svgBaseUrl" class="input input-full" placeholder="e.g. ./svg/" /></div>
 
-            <div class="k">Load from API</div>
-            <div class="v" title="Fallback to API images if local SVG not found"><input type="checkbox" id="svgFromApi" checked /> <label for="svgFromApi" class="label-muted">Load images from CK API</label></div>
+            <div class="k">API images</div>
+            <div class="v"><input type="checkbox" id="svgFromApi" checked /></div>
 
             <div class="k">CK site base</div>
             <div class="v"><input id="siteBaseUrl" class="input input-full" /></div>
 
             <div class="k">Pre-fetch</div>
-            <div class="v" title="Fetch full details for new kitties when expanding (slower but accurate parent edges)"><input type="checkbox" id="prefetchChildren" checked /> <label for="prefetchChildren" class="label-muted">Fetch details on expand</label></div>
+            <div class="v"><input type="checkbox" id="prefetchChildren" checked /></div>
 
             <div class="k">Auto-connect</div>
-            <div class="v" title="When expanding, also add relatives that connect to existing nodes"><input type="checkbox" id="autoConnect" checked /> <label for="autoConnect" class="label-muted">Discover connections</label></div>
+            <div class="v"><input type="checkbox" id="autoConnect" checked /></div>
           </div>
         </div>
       </div>

@@ -1,0 +1,54 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code - force LF line endings
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.php text eol=lf
+*.txt text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.sh text eol=lf
+
+# Config files
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.webmanifest text eol=lf
+
+# SVG - text but treat as binary for diff (can be large/generated)
+*.svg binary
+
+# Images - binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+
+# Video - binary
+*.webm binary
+*.mp4 binary
+
+# Fonts - binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+
+# Archives - binary
+*.zip binary
+*.tar binary
+*.gz binary
+
+# GitHub Linguist overrides
+# Mark vendored/generated files
+dist/example/** linguist-generated
+*.min.js linguist-vendored
+
+# Tools are utilities, not the main project language
+tools/** linguist-vendored

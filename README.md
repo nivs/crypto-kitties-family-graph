@@ -300,7 +300,8 @@ python3 download_svgs.py ../dist/example/holidays/holidays.json \
 
 ## License
 
-MIT License - see [LICENSE](LICENSE)
+- MIT License - see [LICENSE](LICENSE)
+- Third-Party Assets - see [LICENSE-THIRD-PARTY](LICENSE-THIRD-PARTY.md)
 
 ## Credits
 

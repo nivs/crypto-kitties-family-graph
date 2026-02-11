@@ -1716,6 +1716,86 @@
     if (edgeUpdates.length) edges.update(edgeUpdates);
   }
 
+  // Highlight kitties that have a specific trait value
+  function highlightByTrait(traitValue) {
+    if (!traitValue) return;
+    const traitLower = traitValue.toLowerCase();
+    const matchingIds = new Set();
+
+    // Find all kitties with this trait value
+    for (const [id, k] of kittyById.entries()) {
+      const traits = k.traits || {};
+      for (const val of Object.values(traits)) {
+        if (val && val.toLowerCase() === traitLower) {
+          matchingIds.add(id);
+          break;
+        }
+      }
+    }
+
+    log("highlightByTrait:", { traitValue, count: matchingIds.size });
+
+    // Highlight matching nodes, dim others (preserve selection styling)
+    const nodeUpdates = [];
+    for (const id of nodes.getIds()) {
+      const nid = Number(id);
+      const base = nodeBaseStyle.get(nid);
+      if (!base) continue;
+
+      if (nid === selectedNodeId) {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size + 6,
+          color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else if (matchingIds.has(nid)) {
+        nodeUpdates.push({
+          id: nid,
+          size: 48,
+          color: { background: brightenHex(base.bg, 0.25), border: "#ffcc00" },
+          borderWidth: 3
+        });
+      } else {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size,
+          color: { background: base.bg, border: "rgba(255,255,255,0.1)" },
+          borderWidth: 1
+        });
+      }
+    }
+    if (nodeUpdates.length) nodes.update(nodeUpdates);
+
+    // Dim edges not between matching kitties
+    const edgeUpdates = [];
+    for (const edge of edges.get()) {
+      const match = edge.id.match(/^([ms]):(\d+)->(\d+)$/);
+      if (match) {
+        const fromId = Number(match[2]);
+        const toId = Number(match[3]);
+        const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
+
+        if (matchingIds.has(fromId) && matchingIds.has(toId)) {
+          edgeUpdates.push({
+            id: edge.id,
+            color: getEdgeColor(edge.id),
+            width: 2,
+            arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } }
+          });
+        } else {
+          edgeUpdates.push({
+            id: edge.id,
+            color: dimColor,
+            width: 1.5,
+            arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+          });
+        }
+      }
+    }
+    if (edgeUpdates.length) edges.update(edgeUpdates);
+  }
+
   // Filter state
   let filterEdgeHighlight = false; // Whether to highlight edges between filtered kitties
 
@@ -2653,12 +2733,12 @@
       const traitLink = `<a href="${cattributeUrl(traitValue)}" target="_blank" rel="noopener" class="trait-link">${safeText(traitValue)}</a>`;
       const gem = gems.find(g => g.type === t);
       if (gem) {
-        return `<span class="tag tag-mewtation" title="${gemDisplayName(gem.gem)} #${gem.position}">
+        return `<span class="tag tag-mewtation tag-trait" data-trait="${safeText(traitValue)}" title="${gemDisplayName(gem.gem)} #${gem.position}">
           <img src="${GEM_IMAGES[gem.gem]}" alt="" class="gem-icon gem-icon-sm" />
           ${t}: ${traitLink}
         </span>`;
       }
-      return `<span class="tag">${t}: ${traitLink}</span>`;
+      return `<span class="tag tag-trait" data-trait="${safeText(traitValue)}">${t}: ${traitLink}</span>`;
     }).join("");
 
     const kittyImg = k.image_url || "";
@@ -2739,12 +2819,56 @@
     // Set up handlers for sidebar
     setupOwnerHighlightHandlers(selectedBox);
 
+    // Set up trait highlight handlers
+    function setupTraitHighlightHandlers(container) {
+      const traitTags = container.querySelectorAll(".tag-trait");
+      traitTags.forEach(tag => {
+        tag.addEventListener("mouseenter", () => {
+          const traitValue = tag.dataset.trait;
+          if (traitValue) highlightByTrait(traitValue);
+        });
+        tag.addEventListener("mouseleave", () => {
+          // Restore to previous state
+          if (selectedNodeId) {
+            highlightFamilyEdges(selectedNodeId);
+            // Restore node styles
+            const nodeUpdates = [];
+            for (const nid of nodes.getIds()) {
+              const base = nodeBaseStyle.get(Number(nid));
+              if (!base) continue;
+              if (Number(nid) === selectedNodeId) {
+                nodeUpdates.push({
+                  id: Number(nid),
+                  size: base.size + 6,
+                  color: { background: base.bg, border: "#ffffff" },
+                  borderWidth: 3
+                });
+              } else {
+                nodeUpdates.push({
+                  id: Number(nid),
+                  size: base.size,
+                  color: { background: base.bg, border: base.border },
+                  borderWidth: base.borderWidth
+                });
+              }
+            }
+            if (nodeUpdates.length) nodes.update(nodeUpdates);
+          } else {
+            restoreAllNodes();
+          }
+        });
+      });
+    }
+
+    setupTraitHighlightHandlers(selectedBox);
+
     // Also update floating panel (for embed mode)
     const floatingBox = $("floatingSelectedBox");
     if (floatingBox) {
       floatingBox.innerHTML = selectedBox.innerHTML;
       // Set up handlers for floating panel
       setupOwnerHighlightHandlers(floatingBox);
+      setupTraitHighlightHandlers(floatingBox);
       // Show floating panel if hidden
       const floatingPanel = $("floatingPanel");
       if (floatingPanel) floatingPanel.classList.remove("panel-hidden");
@@ -3641,6 +3765,25 @@
     applyDefaultsToUI();
     wireControls();
     preloadGemImages(); // Load mewtation gem images
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        // Disable shortest path mode
+        if (shortestPathMode) {
+          shortestPathMode = false;
+          const spToggle = $("shortestPathMode");
+          if (spToggle) spToggle.checked = false;
+          setStatus("Shortest path mode disabled", false);
+          // Restore view
+          if (selectedNodeId) {
+            highlightFamilyEdges(selectedNodeId);
+          } else {
+            restoreAllNodes();
+          }
+        }
+      }
+    });
 
     // Filters panel collapse toggle
     const filtersToggle = $("filtersToggle");

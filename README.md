@@ -11,6 +11,8 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 - **Interactive Graph**: Physics-based layout with drag, zoom, and pan
 - **Family Visualization**: Pink edges for matron (mother), blue edges for sire (father)
 - **Mewtation Gems**: Diamond, Gold, Silver, and Bronze gem badges for trait discoverers
+- **Filters**: Filter by generation range and/or mewtation gems
+- **Shortest Path**: Highlight the path between any two kitties (select one, hover another)
 - **Owner Highlighting**: Hover over owner names to highlight all their kitties (pin with highlight button or `?owner=` param)
 - **Context Menu**: Right-click nodes for quick actions (expand, highlight owner, open pages, etc.)
 - **Smart Expansion**: Double-click to expand family with pre-fetched accurate parent data
@@ -47,6 +49,10 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
 | `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
 | `noExpand` | Skip embedded parent/child extraction (faster, exact IDs only) | `?noExpand=true` |
+| `genMin` | Filter: minimum generation (inclusive) | `?genMin=0` |
+| `genMax` | Filter: maximum generation (inclusive) | `?genMax=10` |
+| `mewtations` | Filter: mewtation gems (`all` or comma-separated: `diamond,gold,silver,bronze`) | `?mewtations=diamond,gold` |
+| `filterEdges` | Highlight edges between filtered kitties | `?filterEdges=true` |
 
 **Examples:**
 ```
@@ -58,6 +64,9 @@ http://localhost:8001/?dataUrl=./example/nivs/nivs.json&svgBaseUrl=./example/niv
 
 # Embed mode with specific kitties
 http://localhost:8001/?embed=true&kitties=124653,129868
+
+# With filters (generation 0-5, gold mewtations, owner highlight)
+http://localhost:8001/?kitties=896775&genMin=0&genMax=5&mewtations=gold&owner=nivs
 ```
 
 ## Embedding
@@ -201,6 +210,7 @@ When hosting on a web server, you may need the CORS proxy for API calls. Deploy 
 - **Pin** owner highlight by clicking the user icon button (persists while navigating)
 - **Drag** nodes to rearrange
 - **Toggle Physics** to freeze/unfreeze the layout
+- **Filters** panel to filter by generation range and/or mewtation gems (AND logic when combined)
 
 ## Example Graphs
 

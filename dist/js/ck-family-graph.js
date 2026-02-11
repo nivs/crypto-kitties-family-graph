@@ -417,7 +417,8 @@
   }
 
   function placeholderDataUri(label, bg) {
-    const text = encodeURIComponent(String(label || "").slice(0, 16));
+    // Use Array.from to properly handle emoji (surrogate pairs) before truncating
+    const text = encodeURIComponent(Array.from(String(label || "")).slice(0, 16).join(""));
     const fill = encodeURIComponent(bg || "#2a2f43");
     const svg =
       `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">` +
@@ -428,7 +429,8 @@
   }
 
   function checkeredPlaceholderDataUri(label) {
-    const text = encodeURIComponent(String(label || "").slice(0, 16));
+    // Use Array.from to properly handle emoji (surrogate pairs) before truncating
+    const text = encodeURIComponent(Array.from(String(label || "")).slice(0, 16).join(""));
     // Checkered pattern with dark and slightly lighter squares
     const svg =
       `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">` +
@@ -493,6 +495,9 @@
 
   // Selected node state
   let selectedNodeId = null;
+
+  // Shortest path mode
+  let shortestPathMode = false;
 
   // Track original dataUrl for permalink (null if loaded via kitty IDs)
   let loadedFromDataUrl = null;
@@ -722,12 +727,44 @@
     kk.matron_id = kk.matron_id ? Number(kk.matron_id) : null;
     kk.sire_id = kk.sire_id ? Number(kk.sire_id) : null;
 
-    // Owner fields - preserve existing owner_address/owner_nickname if set, otherwise extract
-    if (!kk.owner_address) {
-      kk.owner_address = normalizeOwner(kk.owner) || normalizeOwner(kk.owner_profile && kk.owner_profile.address) || normalizeOwner(kk.ownerProfile && kk.ownerProfile.address) || null;
+    // Check for auction seller (real owner when on auction) - check nested raw too
+    const auctionData = kk.auction || (kk.raw && kk.raw.auction) || null;
+    const seller = kk.seller || (auctionData && auctionData.seller ? auctionData.seller : null);
+
+    // Owner fields - prefer seller if on auction AND current owner is auction contract
+    const currentOwnerAddr = kk.owner_address || normalizeOwner(kk.owner);
+    const ownerIsAuctionContract = isAuctionContract(currentOwnerAddr);
+
+    // DEBUG - log any kitty with auction contract owner
+    if (ownerIsAuctionContract || seller) {
+      console.log("DEBUG upsertKitty auction/seller:", {
+        id: kk.id,
+        "kk.auction": kk.auction,
+        "kk.raw exists": !!kk.raw,
+        "kk.raw?.auction": kk.raw?.auction,
+        "auctionData": auctionData,
+        "seller": seller,
+        "currentOwnerAddr": currentOwnerAddr,
+        "ownerIsAuctionContract": ownerIsAuctionContract,
+        "kk.owner_address": kk.owner_address,
+        "kk.owner_nickname": kk.owner_nickname
+      });
     }
-    if (!kk.owner_nickname) {
-      kk.owner_nickname = normalizeOwnerNickname(kk);
+
+    if (seller && ownerIsAuctionContract) {
+      // Replace auction contract with actual seller
+      kk.owner_address = normalizeOwner(seller) || kk.owner_address;
+      kk.owner_nickname = seller.nickname || seller.username || seller.name || kk.owner_nickname;
+      kk.seller = seller;
+      kk.auction = auctionData;
+      kk.isOnAuction = auctionData && auctionData.status === "open";
+    } else {
+      if (!kk.owner_address) {
+        kk.owner_address = normalizeOwner(kk.owner) || normalizeOwner(kk.owner_profile && kk.owner_profile.address) || normalizeOwner(kk.ownerProfile && kk.ownerProfile.address) || null;
+      }
+      if (!kk.owner_nickname) {
+        kk.owner_nickname = normalizeOwnerNickname(kk);
+      }
     }
 
     kittyById.set(kk.id, kk);
@@ -807,6 +844,135 @@
       if (k.sire_id) add(k.id, k.sire_id);
     }
     return adj;
+  }
+
+  // Find shortest path between two nodes using BFS
+  // Returns array of node IDs in the path, or empty array if no path exists
+  function findShortestPath(fromId, toId) {
+    if (fromId === toId) return [fromId];
+
+    const adj = buildAdjacency();
+    if (!adj.has(fromId) || !adj.has(toId)) return [];
+
+    const visited = new Set([fromId]);
+    const queue = [[fromId]]; // Queue of paths
+
+    while (queue.length > 0) {
+      const path = queue.shift();
+      const current = path[path.length - 1];
+
+      const neighbors = adj.get(current);
+      if (!neighbors) continue;
+
+      for (const neighbor of neighbors) {
+        if (neighbor === toId) {
+          return [...path, neighbor];
+        }
+        if (!visited.has(neighbor)) {
+          visited.add(neighbor);
+          queue.push([...path, neighbor]);
+        }
+      }
+    }
+
+    return []; // No path found
+  }
+
+  // Get edge IDs for a path of nodes
+  function getPathEdgeIds(pathNodes) {
+    const edgeIds = [];
+    for (let i = 0; i < pathNodes.length - 1; i++) {
+      const a = pathNodes[i];
+      const b = pathNodes[i + 1];
+      // Check both directions for matron/sire edges
+      const possibleIds = [
+        `m:${a}->${b}`, `s:${a}->${b}`,
+        `m:${b}->${a}`, `s:${b}->${a}`
+      ];
+      for (const edgeId of possibleIds) {
+        if (edges.get(edgeId)) {
+          edgeIds.push(edgeId);
+          break;
+        }
+      }
+    }
+    return edgeIds;
+  }
+
+  // Highlight the shortest path between two nodes
+  function highlightShortestPath(fromId, toId) {
+    const path = findShortestPath(fromId, toId);
+    if (path.length === 0) {
+      log("No path found between", fromId, "and", toId);
+      return;
+    }
+
+    log("Shortest path:", path.join(" -> "));
+    const pathEdgeIds = new Set(getPathEdgeIds(path));
+    const pathNodeIds = new Set(path);
+
+    // Highlight path nodes
+    const nodeUpdates = [];
+    for (const id of nodes.getIds()) {
+      const nid = Number(id);
+      const base = nodeBaseStyle.get(nid);
+      if (!base) continue;
+
+      if (nid === selectedNodeId) {
+        // Selected node - keep selection styling
+        nodeUpdates.push({
+          id: nid,
+          size: base.size + 6,
+          color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else if (pathNodeIds.has(nid)) {
+        // Path node - bright white border to indicate path, enlarged
+        nodeUpdates.push({
+          id: nid,
+          size: 46,
+          color: { background: brightenHex(base.bg, 0.3), border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else {
+        // Dim other nodes
+        nodeUpdates.push({
+          id: nid,
+          size: base.size,
+          color: { background: darkenColor(base.bg, 0.4), border: "rgba(255,255,255,0.05)" },
+          borderWidth: 1
+        });
+      }
+    }
+    if (nodeUpdates.length) nodes.update(nodeUpdates);
+
+    // Highlight path edges - preserve matron/sire colors but make them brighter
+    const edgeUpdates = [];
+    for (const edge of edges.get()) {
+      if (pathEdgeIds.has(edge.id)) {
+        // Path edge - use bright matron/sire colors
+        const isMatron = edge.id.startsWith("m:");
+        const pathColor = isMatron
+          ? { color: "#ff40a0", highlight: "#ff60b0" }  // Bright pink for matron
+          : { color: "#40a0ff", highlight: "#60b0ff" }; // Bright blue for sire
+        edgeUpdates.push({
+          id: edge.id,
+          color: pathColor,
+          width: 4,
+          arrows: { to: { enabled: true, scaleFactor: 1.2, type: "arrow" } }
+        });
+      } else {
+        // Dim other edges
+        const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
+        edgeUpdates.push({
+          id: edge.id,
+          color: dimColor,
+          width: 1.5,
+          arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+        });
+      }
+    }
+    if (edgeUpdates.length) edges.update(edgeUpdates);
   }
 
   function reachableFromRoots() {
@@ -1062,8 +1228,9 @@
     const color = raw.color || null; // CK color name like "mintgreen", "bubblegum"
     const image_url = raw.image_url || raw.imageUrl || raw.image_url_cdn || raw.imageUrlCdn || null;
 
-    // Extract auction info
-    const auction = raw.auction && typeof raw.auction === "object" && raw.auction.type ? raw.auction : null;
+    // Extract auction info - check both direct and nested raw
+    const auctionData = raw.auction || (raw.raw && raw.raw.auction) || null;
+    const auction = auctionData && typeof auctionData === "object" && auctionData.type ? auctionData : null;
     const isOnAuction = auction && auction.status === "open";
     const auctionType = auction ? auction.type : null; // "sale" or "sire"
     const seller = auction && auction.seller ? auction.seller : null;
@@ -1296,6 +1463,7 @@
 
       rebuildAllEdges(); // Create edges now that all nodes exist
       setStats();
+      updateFilterControls();
       log("expandFamily post-merge:", { nodes: nodes.length, edges: edges.length });
 
       // Run physics stabilization to rearrange nodes
@@ -1548,7 +1716,443 @@
     if (edgeUpdates.length) edges.update(edgeUpdates);
   }
 
+  // Filter state
+  let filterEdgeHighlight = false; // Whether to highlight edges between filtered kitties
+
+  // Generation highlight state
+  let generationHighlightActive = false;
+  let generationRangeMin = null;
+  let generationRangeMax = null;
+
+  function getAvailableGenerations() {
+    const gens = new Set();
+    for (const k of kittyById.values()) {
+      if (typeof k.generation === "number") {
+        gens.add(k.generation);
+      }
+    }
+    return Array.from(gens).sort((a, b) => a - b);
+  }
+
+  function highlightByGenerationRange(minGen, maxGen) {
+    // If both null/undefined, clear filter
+    if ((minGen === null || minGen === undefined || minGen === "") &&
+        (maxGen === null || maxGen === undefined || maxGen === "")) {
+      generationHighlightActive = false;
+      generationRangeMin = null;
+      generationRangeMax = null;
+      applyFilterHighlighting(); // Use unified function
+      return;
+    }
+
+    generationHighlightActive = true;
+    generationRangeMin = (minGen !== null && minGen !== undefined && minGen !== "") ? Number(minGen) : null;
+    generationRangeMax = (maxGen !== null && maxGen !== undefined && maxGen !== "") ? Number(maxGen) : null;
+
+    log("highlightByGenerationRange:", { min: generationRangeMin, max: generationRangeMax });
+    applyFilterHighlighting(); // Use unified function
+  }
+
+  // Mewtation highlight state
+  let mewtationHighlightActive = false;
+  let highlightedGemTypes = new Set(); // empty = all gems
+
+  // Combined filter matching - returns true if kitty matches ALL active filters
+  function doesKittyMatchAllFilters(k) {
+    if (!k) return false;
+
+    // Check generation filter
+    if (generationHighlightActive) {
+      if (typeof k.generation !== "number") return false;
+      const inRange =
+        (generationRangeMin === null || k.generation >= generationRangeMin) &&
+        (generationRangeMax === null || k.generation <= generationRangeMax);
+      if (!inRange) return false;
+    }
+
+    // Check mewtation filter
+    if (mewtationHighlightActive) {
+      const gems = getMewtationGems(k);
+      if (gems.length === 0) return false;
+      if (highlightedGemTypes.size > 0) {
+        // Must have at least one matching gem type
+        let hasMatchingGem = false;
+        for (const gem of gems) {
+          if (highlightedGemTypes.has(gem.gem)) {
+            hasMatchingGem = true;
+            break;
+          }
+        }
+        if (!hasMatchingGem) return false;
+      }
+    }
+
+    return true;
+  }
+
+  // Get all kitty IDs that match the combined active filters
+  function getFilteredKittyIds() {
+    const matchingIds = new Set();
+    for (const [id, k] of kittyById.entries()) {
+      if (doesKittyMatchAllFilters(k)) {
+        matchingIds.add(id);
+      }
+    }
+    return matchingIds;
+  }
+
+  // Apply combined filter highlighting to all nodes and edges
+  function applyFilterHighlighting() {
+    const filterActive = generationHighlightActive || mewtationHighlightActive;
+
+    if (!filterActive) {
+      restoreAllNodes();
+      return;
+    }
+
+    const matchingIds = getFilteredKittyIds();
+    log("applyFilterHighlighting:", {
+      generationActive: generationHighlightActive,
+      mewtationActive: mewtationHighlightActive,
+      matchingCount: matchingIds.size
+    });
+
+    // Highlight matching nodes, dim others
+    const nodeUpdates = [];
+    for (const id of nodes.getIds()) {
+      const nid = Number(id);
+      const base = nodeBaseStyle.get(nid);
+      if (!base) continue;
+
+      // Check if this kitty belongs to the pinned owner
+      const k = kittyById.get(nid);
+      let isOwnedByPinned = false;
+      if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick) && k) {
+        const ownerAddrLower = lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null;
+        const ownerNickLower = lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null;
+        isOwnedByPinned = doesKittyMatchOwner(k, ownerAddrLower, ownerNickLower);
+      }
+
+      if (nid === selectedNodeId) {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size + 6,
+          color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else if (matchingIds.has(nid)) {
+        // Determine border color based on active filters
+        let borderColor = "#ffcc00"; // Default yellow for generation
+
+        // If mewtation filter is active, use gem-specific color
+        if (mewtationHighlightActive && k) {
+          const gems = getMewtationGems(k);
+          if (gems.length > 0) {
+            const topGem = [...gems].sort((a, b) => {
+              const priority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
+              return (priority[b.gem] || 0) - (priority[a.gem] || 0);
+            })[0];
+            const gemColors = {
+              diamond: "#00ffff",
+              gold: "#ffd700",
+              silver: "#c0c0c0",
+              bronze: "#cd7f32"
+            };
+            borderColor = gemColors[topGem?.gem] || borderColor;
+          }
+        }
+
+        nodeUpdates.push({
+          id: nid,
+          size: mewtationHighlightActive ? 48 : 46,
+          color: { background: brightenHex(base.bg, mewtationHighlightActive ? 0.25 : 0.2), border: borderColor },
+          borderWidth: mewtationHighlightActive ? 3 : 2
+        });
+      } else {
+        // Dim non-matching nodes - darkened background (preserve owner indication)
+        nodeUpdates.push({
+          id: nid,
+          size: base.size,
+          color: {
+            background: darkenColor(base.bg, isOwnedByPinned ? 0.25 : 0.4),
+            border: isOwnedByPinned ? "#7aa2ff" : "rgba(255,255,255,0.05)"
+          },
+          borderWidth: isOwnedByPinned ? 2 : 1
+        });
+      }
+    }
+    if (nodeUpdates.length) nodes.update(nodeUpdates);
+
+    // Handle edges based on filterEdgeHighlight toggle
+    if (filterEdgeHighlight) {
+      const edgeUpdates = [];
+      for (const edge of edges.get()) {
+        const match = edge.id.match(/^([ms]):(\d+)->(\d+)$/);
+        if (match) {
+          const fromId = Number(match[2]);
+          const toId = Number(match[3]);
+          const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
+
+          if (matchingIds.has(fromId) && matchingIds.has(toId)) {
+            // Highlight edges between filtered kitties
+            edgeUpdates.push({
+              id: edge.id,
+              color: getEdgeColor(edge.id),
+              width: 2,
+              arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } }
+            });
+          } else {
+            // Dim other edges
+            edgeUpdates.push({
+              id: edge.id,
+              color: dimColor,
+              width: 1.5,
+              arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+            });
+          }
+        }
+      }
+      if (edgeUpdates.length) edges.update(edgeUpdates);
+    } else {
+      // Filter edge highlight unchecked - preserve selected/owner edges
+      if (selectedNodeId) {
+        highlightFamilyEdges(selectedNodeId);
+      } else {
+        reapplyOwnerEdges();
+      }
+    }
+  }
+
+  function getAvailableMewtationGems() {
+    const gems = new Set();
+    for (const k of kittyById.values()) {
+      const kittyGems = getMewtationGems(k);
+      for (const gem of kittyGems) {
+        gems.add(gem.gem);
+      }
+    }
+    return gems;
+  }
+
+  function updateMewtationFilterButtons() {
+    const availableGems = getAvailableMewtationGems();
+    const hasAnyGems = availableGems.size > 0;
+
+    const mewtationBtns = {
+      all: $("mewtationFilterAll"),
+      diamond: $("mewtationFilterDiamond"),
+      gold: $("mewtationFilterGold"),
+      silver: $("mewtationFilterSilver"),
+      bronze: $("mewtationFilterBronze")
+    };
+
+    // Enable/disable "All" button based on whether any gems exist
+    if (mewtationBtns.all) {
+      mewtationBtns.all.disabled = !hasAnyGems;
+    }
+
+    // Enable/disable individual gem buttons based on availability
+    ["diamond", "gold", "silver", "bronze"].forEach(gemType => {
+      const btn = mewtationBtns[gemType];
+      if (btn) {
+        btn.disabled = !availableGems.has(gemType);
+        // If button was active but gem type no longer available, deactivate it
+        if (btn.disabled && btn.classList.contains("active")) {
+          btn.classList.remove("active");
+        }
+      }
+    });
+
+    log("updateMewtationFilterButtons:", { available: Array.from(availableGems) });
+  }
+
+  function highlightMewtations(gemTypes = null) {
+    if (gemTypes === null || gemTypes === false) {
+      mewtationHighlightActive = false;
+      highlightedGemTypes.clear();
+      applyFilterHighlighting(); // Use unified function
+      return;
+    }
+
+    mewtationHighlightActive = true;
+    highlightedGemTypes = gemTypes === true ? new Set() : new Set(gemTypes);
+
+    log("highlightMewtations:", { gemTypes: highlightedGemTypes.size ? Array.from(highlightedGemTypes) : "all" });
+    applyFilterHighlighting(); // Use unified function
+  }
+
+  // Reapply edge highlighting for the currently active filter
+  function reapplyFilterEdges() {
+    if (!filterEdgeHighlight) return false;
+
+    const filterActive = generationHighlightActive || mewtationHighlightActive;
+    if (!filterActive) return false;
+
+    const matchingIds = getFilteredKittyIds();
+    if (matchingIds.size === 0) return false;
+
+    // Apply edge highlighting
+    const edgeUpdates = [];
+    for (const edge of edges.get()) {
+      const match = edge.id.match(/^([ms]):(\d+)->(\d+)$/);
+      if (match) {
+        const fromId = Number(match[2]);
+        const toId = Number(match[3]);
+        const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
+
+        if (matchingIds.has(fromId) && matchingIds.has(toId)) {
+          edgeUpdates.push({
+            id: edge.id,
+            color: getEdgeColor(edge.id),
+            width: 2,
+            arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } }
+          });
+        } else {
+          edgeUpdates.push({
+            id: edge.id,
+            color: dimColor,
+            width: 1.5,
+            arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+          });
+        }
+      }
+    }
+    if (edgeUpdates.length) edges.update(edgeUpdates);
+    return true;
+  }
+
+  // Get the correct node style based on active filters
+  // Returns null if no filter is active
+  function getFilteredNodeStyle(nid) {
+    const filterActive = generationHighlightActive || mewtationHighlightActive;
+    if (!filterActive) return null;
+
+    const base = nodeBaseStyle.get(nid);
+    if (!base) return null;
+
+    const k = kittyById.get(nid);
+
+    // Check if this kitty belongs to the pinned owner
+    let isOwnedByPinned = false;
+    if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick) && k) {
+      const ownerAddrLower = lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null;
+      const ownerNickLower = lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null;
+      isOwnedByPinned = doesKittyMatchOwner(k, ownerAddrLower, ownerNickLower);
+    }
+
+    // Check if kitty matches all active filters
+    const matches = doesKittyMatchAllFilters(k);
+
+    if (matches) {
+      // Determine border color based on active filters
+      let borderColor = "#ffcc00"; // Default yellow for generation
+
+      // If mewtation filter is active, use gem-specific color
+      if (mewtationHighlightActive && k) {
+        const gems = getMewtationGems(k);
+        if (gems.length > 0) {
+          const topGem = [...gems].sort((a, b) => {
+            const priority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
+            return (priority[b.gem] || 0) - (priority[a.gem] || 0);
+          })[0];
+          const gemColors = {
+            diamond: "#00ffff",
+            gold: "#ffd700",
+            silver: "#c0c0c0",
+            bronze: "#cd7f32"
+          };
+          borderColor = gemColors[topGem?.gem] || borderColor;
+        }
+      }
+
+      return {
+        id: nid,
+        size: mewtationHighlightActive ? 48 : 46,
+        color: { background: brightenHex(base.bg, mewtationHighlightActive ? 0.25 : 0.2), border: borderColor },
+        borderWidth: mewtationHighlightActive ? 3 : 2
+      };
+    } else {
+      // Dim non-matching (but preserve owner indication)
+      return {
+        id: nid,
+        size: base.size,
+        color: {
+          background: darkenColor(base.bg, isOwnedByPinned ? 0.25 : 0.4),
+          border: isOwnedByPinned ? "#7aa2ff" : "rgba(255,255,255,0.05)"
+        },
+        borderWidth: isOwnedByPinned ? 2 : 1
+      };
+    }
+  }
+
+  // Restore edges based on owner highlighting (without touching nodes)
+  function reapplyOwnerEdges() {
+    if (!ownerHighlightLocked || (!lockedOwnerAddr && !lockedOwnerNick)) {
+      restoreEdgeColors();
+      return;
+    }
+
+    const ownedIds = new Set();
+    const ownerAddrLower = lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null;
+    const ownerNickLower = lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null;
+
+    for (const [id, k] of kittyById.entries()) {
+      if (doesKittyMatchOwner(k, ownerAddrLower, ownerNickLower)) {
+        ownedIds.add(id);
+      }
+    }
+
+    const edgeUpdates = [];
+    for (const edge of edges.get()) {
+      const match = edge.id.match(/^([ms]):(\d+)->(\d+)$/);
+      if (match) {
+        const fromId = Number(match[2]);
+        const toId = Number(match[3]);
+        const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
+
+        if (ownedIds.has(fromId) && ownedIds.has(toId)) {
+          edgeUpdates.push({
+            id: edge.id,
+            color: getEdgeColor(edge.id),
+            width: 2,
+            arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } }
+          });
+        } else {
+          edgeUpdates.push({
+            id: edge.id,
+            color: dimColor,
+            width: 1.5,
+            arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+          });
+        }
+      }
+    }
+    if (edgeUpdates.length) edges.update(edgeUpdates);
+  }
+
+  // Reapply all filter styling to all nodes (used when deselecting)
+  function reapplyFilterNodes() {
+    if (!generationHighlightActive && !mewtationHighlightActive) return false;
+
+    const nodeUpdates = [];
+    for (const id of nodes.getIds()) {
+      const nid = Number(id);
+      const style = getFilteredNodeStyle(nid);
+      if (style) {
+        nodeUpdates.push(style);
+      }
+    }
+    if (nodeUpdates.length) nodes.update(nodeUpdates);
+    return true;
+  }
+
   function restoreAllNodes() {
+    // If owner highlight is pinned, restore that instead of base styles
+    if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
+      highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+      return;
+    }
+
     const nodeUpdates = [];
     for (const id of nodes.getIds()) {
       const nid = Number(id);
@@ -1861,6 +2465,9 @@
         lockedOwnerAddr = null;
         lockedOwnerNick = null;
         loadedFromDataUrl = null;
+        shortestPathMode = false;
+        const spToggle = $("shortestPathMode");
+        if (spToggle) spToggle.checked = false;
         loadKittiesById([nodeId]);
         break;
 
@@ -1909,8 +2516,8 @@
     const auctionType = auction ? auction.type : null;
     const seller = k.seller || (auction ? auction.seller : null);
 
-    // Get the raw owner address
-    const rawOwnerAddr = normalizeOwner(k.owner) || k.owner_address || k.owner_wallet_address || null;
+    // Get owner address - prefer k.owner_address (may have been set from seller) over k.owner
+    const rawOwnerAddr = k.owner_address || normalizeOwner(k.owner) || k.owner_wallet_address || null;
     const ownerIsContract = isAuctionContract(rawOwnerAddr);
 
     // Determine display owner
@@ -2266,8 +2873,25 @@
         if (prevSelected) {
           clearSelectionStyle(prevSelected);
         }
-        // Restore owner highlight if pinned, otherwise restore all nodes
-        if (ownerHighlightLocked) {
+
+        // Check if a filter is active
+        const filterActive = generationHighlightActive || mewtationHighlightActive;
+
+        if (filterActive) {
+          // Restore filter styling to the previously selected node
+          if (prevSelected) {
+            const filteredStyle = getFilteredNodeStyle(prevSelected);
+            if (filteredStyle) {
+              nodes.update(filteredStyle);
+            }
+          }
+          // Restore edges based on filter settings
+          if (filterEdgeHighlight) {
+            reapplyFilterEdges();
+          } else {
+            reapplyOwnerEdges();
+          }
+        } else if (ownerHighlightLocked) {
           highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
         } else {
           restoreAllNodes();
@@ -2299,13 +2923,19 @@
       const base = nodeBaseStyle.get(id);
       if (!base) return;
 
-      // Enlarge hovered node
-      nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
-
       // Show tooltip
       showTooltip(id, params.event);
 
-      // Dim edges that aren't direct parent/child connections
+      // Shortest path mode: highlight path from selected node to hovered node
+      if (shortestPathMode && selectedNodeId && selectedNodeId !== id) {
+        highlightShortestPath(selectedNodeId, id);
+        // Enlarge hovered node on top of path styling
+        nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" }, borderWidth: 3 });
+        return;
+      }
+
+      // Normal mode: enlarge hovered node and highlight family edges
+      nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
       highlightFamilyEdges(id);
     });
 
@@ -2317,25 +2947,78 @@
       // Hide tooltip
       hideTooltip();
 
-      // Restore state - check selection first, then owner highlight
+      // Shortest path mode: restore all nodes and show selected node's family edges
+      if (shortestPathMode && selectedNodeId) {
+        // Restore all nodes to base/filter state
+        const filterActive = generationHighlightActive || mewtationHighlightActive;
+        const nodeUpdates = [];
+        for (const nodeId of nodes.getIds()) {
+          const nid = Number(nodeId);
+          const nodeBase = nodeBaseStyle.get(nid);
+          if (!nodeBase) continue;
+
+          if (nid === selectedNodeId) {
+            nodeUpdates.push({
+              id: nid,
+              size: nodeBase.size + 6,
+              color: { background: nodeBase.bg, border: "#ffffff" },
+              borderWidth: 3
+            });
+          } else if (filterActive) {
+            const filteredStyle = getFilteredNodeStyle(nid);
+            if (filteredStyle) nodeUpdates.push(filteredStyle);
+          } else {
+            nodeUpdates.push({
+              id: nid,
+              size: nodeBase.size,
+              color: { background: nodeBase.bg, border: nodeBase.border },
+              borderWidth: nodeBase.borderWidth
+            });
+          }
+        }
+        if (nodeUpdates.length) nodes.update(nodeUpdates);
+
+        // Restore edges to selected node's family
+        highlightFamilyEdges(selectedNodeId);
+        return;
+      }
+
+      // Restore state - check selection first, then filters, then owner highlight
       if (id === selectedNodeId) {
         // This node is selected - keep showing its family edges
         applySelectionStyle(id);
         highlightFamilyEdges(id);
       } else {
-        // Restore this node to base size
-        nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border }, borderWidth: base.borderWidth });
+        // Check if a filter is active
+        const filterActive = generationHighlightActive || mewtationHighlightActive;
 
-        // Restore edge state based on priority: selected node > pinned owner > normal
-        if (selectedNodeId) {
-          // There's a selected node - keep showing its family edges
-          highlightFamilyEdges(selectedNodeId);
-        } else if (ownerHighlightLocked) {
-          // No selection, but owner is pinned - restore owner highlighting
-          highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+        if (filterActive) {
+          // Restore this node to its filtered state
+          const filteredStyle = getFilteredNodeStyle(id);
+          if (filteredStyle) {
+            nodes.update(filteredStyle);
+          }
+          // Restore edges: selected node > filter edges (if enabled) > owner edges > normal
+          if (selectedNodeId) {
+            highlightFamilyEdges(selectedNodeId);
+          } else if (filterEdgeHighlight) {
+            reapplyFilterEdges();
+          } else {
+            // Filter active but edge highlight unchecked - show owner edges if pinned
+            reapplyOwnerEdges();
+          }
         } else {
-          // No selection, no pinned owner - restore normal edges
-          restoreEdgeColors();
+          // No filter active - restore to base style
+          nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border }, borderWidth: base.borderWidth });
+
+          // Restore edge state based on priority: selected node > pinned owner > normal
+          if (selectedNodeId) {
+            highlightFamilyEdges(selectedNodeId);
+          } else if (ownerHighlightLocked) {
+            highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+          } else {
+            restoreEdgeColors();
+          }
         }
       }
     });
@@ -2358,6 +3041,31 @@
     cachedApiResponses.clear();
     selectedNodeId = null;
 
+    // Reset filter states
+    generationHighlightActive = false;
+    generationRangeMin = null;
+    generationRangeMax = null;
+    mewtationHighlightActive = false;
+    highlightedGemTypes.clear();
+    filterEdgeHighlight = false;
+    shortestPathMode = false;
+
+    // Reset filter UI
+    const genMinInput = $("generationMin");
+    const genMaxInput = $("generationMax");
+    const edgeHighlightToggle = $("filterEdgeHighlight");
+    const shortestPathToggle = $("shortestPathMode");
+    if (genMinInput) genMinInput.value = "";
+    if (genMaxInput) genMaxInput.value = "";
+    if (edgeHighlightToggle) edgeHighlightToggle.checked = false;
+    if (shortestPathToggle) shortestPathToggle.checked = false;
+
+    // Clear mewtation buttons
+    ["mewtationFilterAll", "mewtationFilterDiamond", "mewtationFilterGold", "mewtationFilterSilver", "mewtationFilterBronze"].forEach(id => {
+      const btn = $(id);
+      if (btn) btn.classList.remove("active");
+    });
+
     const roots = Array.isArray(obj.root_ids) ? obj.root_ids.map(Number) : [];
     myKittyIds = new Set(roots);
 
@@ -2368,7 +3076,32 @@
     rebuildAllEdges(); // Create edges after all nodes exist
 
     renderNetwork();
+    updateFilterControls();
     setStatus(`Loaded ${kitties.length} kitties`, false);
+  }
+
+  function updateFilterControls() {
+    // Update generation range placeholders
+    const gens = getAvailableGenerations();
+    const minGen = gens.length > 0 ? Math.min(...gens) : 0;
+    const maxGen = gens.length > 0 ? Math.max(...gens) : 0;
+
+    const genMinInput = $("generationMin");
+    const genMaxInput = $("generationMax");
+
+    if (genMinInput) {
+      genMinInput.placeholder = `Min (${minGen})`;
+      genMinInput.min = minGen;
+    }
+    if (genMaxInput) {
+      genMaxInput.placeholder = `Max (${maxGen})`;
+      genMaxInput.max = maxGen;
+    }
+
+    log("updateFilterControls:", { generations: gens, minGen, maxGen });
+
+    // Update mewtation filter buttons
+    updateMewtationFilterButtons();
   }
 
   async function loadJsonFromUrl(url) {
@@ -2547,6 +3280,7 @@
         mergeJson({ kitties: kittiesToAdd }, true);
         rebuildAllEdges();
         setStats();
+        updateFilterControls();
 
         network.setOptions({
           physics: {
@@ -2606,6 +3340,30 @@
     if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
       const ownerParam = lockedOwnerAddr || lockedOwnerNick;
       url += `&owner=${encodeURIComponent(ownerParam)}`;
+    }
+
+    // Add generation filter if active
+    if (generationHighlightActive) {
+      if (generationRangeMin !== null) {
+        url += `&genMin=${generationRangeMin}`;
+      }
+      if (generationRangeMax !== null) {
+        url += `&genMax=${generationRangeMax}`;
+      }
+    }
+
+    // Add mewtation filter if active
+    if (mewtationHighlightActive) {
+      if (highlightedGemTypes.size === 0) {
+        url += `&mewtations=all`;
+      } else {
+        url += `&mewtations=${Array.from(highlightedGemTypes).join(",")}`;
+      }
+    }
+
+    // Add edge highlight toggle if enabled
+    if (filterEdgeHighlight) {
+      url += `&filterEdges=true`;
     }
 
     return url;
@@ -2734,6 +3492,148 @@
         for (const k of kittyById.values()) addOrUpdateKittyNode(k);
       });
     });
+
+    // Generation range filter
+    const genMinInput = $("generationMin");
+    const genMaxInput = $("generationMax");
+
+    const applyGenerationFilter = () => {
+      const minVal = genMinInput ? genMinInput.value : "";
+      const maxVal = genMaxInput ? genMaxInput.value : "";
+      highlightByGenerationRange(minVal, maxVal);
+    };
+
+    if (genMinInput) {
+      genMinInput.addEventListener("input", applyGenerationFilter);
+    }
+    if (genMaxInput) {
+      genMaxInput.addEventListener("input", applyGenerationFilter);
+    }
+
+    // Edge highlight toggle
+    const edgeHighlightToggle = $("filterEdgeHighlight");
+    if (edgeHighlightToggle) {
+      edgeHighlightToggle.addEventListener("change", () => {
+        filterEdgeHighlight = edgeHighlightToggle.checked;
+        // Re-apply active filter if any
+        if (generationHighlightActive) {
+          applyGenerationFilter();
+        } else if (mewtationHighlightActive) {
+          const activeGems = ["diamond", "gold", "silver", "bronze"].filter(
+            g => {
+              const btn = $(`mewtationFilter${g.charAt(0).toUpperCase() + g.slice(1)}`);
+              return btn && btn.classList.contains("active");
+            }
+          );
+          const allBtn = $("mewtationFilterAll");
+          if (allBtn && allBtn.classList.contains("active")) {
+            highlightMewtations(true);
+          } else if (activeGems.length > 0) {
+            highlightMewtations(activeGems);
+          }
+        }
+      });
+    }
+
+    // Mewtation filter buttons
+    const mewtationBtns = {
+      all: $("mewtationFilterAll"),
+      diamond: $("mewtationFilterDiamond"),
+      gold: $("mewtationFilterGold"),
+      silver: $("mewtationFilterSilver"),
+      bronze: $("mewtationFilterBronze")
+    };
+
+    const clearMewtationBtns = () => {
+      Object.values(mewtationBtns).forEach(btn => btn && btn.classList.remove("active"));
+    };
+
+    if (mewtationBtns.all) {
+      mewtationBtns.all.addEventListener("click", () => {
+        if (mewtationBtns.all.classList.contains("active")) {
+          // Toggle off
+          clearMewtationBtns();
+          highlightMewtations(null);
+        } else {
+          clearMewtationBtns();
+          mewtationBtns.all.classList.add("active");
+          highlightMewtations(true); // All gems
+        }
+      });
+    }
+
+    ["diamond", "gold", "silver", "bronze"].forEach(gemType => {
+      const btn = mewtationBtns[gemType];
+      if (btn) {
+        btn.addEventListener("click", () => {
+          if (btn.classList.contains("active")) {
+            // Toggle off
+            btn.classList.remove("active");
+            // Check if any other gem buttons are active
+            const activeGems = ["diamond", "gold", "silver", "bronze"].filter(
+              g => mewtationBtns[g] && mewtationBtns[g].classList.contains("active")
+            );
+            if (activeGems.length === 0) {
+              highlightMewtations(null);
+            } else {
+              highlightMewtations(activeGems);
+            }
+          } else {
+            // Toggle on - allow multiple selection
+            mewtationBtns.all && mewtationBtns.all.classList.remove("active");
+            btn.classList.add("active");
+            const activeGems = ["diamond", "gold", "silver", "bronze"].filter(
+              g => mewtationBtns[g] && mewtationBtns[g].classList.contains("active")
+            );
+            highlightMewtations(activeGems);
+          }
+        });
+      }
+    });
+
+    // Shortest path mode toggle
+    const shortestPathToggle = $("shortestPathMode");
+    if (shortestPathToggle) {
+      shortestPathToggle.addEventListener("change", () => {
+        shortestPathMode = shortestPathToggle.checked;
+        if (shortestPathMode) {
+          setStatus("Shortest path mode: hover over a kitty to see path from selected", false);
+        } else {
+          setStatus("Shortest path mode disabled", false);
+        }
+      });
+    }
+
+    // Clear filters button
+    const clearFiltersBtn = $("clearFiltersBtn");
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener("click", () => {
+        // Reset generation range filter
+        if (genMinInput) genMinInput.value = "";
+        if (genMaxInput) genMaxInput.value = "";
+        generationHighlightActive = false;
+        generationRangeMin = null;
+        generationRangeMax = null;
+
+        // Reset mewtation filters
+        clearMewtationBtns();
+        mewtationHighlightActive = false;
+        highlightedGemTypes.clear();
+
+        // Reset edge highlight toggle
+        if (edgeHighlightToggle) edgeHighlightToggle.checked = false;
+        filterEdgeHighlight = false;
+
+        // Reset shortest path mode
+        if (shortestPathToggle) shortestPathToggle.checked = false;
+        shortestPathMode = false;
+
+        // Note: Owner highlight is preserved - use the owner highlight button to clear it
+
+        restoreAllNodes();
+        setStatus("Filters cleared", false);
+      });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -2741,6 +3641,16 @@
     applyDefaultsToUI();
     wireControls();
     preloadGemImages(); // Load mewtation gem images
+
+    // Filters panel collapse toggle
+    const filtersToggle = $("filtersToggle");
+    const filtersBody = $("filtersBody");
+    if (filtersToggle && filtersBody) {
+      filtersToggle.addEventListener("click", () => {
+        filtersToggle.classList.toggle("collapsed");
+        filtersBody.classList.toggle("collapsed");
+      });
+    }
 
     // Settings panel collapse toggle
     const settingsToggle = $("settingsToggle");
@@ -2921,6 +3831,75 @@
     // Check for ?owner= to pin owner highlight (detects address vs nickname)
     const ownerParam = params.get("owner");
 
+    // Check for filter query params
+    const genMinParam = params.get("genMin");
+    const genMaxParam = params.get("genMax");
+    const mewtationsParam = params.get("mewtations");
+    const filterEdgesParam = params.get("filterEdges") === "true" || params.get("filterEdges") === "1";
+
+    // Helper to apply filters after graph loads
+    const applyFiltersFromParams = () => {
+      // Wait a bit for the graph to stabilize
+      setTimeout(() => {
+        let filtersApplied = false;
+
+        // Apply generation filter
+        if (genMinParam !== null || genMaxParam !== null) {
+          const genMinInput = $("generationMin");
+          const genMaxInput = $("generationMax");
+          if (genMinParam && genMinInput) genMinInput.value = genMinParam;
+          if (genMaxParam && genMaxInput) genMaxInput.value = genMaxParam;
+
+          generationHighlightActive = true;
+          generationRangeMin = genMinParam ? Number(genMinParam) : null;
+          generationRangeMax = genMaxParam ? Number(genMaxParam) : null;
+          filtersApplied = true;
+          log("Generation filter from query param:", { min: generationRangeMin, max: generationRangeMax });
+        }
+
+        // Apply mewtation filter
+        if (mewtationsParam) {
+          const mewtationBtns = {
+            all: $("mewtationFilterAll"),
+            diamond: $("mewtationFilterDiamond"),
+            gold: $("mewtationFilterGold"),
+            silver: $("mewtationFilterSilver"),
+            bronze: $("mewtationFilterBronze")
+          };
+
+          mewtationHighlightActive = true;
+
+          if (mewtationsParam.toLowerCase() === "all") {
+            highlightedGemTypes = new Set();
+            if (mewtationBtns.all) mewtationBtns.all.classList.add("active");
+          } else {
+            const gemTypes = mewtationsParam.toLowerCase().split(",").map(s => s.trim()).filter(s => s);
+            highlightedGemTypes = new Set(gemTypes);
+            // Update UI buttons
+            for (const gemType of gemTypes) {
+              const btn = mewtationBtns[gemType];
+              if (btn) btn.classList.add("active");
+            }
+          }
+          filtersApplied = true;
+          log("Mewtation filter from query param:", { mewtations: mewtationsParam, gemTypes: Array.from(highlightedGemTypes) });
+        }
+
+        // Apply edge highlight toggle
+        if (filterEdgesParam) {
+          const edgeHighlightToggle = $("filterEdgeHighlight");
+          if (edgeHighlightToggle) edgeHighlightToggle.checked = true;
+          filterEdgeHighlight = true;
+          log("Filter edges from query param: true");
+        }
+
+        // Apply combined filters if any were set
+        if (filtersApplied) {
+          applyFilterHighlighting();
+        }
+      }, 600); // Slightly after owner highlight (500ms)
+    };
+
     // Helper to apply owner highlight after graph loads
     const applyOwnerHighlight = () => {
       if (ownerParam) {
@@ -2937,6 +3916,12 @@
       }
     };
 
+    // Combined callback for post-load actions
+    const applyPostLoadParams = () => {
+      applyOwnerHighlight();
+      applyFiltersFromParams();
+    };
+
     // Check for noExpand param (skip embedded parent/child extraction)
     const noExpand = params.get("noExpand") === "true" || params.get("noExpand") === "1";
 
@@ -2945,7 +3930,7 @@
       log("Loading from query param:", kittyIds, "noExpand:", noExpand);
       loadedFromDataUrl = null;
       loadKittiesById(kittyIds, noExpand).then(() => {
-        applyOwnerHighlight();
+        applyPostLoadParams();
       }).catch((e) => {
         console.error(e);
         setStatus("Failed to load kitties from query param", true);
@@ -2957,7 +3942,7 @@
       if (url) {
         loadedFromDataUrl = url;
         loadJsonFromUrl(url).then(() => {
-          applyOwnerHighlight();
+          applyPostLoadParams();
         }).catch((e) => {
           console.error(e);
           setStatus("Failed to load default JSON", true);

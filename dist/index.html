@@ -229,6 +229,34 @@
     .example-link:hover{text-decoration:underline;}
     .example-desc{color:var(--muted);font-size:11px;}
 
+    /* Filter controls */
+    .filter-controls{display:flex;flex-direction:column;gap:12px;}
+    .filter-row{display:flex;flex-direction:column;gap:4px;}
+    .filter-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .filter-select{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px;cursor:pointer;}
+    .filter-select:hover{border-color:var(--accent);}
+    .filter-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(122,162,255,0.2);}
+    .filter-buttons{display:flex;gap:6px;flex-wrap:wrap;}
+    .filter-btn{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all 0.15s;}
+    .filter-btn:hover{border-color:var(--accent);background:rgba(122,162,255,0.1);}
+    .filter-btn.active{border-color:var(--accent);background:rgba(122,162,255,0.2);color:#fff;}
+    .filter-btn.gem-diamond.active{border-color:#00ffff;background:rgba(0,255,255,0.15);}
+    .filter-btn.gem-gold.active{border-color:#ffd700;background:rgba(255,215,0,0.15);}
+    .filter-btn.gem-silver.active{border-color:#c0c0c0;background:rgba(192,192,192,0.15);}
+    .filter-btn.gem-bronze.active{border-color:#cd7f32;background:rgba(205,127,50,0.15);}
+    .filter-btn:disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+    .gem-filter-icon{width:16px;height:16px;}
+    .btn-small{font-size:11px;padding:4px 10px;}
+    .filter-range{display:flex;align-items:center;gap:6px;}
+    .filter-input{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;width:80px;text-align:center;}
+    .filter-input:focus{outline:none;border-color:var(--accent);}
+    .filter-input::placeholder{color:var(--muted);opacity:0.6;}
+    .filter-range-sep{color:var(--muted);font-size:12px;}
+    .filter-row-inline{margin-top:4px;}
+    .filter-checkbox-label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer;}
+    .filter-checkbox-label input[type="checkbox"]{width:14px;height:14px;accent-color:var(--accent);cursor:pointer;}
+    .filter-checkbox-label:hover{color:var(--text);}
+
     /* Embed mode */
     body.embed-mode header,
     body.embed-mode aside{display:none;}
@@ -493,6 +521,53 @@
       <div class="card">
         <h3>Selected Kitty</h3>
         <div id="selectedBox" class="small">None</div>
+      </div>
+
+      <div class="card">
+        <h3 class="collapsible" id="filtersToggle">Filters</h3>
+        <div class="card-body" id="filtersBody">
+          <div class="filter-controls">
+            <div class="filter-row">
+              <label class="filter-label">Generation Range</label>
+              <div class="filter-range">
+                <input type="number" id="generationMin" class="filter-input" placeholder="Min" min="0" />
+                <span class="filter-range-sep">–</span>
+                <input type="number" id="generationMax" class="filter-input" placeholder="Max" min="0" />
+              </div>
+            </div>
+            <div class="filter-row">
+              <label class="filter-label">Mewtations</label>
+              <div class="filter-buttons">
+                <button class="filter-btn" id="mewtationFilterAll" title="Show all mewtations">All</button>
+                <button class="filter-btn gem-diamond" id="mewtationFilterDiamond" title="Diamond (1st discovery)">
+                  <img src="./images/cattributes/mewtation-gems/diamond.svg" alt="Diamond" class="gem-filter-icon" />
+                </button>
+                <button class="filter-btn gem-gold" id="mewtationFilterGold" title="Gilded (2-10)">
+                  <img src="./images/cattributes/mewtation-gems/gold.svg" alt="Gold" class="gem-filter-icon" />
+                </button>
+                <button class="filter-btn gem-silver" id="mewtationFilterSilver" title="Amethyst (11-100)">
+                  <img src="./images/cattributes/mewtation-gems/silver.svg" alt="Silver" class="gem-filter-icon" />
+                </button>
+                <button class="filter-btn gem-bronze" id="mewtationFilterBronze" title="Lapis (101-500)">
+                  <img src="./images/cattributes/mewtation-gems/bronze.svg" alt="Bronze" class="gem-filter-icon" />
+                </button>
+              </div>
+            </div>
+            <div class="filter-row filter-row-inline">
+              <label class="filter-checkbox-label">
+                <input type="checkbox" id="filterEdgeHighlight" />
+                <span>Highlight edges between filtered kitties</span>
+              </label>
+            </div>
+            <div class="filter-row filter-row-inline">
+              <label class="filter-checkbox-label" title="Hover to highlight path from selected">
+                <input type="checkbox" id="shortestPathMode" />
+                <span>Highlight shortest path</span>
+              </label>
+            </div>
+            <button class="btn btn-small" id="clearFiltersBtn">Clear Filters</button>
+          </div>
+        </div>
       </div>
 
       <div class="card">

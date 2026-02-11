@@ -1,6 +1,6 @@
 {
   "source": "CryptoKitties public API v3",
-  "generated_at_utc": "2026-02-09T17:28:40Z",
+  "generated_at_utc": "2026-02-11T03:32:37Z",
   "config": {
     "parent_levels": 1,
     "child_levels": 0,
@@ -15,7 +15,8 @@
     "shadow_mode": "darken",
     "shadow_factor": 0.18,
     "css_url": "https://www.cryptokitties.co/index.b4a978279e40ce1b7fbb.css",
-    "css_palette_enabled": true
+    "css_palette_enabled": true,
+    "embedded_only": false
   },
   "root_ids": [
     896775
@@ -52,6 +53,8 @@
       },
       "owner_address": "0xb6c7c43fb87941685e143dc825d6c0ab38ce6f36",
       "owner_nickname": null,
+      "auction": null,
+      "seller": null,
       "matron_id": 892871,
       "sire_id": 892412,
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/894625.svg",
@@ -162,7 +165,7 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1509387312436,
-          "dynamic_cooldown": 1551063863403,
+          "dynamic_cooldown": 1550187975911,
           "cooldown_index": 8,
           "cooldown_end_block": 6175891,
           "pending_tx_type": null,
@@ -771,6 +774,8 @@
       },
       "owner_address": "0xb6c7c43fb87941685e143dc825d6c0ab38ce6f36",
       "owner_nickname": null,
+      "auction": null,
+      "seller": null,
       "matron_id": 892725,
       "sire_id": 892271,
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/894626.svg",
@@ -888,7 +893,7 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1511396185579,
-          "dynamic_cooldown": 1552521471332,
+          "dynamic_cooldown": 1551651396834,
           "cooldown_index": 9,
           "cooldown_end_block": 6296995,
           "pending_tx_type": null,
@@ -1589,16 +1594,36 @@
       "kitty_color": "#efe1da",
       "shadow_color": "#c4b8b3",
       "owner": {
-        "address": "0xb1690c08e213a35ed9bab7b318de14420fb57d8c",
+        "address": "0x0e7afeee3a623decb71cf367e86191865ede6c5f",
         "hasDapper": false,
-        "twitter_id": null,
-        "twitter_image_url": null,
-        "twitter_handle": null,
-        "image": "16",
-        "nickname": "CK Auction Contract 🌻"
+        "nickname": "rabono",
+        "image": "16"
       },
-      "owner_address": "0xb1690c08e213a35ed9bab7b318de14420fb57d8c",
-      "owner_nickname": "CK Auction Contract 🌻",
+      "owner_address": "0x0e7afeee3a623decb71cf367e86191865ede6c5f",
+      "owner_nickname": "rabono",
+      "auction": {
+        "id": 1771783,
+        "type": "sale",
+        "start_price": "600000000000000000000",
+        "end_price": "600000000000000000000",
+        "start_time": "1536035519000",
+        "end_time": "1567571519000",
+        "current_price": "600000000000000000000",
+        "duration": "31536000000",
+        "status": "open",
+        "seller": {
+          "address": "0x0e7afeee3a623decb71cf367e86191865ede6c5f",
+          "hasDapper": false,
+          "nickname": "rabono",
+          "image": "16"
+        }
+      },
+      "seller": {
+        "address": "0x0e7afeee3a623decb71cf367e86191865ede6c5f",
+        "hasDapper": false,
+        "nickname": "rabono",
+        "image": "16"
+      },
       "matron_id": 894625,
       "sire_id": 894626,
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/896775.svg",
@@ -1709,7 +1734,7 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1406836343341,
-          "dynamic_cooldown": 1476730839133,
+          "dynamic_cooldown": 1475558508879,
           "cooldown_index": 4,
           "cooldown_end_block": 0,
           "pending_tx_type": null,

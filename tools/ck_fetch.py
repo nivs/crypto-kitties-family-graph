@@ -375,6 +375,17 @@ def normalize_kitty(kitty: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
     if not owner_address:
         owner_address = kitty.get("owner_address") or kitty.get("ownerAddress") or kitty.get("owner_wallet_address") or None
 
+    # If kitty is on auction, use the seller as the real owner instead of auction contract
+    auction = kitty.get("auction") or None
+    seller = None
+    if isinstance(auction, dict) and auction.get("seller"):
+        seller = auction["seller"]
+        if isinstance(seller, dict):
+            owner_address = seller.get("address") or owner_address
+            owner_nickname = seller.get("nickname") or owner_nickname
+            # Update owner_raw to reflect the seller
+            owner_raw = seller
+
     color_name = kitty.get("color") or None
     background_color = kitty.get("background_color") or kitty.get("backgroundColor") or None
 
@@ -417,6 +428,8 @@ def normalize_kitty(kitty: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
         "owner": owner_raw,
         "owner_address": owner_address,
         "owner_nickname": owner_nickname,
+        "auction": auction,
+        "seller": seller,
         "matron_id": matron_id,
         "sire_id": sire_id,
         "image_url": image_url,

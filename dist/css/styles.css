@@ -27,7 +27,8 @@
       height:calc(100vh - 74px);
       min-height:560px;
     }
-    #network{position:absolute;inset:0;}
+    #network{position:absolute;inset:0;outline:none;}
+    #network canvas{outline:none;}
     #banner{
       position:absolute;left:80px;right:160px;bottom:16px;
       padding:10px 12px;border-radius:12px;
@@ -40,7 +41,9 @@
     aside{height:calc(100vh - 74px);min-height:560px;display:flex;flex-direction:column;gap:12px;}
     .card{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:12px;}
     .card h3{margin:0 0 8px 0;font-size:13px;font-weight:650;letter-spacing:0.2px;color:var(--text);}
-    .card h3.collapsible{cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:0;}
+    .card h3.collapsible{cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin:-12px -12px 0 -12px;padding:12px;border-radius:14px 14px 0 0;}
+    .card h3.collapsible:hover{background:rgba(255,255,255,0.03);}
+    .card h3.collapsible.collapsed{border-radius:14px;margin-bottom:-12px;}
     .card h3.collapsible::after{content:"";display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--muted);transition:transform 0.2s;}
     .card h3.collapsible.collapsed::after{transform:rotate(-90deg);}
     .card .card-body{overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;max-height:500px;margin-top:8px;}

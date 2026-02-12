@@ -1228,38 +1228,30 @@
     if (!network) return;
     physicsOn = enabled;
 
-    if (physicsOn) {
-      // Enable physics - nodes will move to find equilibrium
-      network.setOptions({
-        physics: {
-          enabled: true,
-          stabilization: { enabled: true, iterations: 200, updateInterval: 25, fit: true },
-          solver: "forceAtlas2Based",
-          forceAtlas2Based: {
-            gravitationalConstant: -80,
-            centralGravity: 0.01,
-            springLength: 100,
-            springConstant: 0.08,
-            damping: 0.4,
-            avoidOverlap: 0.8
-          }
-        }
-      });
-      network.stabilize();
-    } else {
-      // Disable physics - nodes stay where they are
-      network.setOptions({ physics: { enabled: false } });
-    }
+    // Just toggle physics on/off - don't reset solver settings
+    // This preserves current node positions when re-enabling
+    network.setOptions({ physics: { enabled: physicsOn } });
 
     const btn = $("togglePhysicsBtn");
     if (btn) btn.textContent = `Physics: ${physicsOn ? "on" : "off"}`;
   }
 
   // Current layout mode
-  let currentLayout = "physics";
+  let currentLayout = "clustered";
 
   // Physics solver configurations
   const PHYSICS_SOLVERS = {
+    clustered: {
+      solver: "forceAtlas2Based",
+      forceAtlas2Based: {
+        gravitationalConstant: -50,
+        centralGravity: 0.005,
+        springLength: 100,
+        springConstant: 0.1,
+        damping: 0.4,
+        avoidOverlap: 0.5
+      }
+    },
     physics: {
       solver: "forceAtlas2Based",
       forceAtlas2Based: {
@@ -1584,6 +1576,8 @@
       });
       network.stabilize();
       physicsOn = true;
+      const physBtn = $("togglePhysicsBtn");
+      if (physBtn) physBtn.textContent = "Physics: on";
 
       setStatus(`Expanded ${id}`, false);
     } catch (e) {
@@ -2341,6 +2335,10 @@
       return;
     }
 
+    // Save current view to prevent zoom jitter during batch updates
+    const currentScale = network ? network.getScale() : null;
+    const currentPosition = network ? network.getViewPosition() : null;
+
     const nodeUpdates = [];
     for (const id of nodes.getIds()) {
       const nid = Number(id);
@@ -2365,6 +2363,11 @@
     }
     if (nodeUpdates.length) nodes.update(nodeUpdates);
     restoreEdgeColors();
+
+    // Restore view position after updates
+    if (network && currentScale !== null && currentPosition !== null) {
+      network.moveTo({ scale: currentScale, position: currentPosition, animation: false });
+    }
   }
 
   function applySelectionStyle(id) {
@@ -2424,14 +2427,26 @@
     ).join("");
   }
 
-  function showTooltip(id, event) {
+  function showTooltip(id, event, pathInfo = null) {
     if (!tooltipEl) return;
     const k = kittyById.get(id);
     if (!k) return;
 
     const img = k.image_url || "";
     const title = safeText(k.name || `Kitty ${k.id}`);
-    const sub = `#${k.id}` + (typeof k.generation === "number" ? ` · Gen ${k.generation}` : "");
+    let sub = `#${k.id}` + (typeof k.generation === "number" ? ` · Gen ${k.generation}` : "");
+
+    // Add path info if in shortest path mode
+    if (pathInfo) {
+      if (pathInfo.hops === 0) {
+        sub += ` · <span style="color:#7aa2ff">Selected</span>`;
+      } else if (pathInfo.hops > 0) {
+        const hopWord = pathInfo.hops === 1 ? "hop" : "hops";
+        sub += ` · <span style="color:#7aa2ff">${pathInfo.hops} ${hopWord}</span>`;
+      } else {
+        sub += ` · <span style="color:#ff6b6b">No path</span>`;
+      }
+    }
 
     const born = formatDateOnly(k.created_at || k.birthday || "");
     const traits = k.traits || {};
@@ -2712,6 +2727,7 @@
     // Determine display owner
     // Priority: seller info (if on auction) > owner info > hatcher > nothing
     let displayOwnerAddr, displayOwnerNick, showAuctionStatus;
+    let auctionContractName = null; // Track contract name when owner is auction contract with unknown real owner
 
     if (isOnAuction && seller) {
       // Actively on auction with seller info
@@ -2752,12 +2768,16 @@
         displayOwnerNick = displayOwnerNick || ownerNick || null;
       }
 
-      // If still no owner info, show the auction contract as owner
+      // If still no owner info, we only know the auction contract - don't show it as a real owner
+      // Instead show as "unknown" with auction context
       if (!displayOwnerAddr && !displayOwnerNick) {
-        displayOwnerAddr = rawOwnerAddr; // The auction contract address
-        displayOwnerNick = getContractName(rawOwnerAddr); // "Sale Auction" or "Siring Auction"
+        displayOwnerAddr = null; // Don't use contract address for owner highlighting
+        displayOwnerNick = null;
+        showAuctionStatus = true; // Show "On Auction" indicator instead of contract name
+        auctionContractName = getContractName(rawOwnerAddr); // Remember which auction type
+      } else {
+        showAuctionStatus = false;
       }
-      showAuctionStatus = false;
     } else {
       // Normal case - use owner info directly
       displayOwnerAddr = rawOwnerAddr;
@@ -2799,7 +2819,9 @@
         <a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick}>${safeText(ownerText)}</a>
       </span>`;
     } else if (showAuctionStatus) {
-      ownerHtml = `<span class="small auction-warning">On Auction</span>`;
+      // Show auction indicator - include contract type if known (from JSON data with no real owner info)
+      const auctionLabel = auctionContractName ? `On ${auctionContractName}` : "On Auction";
+      ownerHtml = `<span class="small auction-warning">${auctionLabel}</span>`;
     } else {
       ownerHtml = `<span class="small muted">Unknown</span>`;
     }
@@ -3017,6 +3039,7 @@
 
     // Base options shared by all layouts
     const options = {
+      autoResize: false, // Disable to prevent jitter on large graphs (we handle resize manually)
       layout: {
         improvedLayout: useImprovedLayout
       },
@@ -3040,6 +3063,10 @@
         stabilization: { enabled: true, iterations: 300, updateInterval: 25, fit: true },
         ...PHYSICS_SOLVERS[layoutType]
       };
+    } else if (layoutType === "circle") {
+      // Circle layout - positions set manually after network creation
+      options.layout.hierarchical = { enabled: false };
+      options.physics = { enabled: false };
     } else {
       // Sugiyama hierarchical layout
       const directionMap = {
@@ -3066,6 +3093,29 @@
     return options;
   }
 
+  // Arrange nodes in a circle
+  function arrangeNodesInCircle() {
+    const nodeIds = nodes.getIds();
+    const count = nodeIds.length;
+    if (count === 0) return;
+
+    // Calculate radius based on node count (larger graphs need bigger circles)
+    const radius = Math.max(200, count * 12);
+    const angleStep = (2 * Math.PI) / count;
+
+    const updates = [];
+    for (let i = 0; i < count; i++) {
+      const angle = i * angleStep - Math.PI / 2; // Start from top
+      updates.push({
+        id: nodeIds[i],
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle)
+      });
+    }
+    nodes.update(updates);
+    log("arrangeNodesInCircle:", { count, radius });
+  }
+
   function renderNetworkWithLayout(layoutType) {
     const container = $("network");
     if (!container) throw new Error("Missing #network element");
@@ -3083,6 +3133,11 @@
 
     network = new vis.Network(container, { nodes, edges }, options);
     physicsOn = isPhysics;
+
+    // Apply circle layout positioning after network creation
+    if (layoutType === "circle") {
+      arrangeNodesInCircle();
+    }
 
     const physBtn = $("togglePhysicsBtn");
     if (physBtn) physBtn.textContent = `Physics: ${physicsOn ? "on" : "off"}`;
@@ -3194,22 +3249,45 @@
       const base = nodeBaseStyle.get(id);
       if (!base) return;
 
-      showTooltip(id, params.event);
+      // Save current view to restore after updates (prevents zoom jitter)
+      const currentScale = network.getScale();
+      const currentPosition = network.getViewPosition();
+
+      // Calculate path info for tooltip if in shortest path mode
+      let pathInfo = null;
+      if (shortestPathMode && selectedNodeId) {
+        if (id === selectedNodeId) {
+          pathInfo = { hops: 0 };
+        } else {
+          const path = findShortestPath(selectedNodeId, id);
+          pathInfo = { hops: path.length > 0 ? path.length - 1 : -1 };
+        }
+      }
+
+      showTooltip(id, params.event, pathInfo);
 
       if (shortestPathMode && selectedNodeId && selectedNodeId !== id) {
         highlightShortestPath(selectedNodeId, id);
         nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" }, borderWidth: 3 });
+        network.moveTo({ scale: currentScale, position: currentPosition, animation: false });
         return;
       }
 
-      nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
+      nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" }, borderWidth: 3 });
       highlightFamilyEdges(id);
+
+      // Restore view after all updates
+      network.moveTo({ scale: currentScale, position: currentPosition, animation: false });
     });
 
     network.on("blurNode", (params) => {
       const id = Number(params.node);
       const base = nodeBaseStyle.get(id);
       if (!base) return;
+
+      // Save current view to restore after updates (prevents zoom jitter)
+      const currentScale = network.getScale();
+      const currentPosition = network.getViewPosition();
 
       hideTooltip();
 
@@ -3247,6 +3325,7 @@
         } else {
           highlightFamilyEdges(selectedNodeId);
         }
+        network.moveTo({ scale: currentScale, position: currentPosition, animation: false });
         return;
       }
 
@@ -3280,6 +3359,9 @@
           }
         }
       }
+
+      // Restore view after all updates
+      network.moveTo({ scale: currentScale, position: currentPosition, animation: false });
     });
 
     setStats();
@@ -3301,7 +3383,7 @@
   }
 
   function renderNetwork() {
-    renderNetworkWithLayout("physics");
+    renderNetworkWithLayout(currentLayout);
   }
 
   function loadJsonObject(obj) {
@@ -3559,11 +3641,13 @@
         network.setOptions({
           physics: {
             enabled: true,
-            stabilization: { enabled: true, iterations: 200, updateInterval: 25, fit: true }
+            stabilization: { enabled: true, iterations: 200, updateInterval: 25, fit: false }
           }
         });
         network.stabilize();
         physicsOn = true;
+        const physBtn = $("togglePhysicsBtn");
+        if (physBtn) physBtn.textContent = "Physics: on";
 
         setTimeout(() => fitMainCluster(), 200);
         setStatus(`Added ${ids.length} kitty(s) to graph`, false);
@@ -3643,6 +3727,11 @@
     // Add shortest path if active and locked
     if (shortestPathMode && selectedNodeId && lockedPathToId) {
       url += `&pathFrom=${selectedNodeId}&pathTo=${lockedPathToId}`;
+    }
+
+    // Add layout if not default
+    if (currentLayout && currentLayout !== "clustered") {
+      url += `&layout=${encodeURIComponent(currentLayout)}`;
     }
 
     return url;
@@ -3953,6 +4042,8 @@
             restoreAllNodes();
           }
         }
+        // Remove focus to prevent blue outline on buttons
+        if (document.activeElement) document.activeElement.blur();
       }
     });
 
@@ -4145,6 +4236,18 @@
 
     // Check for ?owner= to pin owner highlight (detects address vs nickname)
     const ownerParam = params.get("owner");
+
+    // Check for layout param
+    const layoutParam = params.get("layout");
+
+    // Apply layout param before data loading
+    const validLayouts = ["clustered", "physics", "barnesHut", "repulsion", "circle", "hierarchicalUD", "hierarchicalDU", "hierarchicalLR"];
+    if (layoutParam && validLayouts.includes(layoutParam)) {
+      currentLayout = layoutParam;
+      const layoutSelect = $("layoutSelect");
+      if (layoutSelect) layoutSelect.value = layoutParam;
+      log("Layout from query param:", layoutParam);
+    }
 
     // Check for filter query params
     const genMinParam = params.get("genMin");

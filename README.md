@@ -49,6 +49,7 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
 | `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
 | `noExpand` | Skip embedded parent/child extraction (faster, exact IDs only) | `?noExpand=true` |
+| `layout` | Graph layout (`clustered`, `physics`, `barnesHut`, `repulsion`, `circle`, `hierarchicalUD`, `hierarchicalDU`, `hierarchicalLR`) | `?layout=circle` |
 | `genMin` | Filter: minimum generation (inclusive) | `?genMin=0` |
 | `genMax` | Filter: maximum generation (inclusive) | `?genMax=10` |
 | `mewtations` | Filter: mewtation gems (`all` or comma-separated: `diamond,gold,silver,bronze`) | `?mewtations=diamond,gold` |

@@ -2896,10 +2896,16 @@
     const container = $("network");
     if (!container) throw new Error("Missing #network element");
 
+    // Use improvedLayout for smaller graphs (cleaner initial positioning)
+    // Disable for larger graphs where the algorithm fails/is slow
+    const nodeCount = nodes.length;
+    const useImprovedLayout = nodeCount <= 100;
+    log("renderNetwork:", { nodeCount, useImprovedLayout });
+
     // Use physics-based layout instead of hierarchical to avoid level issues
     const options = {
       layout: {
-        improvedLayout: true,
+        improvedLayout: useImprovedLayout,
         hierarchical: { enabled: false }
       },
       physics: {

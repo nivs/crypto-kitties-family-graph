@@ -19,8 +19,8 @@ Example datasets are in `dist/example/` for testing and demonstrating the analys
 
 | Dataset | Kitties | View (cached) | View (API) |
 |---------|---------|---------------|------------|
-| **Dragon** (600 ETH kitty) | 3 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/) | [API](https://ck.innerlogics.com/?kitties=896775) |
-| **Dragon Extended** | 35 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json) | |
+| **Dragon** (600 ETH kitty) | 3 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/&selected=896775) | [API](https://ck.innerlogics.com/?kitties=896775&selected=896775) |
+| **Dragon Extended** | 35 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&selected=896775) | |
 | **Founders** (#1, #4, #18) | 10 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/) | [API](https://ck.innerlogics.com/?kitties=1,4,18) |
 | **Founders Extended** | 26 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/founders/founders_extended.json) | |
 | **Holidays** (Mistletoe, Santa) | 13 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/) | [API](https://ck.innerlogics.com/?kitties=174756,275808) |
@@ -54,14 +54,16 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `dataUrl` | Load from cached JSON file | `?dataUrl=./example/dragon/dragon.json` |
+| `dataUrl` | Load from cached JSON file | `?dataUrl=./example/dragon/dragon_extended.json` |
 | `svgBaseUrl` | Base URL for local SVG images | `&svgBaseUrl=./example/dragon/svg/` |
+| `selected` | Pre-select a kitty (shows details, centers view) | `&selected=896775` |
 | `owner` | Pin owner highlight | `&owner=nivs` or `&owner=0x1234...` |
 | `genMin` / `genMax` | Filter by generation range | `&genMin=0&genMax=10` |
 | `mewtations` | Filter by gem type | `&mewtations=diamond,gold` or `&mewtations=all` |
 | `filterEdges` | Highlight edges between filtered kitties | `&filterEdges=true` |
 | `noExpand` | Skip embedded parent/child extraction | `&noExpand=true` |
 | `pathFrom` / `pathTo` | Highlight shortest path | `&pathFrom=174756&pathTo=275808` |
+| `layout` | Graph layout type | `&layout=circle` |
 
 ---
 
@@ -136,14 +138,14 @@ Focused collection of kitties with the `liger` body trait (Tier IIII).
 
 ## Dragon Kitty (`dragon/`)
 
-**[View in Graph (cached + SVGs)](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/)** ・ [API](https://ck.innerlogics.com/?kitties=896775)
+**[View in Graph (cached + SVGs)](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&svgBaseUrl=./example/dragon/svg/&selected=896775)** ・ [API](https://ck.innerlogics.com/?kitties=896775&selected=896775)
 
 Kitty #896775 - Sold for 600 ETH (~$170k at the time), the most expensive CryptoKitty ever.
 
 | File | Description | View |
 |------|-------------|------|
-| dragon.json | Original 3 kitties | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/) |
-| dragon_extended.json | Extended with 5 levels of ancestry | [Cached](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json) |
+| dragon.json | Original 3 kitties | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/&selected=896775) |
+| dragon_extended.json | Extended with 5 levels of ancestry | [Cached](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&selected=896775) |
 
 **Notable traits:** dragonwings (wild), secretgarden (environment)
 

@@ -3727,6 +3727,9 @@
     // Add shortest path if active and locked
     if (shortestPathMode && selectedNodeId && lockedPathToId) {
       url += `&pathFrom=${selectedNodeId}&pathTo=${lockedPathToId}`;
+    } else if (selectedNodeId) {
+      // Add selected kitty (only if not using path mode)
+      url += `&selected=${selectedNodeId}`;
     }
 
     // Add layout if not default
@@ -4259,6 +4262,9 @@
     const pathFromParam = params.get("pathFrom");
     const pathToParam = params.get("pathTo");
 
+    // Check for selected kitty param
+    const selectedParam = params.get("selected");
+
     // Helper to apply filters after graph loads
     const applyFiltersFromParams = () => {
       // Wait a bit for the graph to stabilize
@@ -4356,12 +4362,38 @@
             if (toggle) toggle.checked = true;
             // Select the "from" node and highlight path to "to" node
             selectedNodeId = fromId;
+            applySelectionStyle(fromId);
+            showSelected(fromId);
             highlightShortestPath(fromId, toId);
             log("Path highlighting from query params:", { from: fromId, to: toId });
           } else {
             console.warn("pathFrom/pathTo: kitty not found in graph", { fromId, toId });
           }
         }, 700); // After filters (600ms)
+      } else if (selectedParam) {
+        // Apply selected kitty (only if not using path mode)
+        setTimeout(() => {
+          const selId = Number(selectedParam);
+          if (kittyById.has(selId)) {
+            selectedNodeId = selId;
+            applySelectionStyle(selId);
+            highlightFamilyEdges(selId);
+            showSelected(selId);
+            // Center on the selected kitty
+            if (network) {
+              const pos = network.getPosition(selId);
+              if (pos) {
+                network.moveTo({
+                  position: { x: pos.x, y: pos.y },
+                  animation: { duration: 400, easingFunction: "easeInOutQuad" }
+                });
+              }
+            }
+            log("Selected kitty from query param:", selId);
+          } else {
+            console.warn("selected: kitty not found in graph", selId);
+          }
+        }, 700);
       }
     };
 

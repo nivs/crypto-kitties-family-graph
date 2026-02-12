@@ -47,6 +47,7 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 | `dataUrl` | URL to a JSON file with kitty data | `?dataUrl=./my_kitties.json` |
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
+| `selected` | Pre-select a kitty (shows details, centers view) | `?selected=896775` |
 | `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
 | `noExpand` | Skip embedded parent/child extraction (faster, exact IDs only) | `?noExpand=true` |
 | `layout` | Graph layout (`clustered`, `physics`, `barnesHut`, `repulsion`, `circle`, `hierarchicalUD`, `hierarchicalDU`, `hierarchicalLR`) | `?layout=circle` |
@@ -191,7 +192,7 @@ See **[docs/NOTABLE_KITTIES.md](docs/NOTABLE_KITTIES.md)** for the complete cata
 ### Live Demo Links
 
 **Historical:**
-- [Dragon](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/) - 600 ETH (~$170k) ・ [API](https://ck.innerlogics.com/?kitties=896775)
+- [Dragon](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&svgBaseUrl=./example/dragon/svg/&selected=896775) - 600 ETH (~$170k) ・ [API](https://ck.innerlogics.com/?kitties=896775)
 - [Founders](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/) - Genesis + Gen 0 ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
 - [Milestones](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/) - #100k, #500k ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
 - [Holidays](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/) - Mistletoe & SantaClaws

@@ -2737,6 +2737,30 @@
     const gems = getMewtationGems(k);
     const gemsFull = gemsHtml(gems, false);
 
+    // Children count: total from API and how many are in the current graph
+    const apiChildren = raw.children;
+    const totalChildren = Array.isArray(apiChildren) ? apiChildren.length : null;
+    let childrenInGraph = 0;
+    for (const [childId, childK] of kittyById.entries()) {
+      if (childK.matron_id === id || childK.sire_id === id) {
+        childrenInGraph++;
+      }
+    }
+
+    // Build children display: "X (Y shown)" or "X" if all shown, or "Unknown"
+    let childrenHtml;
+    if (totalChildren !== null) {
+      if (totalChildren === 0) {
+        childrenHtml = "0";
+      } else if (childrenInGraph < totalChildren) {
+        childrenHtml = `${totalChildren} <span class="small muted">(${childrenInGraph} shown)</span>`;
+      } else {
+        childrenHtml = `${totalChildren}`;
+      }
+    } else {
+      childrenHtml = `<span class="small muted">Unknown</span>`;
+    }
+
     // Create a set of trait types that earned mewtations for highlighting
     const mewtationTraits = new Set(gems.map(g => g.type));
 
@@ -2773,6 +2797,7 @@
         <div class="k">Born</div><div class="v">${bornHtml}</div>
         <div class="k">Owner</div><div class="v">${ownerHtml}</div>
         ${statusHtml}
+        <div class="k">Children</div><div class="v">${childrenHtml}</div>
         ${gems.length ? `<div class="k">Mewtations</div><div class="v gems-list">${gemsFull}</div>` : ""}
         <div class="k">Traits</div>
         <div class="v">${traitKeys.length ? traitsHtml : "<span class='small'>None</span>"}</div>

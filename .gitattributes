@@ -52,3 +52,6 @@ dist/example/** linguist-generated
 
 # Tools are utilities, not the main project language
 tools/** linguist-vendored
+
+# Proxy is a deployment helper, not the main project
+proxy/** linguist-vendored

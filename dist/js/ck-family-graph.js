@@ -3523,6 +3523,11 @@
       url += `&filterEdges=true`;
     }
 
+    // Add shortest path if active and locked
+    if (shortestPathMode && selectedNodeId && lockedPathToId) {
+      url += `&pathFrom=${selectedNodeId}&pathTo=${lockedPathToId}`;
+    }
+
     return url;
   }
 

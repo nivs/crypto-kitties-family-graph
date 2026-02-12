@@ -479,3 +479,22 @@ mutation_gene = (gene1 / 2) + 16
 ```
 
 Example: Breeding `savannah` (1) + `selkirk` (2) can produce `norwegianforest` (h).
+
+---
+
+## Credits
+
+The genomics information in these tools is based on community reverse engineering work:
+
+| Researcher | Contribution |
+|------------|--------------|
+| **Kai Turner** | First to decode the 5-bit gene structure (Dec 2017) |
+| **Sean Soria** | Reverse engineered the mixGenes breeding algorithm (Dec 2017) |
+| **Alex Hegyi** | Python implementation of gene science (Dec 2017) |
+| **Gerald Bauer** | Comprehensive documentation in the [cryptocopycats](https://github.com/cryptocopycats) repositories |
+
+### Source Repositories (Public Domain)
+
+- [kittypedia](https://github.com/cryptocopycats/kittypedia) - Encyclopedia of traits, timelines, statistics
+- [programming-cryptokitties](https://github.com/cryptocopycats/programming-cryptokitties) - Step-by-step code tutorials
+- [cryptokitties](https://github.com/cryptocopycats/cryptokitties) - Overview, history, contract analysis

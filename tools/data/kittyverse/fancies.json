@@ -1,0 +1,2518 @@
+{
+  "ellie": {
+    "name": "Ellie",
+    "date": "2021-01-16",
+    "recipe": {
+      "limit": 2500,
+      "count": 2,
+      "traits": [
+        "shadowgrey",
+        "flamingo",
+        "littlefoot",
+        "walrus"
+      ]
+    }
+  },
+  "dave": {
+    "name": "Dave",
+    "recipe": {
+      "time": {
+        "start": "2020-12-19",
+        "end": "?"
+      },
+      "count": 239,
+      "traits": [
+        "norwegianforest",
+        "icy",
+        "frozen"
+      ],
+      "variants": {
+        "mintyfresh": {
+          "name": "Minty Fresh",
+          "count": 192
+        },
+        "wintergreen": {
+          "name": "Winter Green",
+          "count": 26
+        },
+        "berryfestive": {
+          "name": "Berry Festive",
+          "count": 21
+        }
+      }
+    }
+  },
+  "holly": {
+    "name": "Holly",
+    "recipe": {
+      "time": {
+        "start": "2020-12-19",
+        "end": "?"
+      },
+      "count": 261,
+      "traits": [
+        "chartreux",
+        "wingtips",
+        "icy"
+      ],
+      "variants": {
+        "eggnoglatte": {
+          "name": "Eggnog Latte",
+          "count": 144
+        },
+        "mintmocha": {
+          "name": "Mint Mocha",
+          "count": 82
+        },
+        "hotcocoapuff": {
+          "name": "Hot Cocoa Puff",
+          "count": 16
+        },
+        "gingerbreadlatte": {
+          "name": "Gingerbread Latte",
+          "count": 19
+        }
+      }
+    }
+  },
+  "catfrost": {
+    "name": "Cat Frost",
+    "recipe": {
+      "time": {
+        "start": "2020-12-06",
+        "end": "2020-12-19"
+      },
+      "count": 288,
+      "traits": [
+        "splat",
+        "wiley",
+        "icicle",
+        "icy"
+      ]
+    }
+  },
+  "abby": {
+    "name": "Abby",
+    "recipe": {
+      "time": {
+        "start": "2020-11-21",
+        "end": "?"
+      },
+      "count": 299,
+      "traits": [
+        "ragamuffin",
+        "swarley",
+        "dune"
+      ]
+    }
+  },
+  "dart": {
+    "name": "Dart",
+    "recipe": {
+      "time": {
+        "start": "2020-11-08",
+        "end": "?"
+      },
+      "count": 370,
+      "traits": [
+        "camo",
+        "oldlace",
+        "coffee",
+        "dune"
+      ]
+    }
+  },
+  "boris": {
+    "name": "Boris",
+    "recipe": {
+      "time": {
+        "start": "2020-09-30",
+        "end": "?"
+      },
+      "count": 667,
+      "traits": [
+        "savannah",
+        "safetyvest",
+        "jacked"
+      ]
+    }
+  },
+  "mibbles": {
+    "name": "Mibbles",
+    "recipe": {
+      "time": {
+        "start": "2020-08-29",
+        "end": "?"
+      },
+      "count": 1301,
+      "traits": [
+        "kurilian",
+        "impish"
+      ]
+    }
+  },
+  "reeves": {
+    "name": "Reeves",
+    "recipe": {
+      "time": {
+        "start": "2020-08-08",
+        "end": "?"
+      },
+      "count": 198,
+      "traits": [
+        "rascal",
+        "swarley",
+        "daemonwings",
+        "dune"
+      ]
+    }
+  },
+  "pickett": {
+    "name": "Pickett",
+    "recipe": {
+      "time": {
+        "start": "2020-07-25",
+        "end": "?"
+      },
+      "count": 224,
+      "traits": [
+        "swarley",
+        "lavender",
+        "dune"
+      ]
+    }
+  },
+  "joan": {
+    "name": "Joan",
+    "recipe": {
+      "time": {
+        "start": "2020-07-16",
+        "end": "?"
+      },
+      "count": 338,
+      "traits": [
+        "lykoi",
+        "drama",
+        "glacier",
+        "springcrocus",
+        "prism"
+      ]
+    }
+  },
+  "starchild": {
+    "name": "Starchild",
+    "recipe": {
+      "time": {
+        "start": "2020-07-11",
+        "end": "?"
+      },
+      "count": 367,
+      "traits": [
+        "razzledazzle",
+        "drama",
+        "glacier",
+        "wolfgrey",
+        "prism"
+      ]
+    }
+  },
+  "travis": {
+    "name": "Travis",
+    "recipe": {
+      "time": {
+        "start": "2020-07-04",
+        "end": "?"
+      },
+      "count": 300,
+      "traits": [
+        "firedup",
+        "wolfgrey",
+        "glacier",
+        "prism"
+      ]
+    }
+  },
+  "steel": {
+    "name": "Steel",
+    "recipe": {
+      "time": {
+        "start": "2020-07-04",
+        "end": "?"
+      },
+      "count": 436,
+      "traits": [
+        "lykoi",
+        "hintomint",
+        "springcrocus",
+        "prism"
+      ]
+    }
+  },
+  "pawvril": {
+    "name": "Pawvril",
+    "recipe": {
+      "time": {
+        "start": "2020-06-20",
+        "end": "?"
+      },
+      "count": 700,
+      "traits": [
+        "glacier",
+        "springcrocus",
+        "drama"
+      ]
+    }
+  },
+  "janis": {
+    "name": "Janis",
+    "recipe": {
+      "time": {
+        "start": "2020-06-20",
+        "end": "?"
+      },
+      "count": 929,
+      "traits": [
+        "glacier",
+        "springcrocus",
+        "prism"
+      ]
+    }
+  },
+  "kunst": {
+    "name": "Kunst",
+    "recipe": {
+      "time": {
+        "start": "2020-06-06",
+        "end": "?"
+      },
+      "count": 1001,
+      "traits": [
+        "mainecoon",
+        "candyshoppe",
+        "royalblue"
+      ]
+    }
+  },
+  "kitiovanni": {
+    "name": "Kitiovanni",
+    "recipe": {
+      "time": {
+        "start": "2020-05-23",
+        "end": "?"
+      },
+      "count": 735,
+      "traits": [
+        "manx",
+        "candyshoppe",
+        "firstblush",
+        "springcrocus",
+        "wyrm"
+      ]
+    }
+  },
+  "hunter": {
+    "name": "Hunter",
+    "recipe": {
+      "time": {
+        "start": "2020-05-09",
+        "end": "?"
+      },
+      "count": 1140,
+      "traits": [
+        "avatar",
+        "chameleon",
+        "tongue",
+        "dragontail"
+      ]
+    }
+  },
+  "vince": {
+    "name": "Vince",
+    "recipe": {
+      "time": {
+        "start": "2020-04-25",
+        "end": "?"
+      },
+      "count": 1424,
+      "traits": [
+        "pixiebob",
+        "bananacream",
+        "daffodil",
+        "ooze"
+      ]
+    }
+  },
+  "zelig": {
+    "name": "Zelig",
+    "recipe": {
+      "time": {
+        "start": "2020-04-18",
+        "end": "?"
+      },
+      "count": 505,
+      "traits": [
+        "avatar",
+        "glacier",
+        "chameleon",
+        "happygokitty"
+      ]
+    }
+  },
+  "billie": {
+    "name": "Billie",
+    "recipe": {
+      "time": {
+        "start": "2020-04-11",
+        "end": "?"
+      },
+      "count": 1261,
+      "traits": [
+        "pixiebob",
+        "cornflower",
+        "cerulian",
+        "mintmacaron"
+      ]
+    }
+  },
+  "bodhi": {
+    "name": "Bodhi",
+    "recipe": {
+      "time": {
+        "start": "2020-03-28",
+        "end": "?"
+      },
+      "count": 616,
+      "traits": [
+        "avatar",
+        "chameleon",
+        "mertail",
+        "majestic"
+      ]
+    }
+  },
+  "cindi": {
+    "name": "Cindi",
+    "recipe": {
+      "time": {
+        "start": "2020-03-21",
+        "end": "?"
+      },
+      "count": 897,
+      "traits": [
+        "pixiebob",
+        "dragonfruit",
+        "prairierose",
+        "missmuffett"
+      ]
+    }
+  },
+  "potricia": {
+    "name": "Potricia",
+    "recipe": {
+      "time": {
+        "start": "2020-03-17",
+        "end": "?"
+      },
+      "count": 665,
+      "traits": [
+        "onyx",
+        "gold",
+        "mertail",
+        "roadtogold"
+      ]
+    }
+  },
+  "cai": {
+    "name": "Cai",
+    "recipe": {
+      "time": {
+        "start": "2020-03-07",
+        "end": "?"
+      },
+      "count": 526,
+      "traits": [
+        "pixiebob",
+        "shamrock",
+        "mertail",
+        "hanauma"
+      ]
+    }
+  },
+  "missmatheson": {
+    "name": "Miss Matheson",
+    "recipe": {
+      "time": {
+        "start": "2020-02-20",
+        "end": "?"
+      },
+      "count": 375,
+      "traits": [
+        "liger",
+        "icicle",
+        "hacker",
+        "kittencream"
+      ]
+    }
+  },
+  "felis": {
+    "name": "Felis",
+    "recipe": {
+      "time": {
+        "start": "2020-02-15",
+        "end": "?"
+      },
+      "count": 1264,
+      "traits": [
+        "mekong",
+        "moonrise",
+        "buzzed",
+        "finalfrontier"
+      ]
+    }
+  },
+  "meuwn": {
+    "name": "Meuwn",
+    "recipe": {
+      "time": {
+        "start": "2020-02-08",
+        "end": "?"
+      },
+      "count": 509,
+      "traits": [
+        "razzledazzle",
+        "cloudwhite",
+        "springcrocus",
+        "finalfrontier"
+      ]
+    }
+  },
+  "lilpurrfect": {
+    "name": "Lil Purrfect",
+    "recipe": {
+      "time": {
+        "start": "2020-02-01",
+        "end": "?"
+      },
+      "count": 662,
+      "traits": [
+        "allyouneed",
+        "garnet",
+        "flapflap"
+      ]
+    }
+  },
+  "mars": {
+    "name": "Mars",
+    "recipe": {
+      "time": {
+        "start": "2020-01-18",
+        "end": "?"
+      },
+      "count": 987,
+      "traits": [
+        "hacker",
+        "prairierose",
+        "delite",
+        "finalfrontier"
+      ]
+    }
+  },
+  "cosmocat": {
+    "name": "Cosmocat",
+    "recipe": {
+      "time": {
+        "start": "2020-01-11",
+        "end": "?"
+      },
+      "count": 688,
+      "traits": [
+        "leopard",
+        "universe",
+        "topoftheworld",
+        "finalfrontier"
+      ]
+    }
+  },
+  "pepito": {
+    "name": "Pepito",
+    "recipe": {
+      "time": {
+        "start": "2020-01-01",
+        "end": "2020-01-07"
+      },
+      "count": 443,
+      "traits": [
+        "ragdoll",
+        "simple",
+        "meowgarine",
+        "junglebook"
+      ]
+    }
+  },
+  "chitten": {
+    "name": "Chitten",
+    "recipe": {
+      "time": {
+        "start": "2019-12-21",
+        "end": "?"
+      },
+      "count": 829,
+      "traits": [
+        "burmilla",
+        "calicool",
+        "hotcocoa",
+        "tongue"
+      ]
+    }
+  },
+  "puuurrot": {
+    "name": "Puuurrot",
+    "recipe": {
+      "time": {
+        "start": "2019-12-07",
+        "end": "?"
+      },
+      "count": 650,
+      "traits": [
+        "chantilly",
+        "firstblush",
+        "skyblue",
+        "tinybox"
+      ]
+    }
+  },
+  "shoopadoop": {
+    "name": "Shoopadoop",
+    "recipe": {
+      "time": {
+        "start": "2019-11-23",
+        "end": "?"
+      },
+      "count": 1269,
+      "traits": [
+        "martian",
+        "wyrm",
+        "SE03"
+      ]
+    }
+  },
+  "bartholomeow": {
+    "name": "Bartholomeow",
+    "date": "2019-11-12",
+    "recipe": {
+      "limit": 10000,
+      "count": 1269,
+      "traits": [
+        "burmilla",
+        "thunderstruck",
+        "salmon",
+        "flamingo",
+        "rosequartz",
+        "wasntme"
+      ]
+    }
+  },
+  "gwendolion": {
+    "name": "Gwendolion",
+    "date": "2019-11-10",
+    "recipe": {
+      "limit": 50000,
+      "count": 297,
+      "traits": [
+        "burmilla",
+        "salmon",
+        "icy"
+      ]
+    }
+  },
+  "catseye": {
+    "name": "Catseye",
+    "date": "2019-11-09",
+    "recipe": {
+      "limit": 30000,
+      "count": 196,
+      "traits": [
+        "burmilla",
+        "rascal",
+        "salmon",
+        "flamingo"
+      ]
+    }
+  },
+  "skeletonne": {
+    "name": "Skeletonne",
+    "recipe": {
+      "time": {
+        "start": "2019-10-26",
+        "end": "?"
+      },
+      "count": 752,
+      "traits": [
+        "sphynx",
+        "scorpius",
+        "dreamboat",
+        "satiated"
+      ]
+    }
+  },
+  "furmione": {
+    "name": "Furmione",
+    "recipe": {
+      "time": {
+        "start": "2019-10-12",
+        "end": "?"
+      },
+      "count": 832,
+      "traits": [
+        "spangled",
+        "firstblush",
+        [
+          "poisonberry",
+          "mallowflower"
+        ]
+      ]
+    }
+  },
+  "purrzival": {
+    "name": "Purrzival the Paladin",
+    "date": "2019-09-20",
+    "recipe": {
+      "limit": 30000,
+      "count": 316,
+      "traits": [
+        "thunderstruck",
+        "rosequartz",
+        "peach",
+        "wasntme"
+      ]
+    }
+  },
+  "jack": {
+    "name": "Jack",
+    "recipe": {
+      "time": {
+        "start": "2019-09-28",
+        "end": "?"
+      },
+      "count": 721,
+      "traits": [
+        "savannah",
+        "shadowgrey",
+        "granitegrey",
+        "jacked"
+      ]
+    }
+  },
+  "pawderick": {
+    "name": "Pawderick the Lancer",
+    "date": "2019-09-14",
+    "recipe": {
+      "limit": 50000,
+      "count": 665,
+      "traits": [
+        "ganado",
+        "rosequartz",
+        "wasntme"
+      ]
+    }
+  },
+  "robin": {
+    "name": "Robin",
+    "recipe": {
+      "time": {
+        "start": "2019-08-31",
+        "end": "?"
+      },
+      "count": 1837,
+      "traits": [
+        "stunned",
+        "meowgarine",
+        "kittencream",
+        "featherbrain"
+      ]
+    }
+  },
+  "kittyformerlyknownasprince": {
+    "name": "Kitty Formerly Known As Prince",
+    "recipe": {
+      "time": {
+        "start": "2019-08-17",
+        "end": "?"
+      },
+      "count": 503,
+      "traits": [
+        "leopard",
+        "tendertears",
+        "royalblue",
+        "pouty"
+      ]
+    }
+  },
+  "djmeowlody": {
+    "name": "DJ Meowlody",
+    "recipe": {
+      "time": {
+        "start": "2019-08-03",
+        "end": "2019-11-30"
+      },
+      "count": 155,
+      "traits": [
+        "happygokitty",
+        "ragdoll",
+        "tigerpunk",
+        "oceanid"
+      ]
+    }
+  },
+  "poisonorchid": {
+    "name": "Poison Orchid",
+    "date": "2019-07-22",
+    "recipe": {
+      "limit": 499,
+      "traits": [
+        "burmilla",
+        "henna",
+        "drama",
+        "onyx",
+        "wolfgrey",
+        "dreamboat",
+        "SE29"
+      ]
+    },
+    "desc": "Ninja Fancy Cat"
+  },
+  "catyrax": {
+    "name": "Catyrax",
+    "date": "2019-07-18",
+    "recipe": {
+      "limit": 500,
+      "traits": [
+        "lykoi",
+        "henna",
+        "bornwithit",
+        "onyx",
+        "wolfgrey",
+        "fallspice",
+        "SE28"
+      ]
+    },
+    "desc": "Fish-Flinging Ninja Fancy Cat"
+  },
+  "catamari": {
+    "name": "Catamari",
+    "recipe": {
+      "time": {
+        "start": "2019-07-06",
+        "end": "2019-07-19"
+      },
+      "count": 378,
+      "traits": [
+        "moonrise",
+        "cobalt",
+        "ducky",
+        "salty"
+      ]
+    },
+    "desc": "Monster Fancy Cat"
+  },
+  "magmeow": {
+    "name": "Magmeow",
+    "recipe": {
+      "time": {
+        "start": "2019-06-23",
+        "end": "2019-06-26"
+      },
+      "count": 736,
+      "traits": [
+        "liger",
+        "moonrise",
+        "redvelvet",
+        "dragontail"
+      ]
+    },
+    "desc": "Multi-Limbed Magma Monster Fancy Cat"
+  },
+  "kitijira": {
+    "name": "Kitijira",
+    "recipe": {
+      "time": {
+        "start": "2019-06-08",
+        "end": "2019-06-21"
+      },
+      "count": 645,
+      "traits": [
+        "mainecoon",
+        "moonrise",
+        "atlantis",
+        "universe",
+        "dragontail"
+      ]
+    },
+    "desc": "City-Smashing Lizard Monster Fancy Cat"
+  },
+  "whisper": {
+    "name": "Whisper",
+    "recipe": {
+      "time": {
+        "start": "2019-05-25",
+        "end": "2019-05-31"
+      },
+      "count": 861,
+      "traits": [
+        "onyx",
+        "henna",
+        "wolfgrey",
+        "sully",
+        "candyshoppe"
+      ]
+    },
+    "desc": "Ninja Fancy Cat"
+  },
+  "curdlin": {
+    "name": "Curdlin",
+    "recipe": {
+      "time": {
+        "start": "2019-05-11",
+        "end": "2019-11-30"
+      },
+      "count": 4,
+      "traits": [
+        "nachocheez",
+        "saycheese",
+        "missmuffett",
+        "dippedcone"
+      ]
+    },
+    "desc": "Cheeze Wizard Cat - Celebrating the Launch of the Cheeze Wizards on the Blockchain"
+  },
+  "krakitten": {
+    "name": "Krakitten",
+    "recipe": {
+      "time": {
+        "start": "2019-04-27",
+        "end": "2019-05-06"
+      },
+      "count": 1221,
+      "traits": [
+        "cobalt",
+        "ducky",
+        "salty",
+        "splat"
+      ]
+    }
+  },
+  "furbeard": {
+    "name": "Furbeard",
+    "recipe": {
+      "time": {
+        "start": "2019-04-13",
+        "end": "2019-04-26"
+      },
+      "count": 3733,
+      "traits": [
+        "inflatablepool",
+        "hanauma",
+        "neckbeard"
+      ]
+    },
+    "desc": "Dread Pirate Cat"
+  },
+  "glitter": {
+    "name": "Glitter",
+    "recipe": {
+      "time": {
+        "start": "2019-03-30",
+        "end": "2019-11-30"
+      },
+      "count": 658,
+      "traits": [
+        "rorschach",
+        "juju",
+        "unicorn",
+        "hyacinth"
+      ]
+    }
+  },
+  "clover": {
+    "name": "Clover",
+    "date": "2019-03-16",
+    "recipe": {
+      "limit": 2506,
+      "traits": [
+        "shamrock",
+        "emeraldgreen",
+        "roadtogold",
+        "PU27"
+      ]
+    },
+    "desc": "Celebrating St. Patrick's Day 2019 (March/19th)"
+  },
+  "glasswalker": {
+    "name": "Glasswalker",
+    "date": "2019-03-02",
+    "recipe": {
+      "limit": 1230,
+      "traits": [
+        "cloudwhite",
+        "henna",
+        "pearl",
+        "firedup"
+      ]
+    },
+    "desc": "Ninja Fancy Cat"
+  },
+  "ande": {
+    "name": "Ande",
+    "date": "2019-02-21",
+    "recipe": {
+      "limit": 440,
+      "traits": [
+        "munchkin",
+        "cashewmilk",
+        "moue",
+        "PU30",
+        "WE10"
+      ]
+    }
+  },
+  "al": {
+    "name": "Al",
+    "recipe": {
+      "time": {
+        "start": "2019-02-17",
+        "end": "2019-12-01"
+      },
+      "count": 3209,
+      "traits": [
+        "munchkin",
+        "moue",
+        "cashewmilk",
+        "brownies"
+      ]
+    }
+  },
+  "pizzazz": {
+    "name": "Pizzazz",
+    "recipe": {
+      "time": {
+        "start": "2019-02-16",
+        "end": "2019-12-01"
+      },
+      "count": 1438,
+      "traits": [
+        "mekong",
+        "scarlet",
+        "spangled",
+        "wonky"
+      ]
+    }
+  },
+  "misspurrfect": {
+    "name": "Miss Purrfect",
+    "recipe": {
+      "time": {
+        "start": "2019-02-09",
+        "end": "2019-02-14"
+      },
+      "count": 1298,
+      "traits": [
+        "allyouneed",
+        "butterscotch",
+        "asif",
+        "satiated",
+        "flapflap"
+      ]
+    },
+    "desc": "Celebrating St. Valentine's Day 2019 (Feb/14th)"
+  },
+  "squib": {
+    "name": "Squib",
+    "date": "2019-01-26",
+    "recipe": {
+      "limit": 1443,
+      "traits": [
+        "oldlace",
+        "razzledazzle",
+        "buzzed",
+        "rollercoaster"
+      ]
+    },
+    "desc": "Celebrating American Football Super Bowl LIII in 2019"
+  },
+  "tallythepurrocious": {
+    "name": "Tally The Purrocious",
+    "recipe": {
+      "time": {
+        "start": "2019-01-10",
+        "end": "2019-01-21"
+      },
+      "count": 3992,
+      "traits": [
+        "selkirk",
+        "koala",
+        "arcreactor",
+        "sully"
+      ]
+    },
+    "desc": "Gods Unchained Promotion - Mystical Cat Talisman"
+  },
+  "genedough": {
+    "name": "Gene Dough",
+    "recipe": {
+      "time": {
+        "start": "2018-12-23",
+        "end": "2019-01-07"
+      },
+      "count": 1376,
+      "traits": [
+        "hotcocoa",
+        "mittens",
+        "frosting"
+      ]
+    }
+  },
+  "pawrula": {
+    "name": "Pawrula the Bright",
+    "recipe": {
+      "time": {
+        "start": "2018-12-15",
+        "end": "2019-11-30"
+      },
+      "count": 1952,
+      "traits": [
+        "camo",
+        "butterscotch",
+        "fox"
+      ]
+    },
+    "desc": "Neha Narula - Director of the Digital Currency Initiative at the MIT Media Lab"
+  },
+  "draco": {
+    "name": "Draco",
+    "recipe": {
+      "time": {
+        "start": "2018-11-30",
+        "end": "2018-12-07"
+      },
+      "count": 1115,
+      "traits": [
+        "toyger",
+        "martian",
+        "peppermint",
+        "dragonwings",
+        "SE03"
+      ]
+    }
+  },
+  "dracojunior": {
+    "name": "Draco Junior",
+    "recipe": {
+      "time": {
+        "start": "2018-11-26",
+        "end": "2018-12-07"
+      },
+      "count": 1398,
+      "traits": [
+        "lynx",
+        "verdigris",
+        "dragontail",
+        "SE03"
+      ]
+    }
+  },
+  "dreggo": {
+    "name": "Dreggo",
+    "recipe": {
+      "time": {
+        "start": "2018-11-21",
+        "end": "2018-12-07"
+      },
+      "count": 3624,
+      "traits": [
+        "siberian",
+        "bananacream",
+        "SE03"
+      ]
+    }
+  },
+  "pickles": {
+    "name": "Pickles",
+    "date": "2018-11-14",
+    "recipe": {
+      "limit": 303,
+      "traits": [
+        "lynx",
+        "martian",
+        "highsociety",
+        "emeraldgreen"
+      ]
+    }
+  },
+  "dukecat": {
+    "name": "Dukecat",
+    "date": "2018-10-18",
+    "recipe": {
+      "limit": 1366,
+      "traits": [
+        "cymric",
+        "periwinkle",
+        "simple",
+        "tongue"
+      ]
+    }
+  },
+  "sheilapurren": {
+    "name": "Sheila Purren",
+    "date": "2018-10-04",
+    "recipe": {
+      "limit": 1971,
+      "traits": [
+        "mauveover",
+        "icy",
+        "wingtips",
+        "fangtastic"
+      ]
+    },
+    "desc": "Sheila Warren Kitty-fied - Head of Blockchain and Distributed Ledger Technology at the World Economic Forum (WEF)"
+  },
+  "pawzilla": {
+    "name": "Pawzilla",
+    "date": "2018-09-22",
+    "recipe": {
+      "limit": 1185,
+      "traits": [
+        "jaguar",
+        "universe",
+        "atlantis",
+        "littlefoot"
+      ]
+    }
+  },
+  "meowstro": {
+    "name": "Meowstro",
+    "date": "2018-09-09",
+    "recipe": {
+      "limit": 1698,
+      "traits": [
+        "onyx",
+        "wowza",
+        "eclipse"
+      ]
+    }
+  },
+  "atlas": {
+    "name": "Atlas",
+    "date": "2018-09-07",
+    "recipe": {
+      "limit": 998,
+      "traits": [
+        "highlander",
+        "kittencream",
+        "swarley",
+        "topoftheworld"
+      ]
+    }
+  },
+  "purrity": {
+    "name": "Purrity",
+    "date": "2018-08-23",
+    "recipe": {
+      "limit": 5984,
+      "traits": [
+        "selkirk",
+        "chronic",
+        "cloudwhite",
+        "cheeky"
+      ]
+    }
+  },
+  "squiddlesworth": {
+    "name": "Squiddlesworth",
+    "date": "2018-08-16",
+    "recipe": {
+      "limit": 1510,
+      "traits": [
+        "sphynx",
+        "redvelvet",
+        "patrickstarfish",
+        "dragontail"
+      ]
+    },
+    "desc": "Lava Squid Cat"
+  },
+  "purrspero": {
+    "name": "Purrspero",
+    "date": "2018-07-27",
+    "recipe": {
+      "limit": 4448,
+      "traits": [
+        "dippedcone",
+        "googly",
+        "royalpurple",
+        "beard"
+      ]
+    }
+  },
+  "catbury": {
+    "name": "Catbury",
+    "date": "2018-07-25",
+    "recipe": {
+      "limit": 76,
+      "traits": [
+        "ragdoll",
+        "crazy",
+        "chocolate",
+        "mintmacaron",
+        "yokel",
+        "WE02"
+      ]
+    }
+  },
+  "lulu": {
+    "name": "Lulu",
+    "date": "2018-07-13",
+    "recipe": {
+      "limit": 999,
+      "traits": [
+        "cyan",
+        "verdigris",
+        "turtleback",
+        "salty"
+      ]
+    }
+  },
+  "boot": {
+    "name": "Boot",
+    "date": "2018-07-05",
+    "recipe": {
+      "limit": 1440,
+      "traits": [
+        "ganado",
+        "wiley",
+        "cerulian",
+        "rollercoaster"
+      ],
+      "variants": {
+        "belgium": {
+          "name": "Belgium",
+          "count": 97,
+          "traits": [
+            [
+              "orangesoda",
+              "onyx"
+            ]
+          ]
+        },
+        "brazil": {
+          "name": "Brazil",
+          "count": 195,
+          "traits": [
+            [
+              "hintomint",
+              "bananacream",
+              "verdigris"
+            ]
+          ]
+        },
+        "croatia": {
+          "name": "Croatia",
+          "count": 253,
+          "traits": [
+            [
+              "cottoncandy",
+              "mauveover",
+              "oldlace"
+            ]
+          ]
+        },
+        "england": {
+          "name": "England",
+          "count": 168,
+          "traits": [
+            [
+              "greymatter",
+              "martian"
+            ]
+          ]
+        },
+        "france": {
+          "name": "France",
+          "count": 317,
+          "traits": [
+            [
+              "harbourfog",
+              "cinderella",
+              "lavender"
+            ]
+          ]
+        },
+        "russia": {
+          "name": "Russia",
+          "count": 94,
+          "traits": [
+            [
+              "shadowgrey",
+              "salmon",
+              "cloudwhite"
+            ]
+          ]
+        },
+        "sweden": {
+          "name": "Sweden",
+          "count": 123,
+          "traits": [
+            [
+              "brownies",
+              "dragonfruit",
+              "redvelvet"
+            ]
+          ]
+        },
+        "uruguay": {
+          "name": "Uruguay",
+          "count": 193,
+          "traits": [
+            [
+              "aquamarine",
+              "nachocheez",
+              "koala"
+            ]
+          ]
+        }
+      }
+    },
+    "desc": "Football World Cup"
+  },
+  "raspoutine": {
+    "name": "Raspoutine",
+    "date": "2018-06-28",
+    "recipe": {
+      "limit": 1867,
+      "traits": [
+        "buzzed",
+        "nachocheez",
+        "sandalwood",
+        "belch"
+      ]
+    }
+  },
+  "kittypride": {
+    "name": "Kitty Pride",
+    "date": "2018-06-21",
+    "recipe": {
+      "limit": 1316,
+      "traits": [
+        "fabulous",
+        "cinderella",
+        "garnet"
+      ]
+    }
+  },
+  "furrmingo": {
+    "name": "Furrmingo",
+    "date": "2018-06-14",
+    "recipe": {
+      "limit": 333,
+      "traits": [
+        "bobtail",
+        "egyptiankohl",
+        "flamingo",
+        "whixtensions"
+      ]
+    }
+  },
+  "page": {
+    "name": "Page",
+    "date": "2018-05-31",
+    "recipe": {
+      "limit": 50000,
+      "count": 3936,
+      "traits": [
+        "rascal",
+        "peach",
+        "wasntme"
+      ]
+    }
+  },
+  "schrödingerscat": {
+    "name": "Schrödinger's Cat",
+    "date": "2018-05-20",
+    "recipe": {
+      "limit": 73,
+      "traits": [
+        "forgetmenot",
+        "tinybox",
+        "PU20",
+        "SE25"
+      ]
+    }
+  },
+  "chatplongeur": {
+    "name": "Chat Plongeur",
+    "date": "2018-05-19",
+    "recipe": {
+      "limit": 1910,
+      "traits": [
+        "aquamarine",
+        "skyblue",
+        "seafoam"
+      ]
+    }
+  },
+  "docpurr": {
+    "name": "Doc Purr",
+    "date": "2018-05-16",
+    "recipe": {
+      "limit": 250,
+      "traits": [
+        "persian",
+        "spock",
+        "raisedbrow",
+        "violet",
+        "tongue"
+      ]
+    }
+  },
+  "swish": {
+    "name": "Swish",
+    "date": "2018-05-08",
+    "recipe": {
+      "limit": 2880,
+      "traits": [
+        "norwegianforest",
+        "luckystripe",
+        "thicccbrowz",
+        "orangesoda"
+      ]
+    }
+  },
+  "flutterbee": {
+    "name": "Flutterbee",
+    "date": "2018-04-28",
+    "recipe": {
+      "limit": 275,
+      "traits": [
+        "cloudwhite",
+        "jaguar",
+        "lemonade",
+        "azaleablush",
+        "WE14"
+      ]
+    }
+  },
+  "vernon": {
+    "name": "Vernon",
+    "date": "2018-04-16",
+    "recipe": {
+      "limit": 320,
+      "traits": [
+        "amur",
+        "fabulous",
+        "cottoncandy",
+        "springcrocus",
+        "belleblue",
+        "soserious"
+      ]
+    },
+    "desc": "Spring Equinox Kitty"
+  },
+  "berry": {
+    "name": "Berry",
+    "date": "2018-03-16",
+    "recipe": {
+      "limit": 200,
+      "traits": [
+        "dragonfruit",
+        "thunderstruck",
+        "emeraldgreen",
+        "apricot",
+        "simple"
+      ]
+    }
+  },
+  "pussforprogress": {
+    "name": "Puss For Progress",
+    "date": "2018-03-08",
+    "recipe": {
+      "limit": 1920,
+      "traits": [
+        "himalayan",
+        "peach",
+        "safetyvest",
+        "gerbil"
+      ]
+    },
+    "desc": "Women's Day"
+  },
+  "fortunecat": {
+    "name": "Fortune Cat",
+    "name_cn": "红包喵",
+    "date": "2018-03-08",
+    "recipe": {
+      "limit": 888,
+      "traits": [
+        "harbourfog",
+        "calicool",
+        "swampgreen",
+        "sapphire",
+        "beard"
+      ]
+    }
+  },
+  "liondance": {
+    "name": "Lion Dance",
+    "name_cn": "咚咚锵",
+    "date": "2018-03-07",
+    "recipe": {
+      "limit": 888,
+      "overflow": 1,
+      "traits": [
+        "manx",
+        "royalblue",
+        "googly",
+        "starstruck"
+      ]
+    }
+  },
+  "dogcat": {
+    "name": "Dog Cat",
+    "name_cn": "汪星爷",
+    "date": "2018-03-02",
+    "recipe": {
+      "limit": 88,
+      "traits": [
+        "tigerpunk",
+        "periwinkle",
+        "barkbrown",
+        "sweetmeloncakes",
+        "yokel"
+      ]
+    },
+    "desc": "Year of the Dog (Greater China)"
+  },
+  "tabby": {
+    "name": "Tabby",
+    "date": "2018-02-26",
+    "recipe": {
+      "limit": 250,
+      "traits": [
+        "ragamuffin",
+        "morningglory",
+        "otaku",
+        "cheeky"
+      ]
+    }
+  },
+  "yuricatsuki": {
+    "name": "Yuri Catsuki",
+    "date": "2018-02-20",
+    "recipe": {
+      "limit": 250,
+      "traits": [
+        "cymric",
+        "tiger",
+        "neckbeard",
+        "elk"
+      ]
+    },
+    "desc": "Figure Scating Kitty - Winter Olympics (Korea)"
+  },
+  "misterpurrfect": {
+    "name": "Mister Purrfect",
+    "date": "2018-02-14",
+    "recipe": {
+      "limit": 1000,
+      "traits": [
+        "chocolate",
+        "baddate",
+        "strawberry",
+        "wuvme"
+      ]
+    },
+    "desc": "Valentine's Day"
+  },
+  "earnie": {
+    "name": "Earnie",
+    "date": "2018-02-13",
+    "recipe": {
+      "limit": 500,
+      "traits": [
+        "birman",
+        "orangesoda",
+        "hotrod",
+        "grim"
+      ]
+    },
+    "desc": "Earn.com - Golden Kitty Award (Product Hunt)"
+  },
+  "momo-chan": {
+    "name": "Momo-chan",
+    "date": "2018-01-31",
+    "recipe": {
+      "limit": 500,
+      "traits": [
+        "onyx",
+        "henna",
+        "bloodred",
+        "wolfgrey",
+        "sass"
+      ]
+    },
+    "desc": "Ninja Kitty"
+  },
+  "negato": {
+    "name": "Negato",
+    "date": "2018-01-29",
+    "recipe": {
+      "limit": 500,
+      "traits": [
+        "onyx",
+        "henna",
+        "wolfgrey",
+        "slyboots"
+      ]
+    },
+    "desc": "Ninja Kitty"
+  },
+  "stitches": {
+    "name": "Stitches",
+    "date": "2018-01-10",
+    "recipe": {
+      "limit": 500,
+      "traits": [
+        "hintomint",
+        "seafoam",
+        "swampgreen",
+        "saycheese"
+      ]
+    },
+    "desc": "Zombie Kitty"
+  },
+  "phuziqaat": {
+    "name": "Phu Ziqaat",
+    "date": "2017-12-31",
+    "recipe": {
+      "limit": 1000,
+      "traits": [
+        "chartreux",
+        "spock",
+        "alien",
+        "pouty"
+      ]
+    },
+    "desc": "Alien Kitty"
+  },
+  "santaclaws": {
+    "name": "Santa Claws",
+    "date": "2017-12-12",
+    "recipe": {
+      "limit": 1000,
+      "overflow": 2,
+      "traits": [
+        "cloudwhite",
+        "scarlet",
+        "beard",
+        "WE12"
+      ]
+    },
+    "desc": "Ho Ho Ho - Santa Claus Kitty"
+  },
+  "mistletoe": {
+    "name": "Mistletoe",
+    "date": "2017-12-09",
+    "recipe": {
+      "limit": 2000,
+      "traits": [
+        "oldlace",
+        "crazy",
+        "gerbil"
+      ]
+    },
+    "desc": "XMas Kitty"
+  },
+  "dracula": {
+    "name": "Dracula",
+    "date": "2017-12-01",
+    "recipe": {
+      "limit": 2000,
+      "traits": [
+        "laperm",
+        "spock",
+        "strawberry",
+        "WE01"
+      ]
+    }
+  },
+  "ducat": {
+    "name": "Du Cat",
+    "date": "2017-11-29",
+    "recipe": {
+      "limit": 10000,
+      "traits": [
+        "cymric",
+        "tongue"
+      ]
+    }
+  },
+  "shipcat": {
+    "name": "Ship Cat",
+    "date": "2017-11-23",
+    "recipe": {
+      "limit": 2000,
+      "traits": [
+        "sphynx",
+        "orangesoda",
+        "luckystripe",
+        "crazy"
+      ]
+    }
+  },
+  "pepitothemascot": {
+    "name": "Pepito The Mascot",
+    "date": "2020-11-07",
+    "exclusive": {
+      "limit": 20,
+      "ids": [
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
+      ]
+    }
+  },
+  "megaflowtron": {
+    "name": "Mega Flowtron",
+    "date": "2020-05-21",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        303
+      ]
+    }
+  },
+  "koshkat": {
+    "name": "Koshkat",
+    "date": "2020-05-15",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        222
+      ]
+    }
+  },
+  "gale": {
+    "name": "Gale",
+    "date": "2020-02-01",
+    "exclusive": {
+      "limit": 33,
+      "ids": [
+        1995387,
+        1995323,
+        1990934,
+        1987022,
+        1986452,
+        1984873,
+        1984313,
+        1980813,
+        1979910,
+        1976399,
+        1973254,
+        1971383,
+        1970499,
+        1968361,
+        1961950,
+        1960448,
+        1957257,
+        1956528,
+        1952165,
+        1946384,
+        1932696,
+        1923247,
+        1909523,
+        1906470,
+        1895691,
+        1895007,
+        1893341,
+        1887536,
+        1861789,
+        1859088,
+        1836698,
+        1825688,
+        1825574
+      ]
+    }
+  },
+  "dapp-e": {
+    "name": "DAPP-E",
+    "date": "2019-05-10",
+    "exclusive": {
+      "limit": 50,
+      "ids": [
+        1829,
+        1830,
+        1831,
+        1832,
+        1833,
+        1834,
+        1835,
+        1836,
+        1837,
+        1838,
+        1839,
+        1840,
+        1841,
+        1842,
+        1843,
+        1844,
+        1845,
+        1846,
+        1847,
+        1848,
+        1849,
+        1850,
+        1851,
+        1852,
+        1853,
+        1854,
+        1855,
+        1856,
+        1857,
+        1858,
+        1859,
+        1860,
+        1861,
+        1862,
+        1863,
+        1864,
+        1865,
+        1866,
+        1867,
+        1868,
+        1869,
+        1870,
+        1871,
+        1872,
+        1873,
+        1874,
+        1875,
+        1876,
+        1877,
+        1878
+      ]
+    },
+    "desc": "Dapper (Crypto Contract) Wallet Promotion Cat"
+  },
+  "papacatuanuku": {
+    "name": "Papacatuanuku",
+    "date": "2019-03-31",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        1500000
+      ]
+    },
+    "desc": "Kitty #1500000"
+  },
+  "sirmeowsalot": {
+    "name": "Sir Meowsalot",
+    "date": "2019-03-26",
+    "exclusive": {
+      "limit": 21,
+      "ids": [
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221
+      ]
+    }
+  },
+  "cyberberry": {
+    "name": "Cyber Berry",
+    "date": "2019-03-02",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        282
+      ]
+    },
+    "desc": "Winner of the NFTme Sweetstakes"
+  },
+  "hinecatone": {
+    "name": "Hinecatone",
+    "date": "2019-03-01",
+    "exclusive": {
+      "limit": 15,
+      "ids": [
+        1423547,
+        1433380,
+        1433486,
+        1440835,
+        1453366,
+        1456935,
+        1456973,
+        1459319,
+        1463197,
+        1466118,
+        1474082,
+        1484593,
+        1484982,
+        1492154,
+        1498885
+      ]
+    }
+  },
+  "felono": {
+    "name": "Felono",
+    "date": "2019-02-15",
+    "exclusive": {
+      "limit": 30,
+      "ids": [
+        1394641,
+        1404595,
+        1406021,
+        1413065,
+        1414375,
+        1420553,
+        1421315,
+        1421864,
+        1424104,
+        1425433,
+        1431823,
+        1435517,
+        1436333,
+        1449860,
+        1451482,
+        1455458,
+        1459320,
+        1462952,
+        1463069,
+        1476999,
+        1483225,
+        1487210,
+        1487551,
+        1489681,
+        1490345,
+        1491632,
+        1492206,
+        1492739,
+        1492817,
+        1498778
+      ]
+    }
+  },
+  "hypurrion": {
+    "name": "Hypurrion",
+    "date": "2019-01-10",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        269
+      ]
+    },
+    "desc": "Hyperion - Mythic Titan of Light - Gods Unchained Promotion"
+  },
+  "dracothemagnificent": {
+    "name": "Draco The Magnificent",
+    "date": "2018-11-27",
+    "exclusive": {
+      "limit": 12,
+      "ids": [
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281
+      ]
+    }
+  },
+  "bugcatv2": {
+    "name": "Bug Cat V2",
+    "date": "2018-11-27",
+    "exclusive": {
+      "limit": 20,
+      "ids": [
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180,
+        181,
+        182,
+        183,
+        184,
+        185,
+        186
+      ]
+    },
+    "desc": "Bug Bounty II (Offers Contract etc) Kitty"
+  },
+  "lilbubthemagicalspacecat": {
+    "name": "Lil Bub Ub Bub (BUB) The Magical Space Cat",
+    "date": "2018-11-13",
+    "exclusive": {
+      "limit": 3,
+      "ids": [
+        266,
+        267,
+        268
+      ]
+    }
+  },
+  "vulcat": {
+    "name": "Vulcat",
+    "date": "2018-09-12",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        1000000
+      ]
+    },
+    "desc": "1 000 000th Kitty"
+  },
+  "vulcant": {
+    "name": "Vulcant",
+    "date": "2018-08-31",
+    "exclusive": {
+      "limit": 20,
+      "ids": [
+        932914,
+        937360,
+        938299,
+        946526,
+        948925,
+        949058,
+        950617,
+        952280,
+        952981,
+        956374,
+        956908,
+        958570,
+        964205,
+        967234,
+        983046,
+        984451,
+        990713,
+        992861,
+        995745,
+        997469
+      ]
+    }
+  },
+  "rabbidkitty": {
+    "name": "Rabbid Kitty",
+    "date": "2018-08-23",
+    "exclusive": {
+      "limit": 6,
+      "ids": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265
+      ]
+    },
+    "desc": "Ubisoft Blockchain Heroes Hackathon"
+  },
+  "honu": {
+    "name": "Honu",
+    "date": "2018-07-20",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        251
+      ]
+    },
+    "desc": "Kitties for Good - Save Turtle Habitats"
+  },
+  "victoire": {
+    "name": "Victoire",
+    "date": "2018-07-18",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        402
+      ]
+    },
+    "desc": "France Football World Cup Champion"
+  },
+  "furlin": {
+    "name": "Furlin",
+    "date": "2018-06-26",
+    "exclusive": {
+      "limit": 52,
+      "ids": [
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166
+      ]
+    }
+  },
+  "celestialcyberdimension": {
+    "name": "Celestial Cyber Dimension",
+    "date": "2018-05-12",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        127
+      ]
+    }
+  },
+  "goldendragoncat": {
+    "name": "Golden Dragon Cat",
+    "name_cn": "帝龙喵",
+    "date": "2018-03-08",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        888
+      ]
+    },
+    "desc": "China Launch"
+  },
+  "goldendogcat": {
+    "name": "Golden Dog Cat",
+    "name_cn": "旺财汪",
+    "date": "2018-03-08",
+    "exclusive": {
+      "limit": 11,
+      "ids": [
+        1802,
+        1803,
+        1805,
+        1806,
+        1808,
+        1809,
+        1812,
+        1816,
+        1825,
+        1826,
+        1827,
+        1828
+      ]
+    },
+    "desc": "China Launch"
+  },
+  "knightkitty": {
+    "name": "Knight Kitty",
+    "date": "2018-03-01",
+    "exclusive": {
+      "limit": 11,
+      "ids": [
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114
+      ]
+    }
+  },
+  "cathena": {
+    "name": "Cathena",
+    "date": "2018-02-06",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        500000
+      ]
+    },
+    "desc": "500 000th Kitty"
+  },
+  "genesis": {
+    "name": "Genesis",
+    "date": "2017-11-24",
+    "exclusive": {
+      "limit": 1,
+      "ids": [
+        1
+      ]
+    },
+    "desc": "1st Kitty"
+  },
+  "bugcat": {
+    "name": "Bug Cat",
+    "date": "2017-11-23",
+    "exclusive": {
+      "limit": 3,
+      "ids": [
+        101,
+        102,
+        103
+      ]
+    },
+    "desc": "Bug Bounty Kitty"
+  },
+  "frostymcwhiskers": {
+    "name": "Frosty McWhiskers",
+    "date": "2020-12-14",
+    "specialedition": {
+      "limit": 104
+    }
+  },
+  "fannie": {
+    "name": "Fannie",
+    "date": "2020-12-14",
+    "specialedition": {
+      "limit": 58
+    }
+  },
+  "algie": {
+    "name": "Algie",
+    "date": "2020-10-29",
+    "specialedition": {
+      "limit": 179
+    }
+  },
+  "eddie": {
+    "name": "Eddie",
+    "date": "2020-09-03",
+    "specialedition": {
+      "limit": 110
+    }
+  },
+  "marty": {
+    "name": "Marty",
+    "date": "2020-09-01",
+    "specialedition": {
+      "limit": 188
+    },
+    "desc": "Collaboration with Muse"
+  },
+  "pandora": {
+    "name": "Pandora",
+    "date": "2020-07-31",
+    "specialedition": {
+      "limit": 50
+    },
+    "desc": "CryptoKitty Box Support"
+  },
+  "holli": {
+    "name": "Holli",
+    "date": "2020-07-03",
+    "specialedition": {
+      "limit": 59
+    }
+  },
+  "kikuyu": {
+    "name": "Kikuyu",
+    "date": "2020-06-13",
+    "specialedition": {
+      "limit": 263
+    },
+    "desc": "For Hunter+Zelig+Bodhi"
+  },
+  "flowtron": {
+    "name": "Flowtron",
+    "date": "2020-05-21",
+    "specialedition": {
+      "limit": 303
+    },
+    "desc": "Exchange on Flow Fancy Set"
+  },
+  "catterina": {
+    "name": "Catterina",
+    "date": "2020-05-13",
+    "specialedition": {
+      "limit": 100
+    },
+    "desc": "Momo Wang"
+  },
+  "negabillie": {
+    "name": "Nega Billie",
+    "date": "2020-04-27",
+    "specialedition": {
+      "limit": 68
+    }
+  },
+  "carl": {
+    "name": "Carl",
+    "date": "2019-08-20",
+    "specialedition": {
+      "limit": 40
+    }
+  },
+  "alice": {
+    "name": "Alice",
+    "date": "2019-08-23",
+    "specialedition": {
+      "limit": 88
+    }
+  },
+  "kitt-e": {
+    "name": "KITT-E",
+    "date": "2019-05-10",
+    "specialedition": {
+      "limit": 500
+    },
+    "desc": "Dapper (Crypto Contract) Wallet Promotion Cat"
+  },
+  "sparkles": {
+    "name": "Sparkles",
+    "date": "2019-04-10",
+    "specialedition": {
+      "limit": 100
+    },
+    "desc": "Freebie for CryptoKitties Community Events"
+  },
+  "aeoncat": {
+    "name": "Aeoncat",
+    "specialedition": {
+      "time": {
+        "start": "2019-01-17",
+        "end": "2019-01-28"
+      },
+      "limit": 380
+    },
+    "desc": "Goddess Aeona - Goddess of Nature - Gods Unchained Promotion"
+  },
+  "catzy": {
+    "name": "Catzy",
+    "date": "2018-12-31",
+    "specialedition": {
+      "limit": 10,
+      "ids": [
+        1137653,
+        1137654,
+        1137655,
+        1137656,
+        1137657,
+        1137658,
+        1137659,
+        1137660,
+        1137661,
+        1137662
+      ]
+    },
+    "desc": "Changpeng \"CZ\" Zhao - CEO of Binance - Top 10 Blockchain Influencer of the Year 2018 by CoinDesk"
+  },
+  "purremyallaire": {
+    "name": "Purremy Allaire",
+    "date": "2018-12-31",
+    "specialedition": {
+      "limit": 10,
+      "ids": [
+        1137663,
+        1137664,
+        1137665,
+        1137666,
+        1137667,
+        1137668,
+        1137669,
+        1137670,
+        1137671,
+        1137672
+      ]
+    },
+    "desc": "Jeremy Allaire - Top 10 Blockchain Influencer of the Year 2018 by CoinDesk"
+  },
+  "lilbub": {
+    "name": "Lil Bub Ub Bub (BUB)",
+    "date": "2018-11-13",
+    "specialedition": {
+      "limit": 500
+    }
+  }
+}

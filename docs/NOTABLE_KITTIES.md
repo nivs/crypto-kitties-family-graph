@@ -13,6 +13,7 @@ Example datasets are in `dist/example/` for testing and demonstrating the analys
 | **Tier IIII** (liger, moonrise) | 158 | [View](https://ck.innerlogics.com/?dataUrl=./example/tier_iiii/tier_iiii.json) | [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./example/tier_iiii/tier_iiii.json&mewtations=diamond) |
 | **Tier III** (lykoi, avatar) | 139 | [View](https://ck.innerlogics.com/?dataUrl=./example/tier_iii/tier_iii.json) | [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./example/tier_iii/tier_iii.json&mewtations=diamond,gold) |
 | **Diamonds** (first discoverers) | 150 | [View](https://ck.innerlogics.com/?dataUrl=./example/diamonds/diamonds.json) | [All gems](https://ck.innerlogics.com/?dataUrl=./example/diamonds/diamonds.json&mewtations=all&filterEdges=true) |
+| **Gen-0 Diamonds** | 40 | [View](https://ck.innerlogics.com/?dataUrl=./example/gen0_diamonds/gen0_diamonds.json) | [Diamond filter](https://ck.innerlogics.com/?dataUrl=./example/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdges=true) |
 | **Liger** (single IIII trait) | 92 | [View](https://ck.innerlogics.com/?dataUrl=./example/liger/liger.json) | |
 
 ### Historical Collections
@@ -20,12 +21,26 @@ Example datasets are in `dist/example/` for testing and demonstrating the analys
 | Dataset | Kitties | View (cached) | View (API) |
 |---------|---------|---------------|------------|
 | **Dragon** (600 ETH kitty) | 3 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/&selected=896775) | [API](https://ck.innerlogics.com/?kitties=896775&selected=896775) |
-| **Dragon Extended** | 35 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&selected=896775) | |
+| **Dragon Extended** | 76 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&selected=896775) | |
 | **Founders** (#1, #4, #18) | 10 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/) | [API](https://ck.innerlogics.com/?kitties=1,4,18) |
 | **Founders Extended** | 26 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/founders/founders_extended.json) | |
+| **Founders Connected** | 6 | [Cached](https://ck.innerlogics.com/?dataUrl=./example/founders/founders_connected.json) | Filtered to connected nodes |
 | **Holidays** (Mistletoe, Santa) | 13 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/) | [API](https://ck.innerlogics.com/?kitties=174756,275808) |
 | **Milestones** (#100k, #500k) | 15 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/) | [API](https://ck.innerlogics.com/?kitties=100000,500000) |
 | **Milestones 1M** | 43 | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones1M.json&svgBaseUrl=./example/milestones/svg/) | |
+
+### Celebrity/Exclusive Collections
+
+| Dataset | Kitties | View | Description |
+|---------|---------|------|-------------|
+| **Exclusives** | 317 | [View](https://ck.innerlogics.com/?dataUrl=./example/exclusives/exclusives.json) | Celebrity cats (Genesis, Vulcat, CZ, etc.) |
+
+### Special Cat Types
+
+| Dataset | Kitties | View | Description |
+|---------|---------|------|-------------|
+| **Fancies** | 42 | [View](https://ck.innerlogics.com/?dataUrl=./example/fancies/fancies.json) | Bred from specific trait recipes |
+| **Purrstiges** | 59 | [View](https://ck.innerlogics.com/?dataUrl=./example/purrstiges/purrstiges.json) | Time-limited breeding events |
 
 ### Personal Collection (nivs)
 
@@ -46,7 +61,8 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 |---------|-------------|------|
 | **Holiday Fancies** | Mistletoe → Santa Claws path | [View path](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) |
 | **Nivs + Dragon** | Personal cats connecting to Dragon | [View path](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) |
-| **Dragon Siblings** | Dragon's family connections | [View](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/dragon_siblings.json&selected=896775&shortestPath=true) |
+| **Dragon Ancestry** | Hover to see paths from Dragon (31 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_connected.json&svgBaseUrl=./example/dragon/svg/&selected=896775&shortestPath=true) |
+| **Nivs Ancestry** | Hover to see paths between nivs cats (55 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./example/nivs/nivs_shortest_path.json&owner=nivs&selected=149343&shortestPath=true) |
 
 ---
 
@@ -115,6 +131,11 @@ Very rare mewtations, one tier below the rarest.
 
 Kitties that were the **first to discover** a mewtation trait. These receive a diamond gem badge on CryptoKitties.
 
+| File | Kitties | Description |
+|------|---------|-------------|
+| diamonds.json | 150 | Diamond discoverers with 3 levels of ancestry |
+| diamonds_only.json | 50 | Diamond discoverers only (no ancestry) |
+
 **Mewtation Distribution:**
 - Tier IIII: 8
 - Tier III: 38
@@ -161,7 +182,8 @@ The original CryptoKitties founders.
 | File | Description | View |
 |------|-------------|------|
 | founders.json | Genesis (#1), Fluffy (#4), #18 with children | [Cached + SVGs](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/) |
-| founders_extended.json | Extended with more founder cats | [Cached](https://ck.innerlogics.com/?dataUrl=./example/founders/founders_extended.json) |
+| founders_extended.json | Extended with more founder cats (26) | [Cached](https://ck.innerlogics.com/?dataUrl=./example/founders/founders_extended.json) |
+| founders_connected.json | Filtered to connected nodes only (6) | [Cached](https://ck.innerlogics.com/?dataUrl=./example/founders/founders_connected.json) |
 
 **Root Kitties:**
 - #1 Genesis - The first CryptoKitty ever ([View](https://ck.innerlogics.com/?kitties=1))
@@ -220,6 +242,66 @@ Personal collection with complete ancestry traced to Gen 0.
 
 ---
 
+## Gen-0 Diamonds (`gen0_diamonds/`)
+
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./example/gen0_diamonds/gen0_diamonds.json)** ・ [Diamond filter](https://ck.innerlogics.com/?dataUrl=./example/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdges=true)
+
+Gen 0 kitties that were the **first to discover** mewtation traits (diamond gem discoverers). These are some of the most valuable CryptoKitties as they combine Gen 0 status with trait discovery.
+
+**Dataset:** 40 kitties (20 Gen-0 diamond discoverers + their direct children)
+
+**Data source:** API search `gen:0 mewtation:diamond`
+
+---
+
+## Exclusive/Celebrity Kitties (`exclusives/`)
+
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./example/exclusives/exclusives.json)**
+
+Celebrity and exclusive cats from the KittyVerse - special cats created for promotions, partnerships, or given to notable individuals.
+
+**Dataset:** 317 exclusive kitties
+
+**Notable Exclusives:**
+- Genesis (#1) - The first CryptoKitty
+- Vulcat (#1000000) - The millionth kitty
+- Catzy (CZ Zhao) - Binance CEO
+- Lil Bub - Famous internet cat
+- Gods Unchained promotions (Aeoncat)
+- Dapper Wallet promotions (KITT-E)
+
+**Data source:** Extracted from [cryptocopycats/kitties](https://github.com/cryptocopycats/kitties) `exclusives.json`
+
+---
+
+## Fancy Cats (`fancies/`)
+
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./example/fancies/fancies.json)**
+
+Fancy cats are special cats bred from specific trait combinations (recipes). Unlike exclusives, they don't have pre-assigned IDs - they're discovered by breeding the right traits together.
+
+**Dataset:** 42 fancy cats with parents
+
+**Data source:** API search `type:fancy`
+
+See `tools/data/kittyverse/fancies.json` for fancy recipes.
+
+---
+
+## Purrstige Cats (`purrstiges/`)
+
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./example/purrstiges/purrstiges.json)**
+
+Purrstige cats are time-limited special cats that could only be bred during specific windows. They require both the right trait combinations AND breeding during the event period.
+
+**Dataset:** 59 purrstige cats with parents
+
+**Data source:** API search `type:purrstige`
+
+See `tools/data/kittyverse/purrstiges.json` for purrstige recipes and time windows.
+
+---
+
 ## Mewtation Tier Reference
 
 | Tier | Kai | Rarity | Example Traits |
@@ -234,7 +316,7 @@ Personal collection with complete ancestry traced to Gen 0.
 
 ## Fetching New Data
 
-See [tools/README.md](../tools/README.md) for detailed tool documentation.
+See [EXAMPLE_GENERATION.md](./EXAMPLE_GENERATION.md) for all example generation commands, or [tools/README.md](../tools/README.md) for detailed tool documentation.
 
 ```bash
 cd tools

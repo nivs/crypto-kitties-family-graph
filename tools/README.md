@@ -23,6 +23,9 @@ pip install requests matplotlib numpy
 | `fancy_detector.py` | Detect fancy cats and potential matches |
 | `find_rare_traits.py` | Search API for rare trait kitties (Tier II-IIII) |
 | `ck_traits.py` | Trait name mappings and mewtation tier data |
+| `filter_connected.py` | Filter dataset to connected nodes only |
+
+> **Example Datasets:** See [docs/EXAMPLE_GENERATION.md](../docs/EXAMPLE_GENERATION.md) for commands to generate all example datasets.
 
 ---
 

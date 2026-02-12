@@ -3728,8 +3728,12 @@
     if (shortestPathMode && selectedNodeId && lockedPathToId) {
       url += `&pathFrom=${selectedNodeId}&pathTo=${lockedPathToId}`;
     } else if (selectedNodeId) {
-      // Add selected kitty (only if not using path mode)
+      // Add selected kitty (only if not using path mode with locked target)
       url += `&selected=${selectedNodeId}`;
+      // Add shortestPath mode if enabled (without locked target)
+      if (shortestPathMode) {
+        url += `&shortestPath=true`;
+      }
     }
 
     // Add layout if not default
@@ -4265,6 +4269,9 @@
     // Check for selected kitty param
     const selectedParam = params.get("selected");
 
+    // Check for shortest path mode param
+    const shortestPathParam = params.get("shortestPath") === "true" || params.get("shortestPath") === "1";
+
     // Helper to apply filters after graph loads
     const applyFiltersFromParams = () => {
       // Wait a bit for the graph to stabilize
@@ -4388,6 +4395,13 @@
                   animation: { duration: 400, easingFunction: "easeInOutQuad" }
                 });
               }
+            }
+            // Enable shortest path mode if requested
+            if (shortestPathParam) {
+              shortestPathMode = true;
+              const toggle = $("shortestPathMode");
+              if (toggle) toggle.checked = true;
+              log("Shortest path mode enabled from query param");
             }
             log("Selected kitty from query param:", selId);
           } else {

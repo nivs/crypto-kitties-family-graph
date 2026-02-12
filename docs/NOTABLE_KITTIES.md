@@ -46,7 +46,7 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 |---------|-------------|------|
 | **Holiday Fancies** | Mistletoe → Santa Claws path | [View path](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) |
 | **Nivs + Dragon** | Personal cats connecting to Dragon | [View path](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) |
-| **Dragon Siblings** | Dragon's family connections | [View](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/dragon_siblings.json) |
+| **Dragon Siblings** | Dragon's family connections | [View](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/dragon_siblings.json&selected=896775&shortestPath=true) |
 
 ---
 
@@ -57,6 +57,7 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 | `dataUrl` | Load from cached JSON file | `?dataUrl=./example/dragon/dragon_extended.json` |
 | `svgBaseUrl` | Base URL for local SVG images | `&svgBaseUrl=./example/dragon/svg/` |
 | `selected` | Pre-select a kitty (shows details, centers view) | `&selected=896775` |
+| `shortestPath` | Enable shortest path mode (use with selected) | `&shortestPath=true` |
 | `owner` | Pin owner highlight | `&owner=nivs` or `&owner=0x1234...` |
 | `genMin` / `genMax` | Filter by generation range | `&genMin=0&genMax=10` |
 | `mewtations` | Filter by gem type | `&mewtations=diamond,gold` or `&mewtations=all` |

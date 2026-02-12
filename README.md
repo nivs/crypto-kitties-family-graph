@@ -48,6 +48,7 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
 | `selected` | Pre-select a kitty (shows details, centers view) | `?selected=896775` |
+| `shortestPath` | Enable shortest path mode (use with `selected`) | `?shortestPath=true` |
 | `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
 | `noExpand` | Skip embedded parent/child extraction (faster, exact IDs only) | `?noExpand=true` |
 | `layout` | Graph layout (`clustered`, `physics`, `barnesHut`, `repulsion`, `circle`, `hierarchicalUD`, `hierarchicalDU`, `hierarchicalLR`) | `?layout=circle` |

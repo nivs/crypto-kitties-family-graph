@@ -1,6 +1,6 @@
 {
   "source": "CryptoKitties public API v3",
-  "generated_at_utc": "2026-02-11T03:32:37Z",
+  "generated_at_utc": "2026-02-11T18:08:47Z",
   "config": {
     "parent_levels": 1,
     "child_levels": 0,
@@ -139,6 +139,7 @@
           "kittyId": 894625
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 894625,
         "name": "Dragon Father #894625",
@@ -165,7 +166,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1509387312436,
-          "dynamic_cooldown": 1550187975911,
           "cooldown_index": 8,
           "cooldown_end_block": 6175891,
           "pending_tx_type": null,
@@ -867,6 +867,7 @@
           "kittyId": 894626
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 894626,
         "name": "DRAGON MOTHER #894626",
@@ -893,7 +894,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1511396185579,
-          "dynamic_cooldown": 1551651396834,
           "cooldown_index": 9,
           "cooldown_end_block": 6296995,
           "pending_tx_type": null,
@@ -1708,6 +1708,7 @@
           "kittyId": 896775
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 896775,
         "name": "Dragon",
@@ -1734,7 +1735,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1406836343341,
-          "dynamic_cooldown": 1475558508879,
           "cooldown_index": 4,
           "cooldown_end_block": 0,
           "pending_tx_type": null,

@@ -1,6 +1,6 @@
 {
   "source": "CryptoKitties public API v3",
-  "generated_at_utc": "2026-02-11T03:31:55Z",
+  "generated_at_utc": "2026-02-11T18:10:25Z",
   "config": {
     "parent_levels": 1,
     "child_levels": 1,
@@ -151,6 +151,7 @@
           "description": "bloodred"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 88446,
         "name": "A3B3-1",
@@ -309,6 +310,7 @@
           "description": "bloodred"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 97722,
         "name": "A4B4-1",
@@ -486,6 +488,7 @@
           "kittyId": 100000
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 100000,
         "name": "Rudiger",
@@ -512,7 +515,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486947025969,
-          "dynamic_cooldown": 1532150980842,
           "cooldown_index": 5,
           "cooldown_end_block": 4683257,
           "pending_tx_type": null,
@@ -1001,6 +1003,7 @@
           "description": "emeraldgreen"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 100734,
         "name": "Cheap G8 Snappy Saycheese",
@@ -1160,6 +1163,7 @@
           "description": "bloodred"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 102390,
         "name": "Summer Donna",
@@ -1319,6 +1323,7 @@
           "description": "azaleablush"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 474593,
         "name": "Cathena - Parent 1",
@@ -1477,6 +1482,7 @@
           "description": "emeraldgreen"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 476349,
         "name": "Cathena - Parent 2",
@@ -1601,6 +1607,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/500000.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 500000,
         "name": "Cathena",
@@ -1627,7 +1634,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1494122426522,
-          "dynamic_cooldown": 1538314787754,
           "cooldown_index": 8,
           "cooldown_end_block": 5193337,
           "pending_tx_type": null,
@@ -2453,6 +2459,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 502195,
         "name": "JayDilla // 1st of Cathena",
@@ -2612,6 +2619,7 @@
           "description": "icy"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 507923,
         "name": "Donald // 2nd of Cathena",
@@ -2771,6 +2779,7 @@
           "description": "purplehaze"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 511036,
         "name": null,
@@ -2930,6 +2939,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 523056,
         "name": "Зубрик",
@@ -3089,6 +3099,7 @@
           "description": "egyptiankohl"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 524994,
         "name": "Cathena's Baby",
@@ -3248,6 +3259,7 @@
           "description": "icy"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 546407,
         "name": null,
@@ -3407,6 +3419,7 @@
           "description": "baddate"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 583474,
         "name": "Blue Bird 🐾",

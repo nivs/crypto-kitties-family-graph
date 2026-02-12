@@ -1,6 +1,6 @@
 {
   "source": "CryptoKitties public API v3",
-  "generated_at_utc": "2026-02-11T03:31:14Z",
+  "generated_at_utc": "2026-02-11T18:10:35Z",
   "config": {
     "parent_levels": 0,
     "child_levels": 1,
@@ -145,6 +145,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 169197,
         "name": "Yay!",
@@ -303,6 +304,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 172555,
         "name": "Oldlace+Gerbil+Gold",
@@ -407,6 +409,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/174756.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 174756,
         "name": "#1 Mistletoe",
@@ -433,7 +436,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1487264325425,
-          "dynamic_cooldown": 1533045868118,
           "cooldown_index": 10,
           "cooldown_end_block": 4757312,
           "pending_tx_type": null,
@@ -1011,6 +1013,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/175601.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 175601,
         "name": "#2 - Mistletoe",
@@ -1121,6 +1124,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 218681,
         "name": null,
@@ -1280,6 +1284,7 @@
           "description": "emeraldgreen"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 235050,
         "name": "Rare Kitty Kawai!",
@@ -1438,6 +1443,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 236312,
         "name": null,
@@ -1597,6 +1603,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 261160,
         "name": "ow+ó!",
@@ -1721,6 +1728,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/275808.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 275808,
         "name": "#1st eva Santa.",
@@ -1747,7 +1755,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1487676001457,
-          "dynamic_cooldown": 1532613091929,
           "cooldown_index": 4,
           "cooldown_end_block": 4721498,
           "pending_tx_type": null,
@@ -2119,6 +2126,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 283123,
         "name": "Ginger",
@@ -2278,6 +2286,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 318568,
         "name": null,
@@ -2437,6 +2446,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 323276,
         "name": null,
@@ -2538,6 +2548,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/361558.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 361558,
         "name": "DuCat Gen9#361558",

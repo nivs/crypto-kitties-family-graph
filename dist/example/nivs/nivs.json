@@ -1,6 +1,6 @@
 {
   "source": "CryptoKitties public API v3",
-  "generated_at_utc": "2026-02-11T06:19:25Z",
+  "generated_at_utc": "2026-02-11T18:10:54Z",
   "config": {
     "parent_levels": 0,
     "child_levels": 0,
@@ -184,6 +184,7 @@
           "kittyId": 4653
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 4653,
         "name": "StrawberryMuffin",
@@ -210,7 +211,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486455599506,
-          "dynamic_cooldown": 1532940319385,
           "cooldown_index": 12,
           "cooldown_end_block": 4709408,
           "pending_tx_type": null,
@@ -1176,6 +1176,7 @@
           "kittyId": 20539
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 20539,
         "name": "Cream Chesse Frosting",
@@ -1202,7 +1203,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1487614687043,
-          "dynamic_cooldown": 1533631792101,
           "cooldown_index": 13,
           "cooldown_end_block": 4766744,
           "pending_tx_type": null,
@@ -1940,6 +1940,7 @@
           "kittyId": 35002
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 35002,
         "name": "CoolCat",
@@ -1966,7 +1967,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486287380649,
-          "dynamic_cooldown": 1532573973505,
           "cooldown_index": 11,
           "cooldown_end_block": 4679031,
           "pending_tx_type": null,
@@ -2552,6 +2552,7 @@
           "kittyId": 58820
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 58820,
         "name": "Mongo",
@@ -2578,7 +2579,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486843690004,
-          "dynamic_cooldown": 1534191760905,
           "cooldown_index": 13,
           "cooldown_end_block": 4813176,
           "pending_tx_type": null,
@@ -3316,6 +3316,7 @@
           "kittyId": 64752
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 64752,
         "name": "Smelly Tigerpunk Cat",
@@ -3342,7 +3343,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1485840027168,
-          "dynamic_cooldown": 1532754486659,
           "cooldown_index": 11,
           "cooldown_end_block": 4693999,
           "pending_tx_type": null,
@@ -4080,6 +4080,7 @@
           "kittyId": 68976
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 68976,
         "name": "Simpatico",
@@ -4106,7 +4107,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486584646177,
-          "dynamic_cooldown": 1533299164310,
           "cooldown_index": 13,
           "cooldown_end_block": 4739163,
           "pending_tx_type": null,
@@ -4844,6 +4844,7 @@
           "kittyId": 94805
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 94805,
         "name": "🤠 Ronald-Chartreux!",
@@ -4870,7 +4871,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486981223225,
-          "dynamic_cooldown": 1532794996567,
           "cooldown_index": 7,
           "cooldown_end_block": 4697358,
           "pending_tx_type": null,
@@ -5608,6 +5608,7 @@
           "kittyId": 114618
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 114618,
         "name": null,
@@ -5634,7 +5635,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1487508670110,
-          "dynamic_cooldown": 1532794996756,
           "cooldown_index": 7,
           "cooldown_end_block": 4697358,
           "pending_tx_type": null,
@@ -6390,6 +6390,7 @@
           "kittyId": 124653
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 124653,
         "name": "Footer",
@@ -6416,7 +6417,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1487799972023,
-          "dynamic_cooldown": 1532910903170,
           "cooldown_index": 11,
           "cooldown_end_block": 4706969,
           "pending_tx_type": null,
@@ -6960,6 +6960,7 @@
           "kittyId": 129868
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 129868,
         "name": "Aristocat",
@@ -6986,7 +6987,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1487140136973,
-          "dynamic_cooldown": 1532980368960,
           "cooldown_index": 12,
           "cooldown_end_block": 4712729,
           "pending_tx_type": null,
@@ -7530,6 +7530,7 @@
           "kittyId": 148439
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 148439,
         "name": "Cat Stevens",
@@ -7556,7 +7557,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1407618116011,
-          "dynamic_cooldown": 1476144857410,
           "cooldown_index": 11,
           "cooldown_end_block": 0,
           "pending_tx_type": null,
@@ -7947,6 +7947,7 @@
           "kittyId": 149343
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 149343,
         "name": "Mulberry",
@@ -7973,7 +7974,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1485907344062,
-          "dynamic_cooldown": 1533022748177,
           "cooldown_index": 5,
           "cooldown_end_block": 4716243,
           "pending_tx_type": null,
@@ -8517,6 +8517,7 @@
           "kittyId": 236402
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 236402,
         "name": "Gravy",
@@ -8543,7 +8544,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1409738737854,
-          "dynamic_cooldown": 1476144857785,
           "cooldown_index": 11,
           "cooldown_end_block": 0,
           "pending_tx_type": null,
@@ -8934,6 +8934,7 @@
           "kittyId": 248667
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 248667,
         "name": "Dozer",
@@ -8960,7 +8961,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1407287272714,
-          "dynamic_cooldown": 1476144857974,
           "cooldown_index": 10,
           "cooldown_end_block": 0,
           "pending_tx_type": null,
@@ -9333,6 +9333,7 @@
           "kittyId": 329987
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 329987,
         "name": "Sis",
@@ -9359,7 +9360,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1410204902890,
-          "dynamic_cooldown": 1476144858158,
           "cooldown_index": 9,
           "cooldown_end_block": 0,
           "pending_tx_type": null,

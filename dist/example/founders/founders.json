@@ -1,6 +1,6 @@
 {
   "source": "CryptoKitties public API v3",
-  "generated_at_utc": "2026-02-11T03:32:23Z",
+  "generated_at_utc": "2026-02-11T18:09:02Z",
   "config": {
     "parent_levels": 0,
     "child_levels": 1,
@@ -85,6 +85,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/1.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 1,
         "name": "Genesis",
@@ -111,7 +112,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1408971663578,
-          "dynamic_cooldown": 1475558506102,
           "cooldown_index": 0,
           "cooldown_end_block": 0,
           "pending_tx_type": null,
@@ -258,6 +258,7 @@
           "kittyId": 4
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 4,
         "name": "Fluffy Founder",
@@ -284,7 +285,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1485892613995,
-          "dynamic_cooldown": 1532053538503,
           "cooldown_index": 2,
           "cooldown_end_block": 4675193,
           "pending_tx_type": null,
@@ -644,6 +644,7 @@
           "kittyId": 18
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 18,
         "name": "Founder Cat #18",
@@ -670,7 +671,6 @@
           "is_ready": true,
           "is_gestating": false,
           "cooldown": 1486253621728,
-          "dynamic_cooldown": 1532318685818,
           "cooldown_index": 5,
           "cooldown_end_block": 4697135,
           "pending_tx_type": null,
@@ -1189,6 +1189,7 @@
           "description": "kittencream"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 52431,
         "name": "jaguar 4cb 4jaguar 3F 3x9",
@@ -1348,6 +1349,7 @@
           "description": "emeraldgreen"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 69060,
         "name": "Son of Most ExpensiveCatall 4",
@@ -1449,6 +1451,7 @@
       "image_url": "https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/121126.png",
       "traits": {},
       "enhanced_cattributes": [],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 121126,
         "name": null,
@@ -1559,6 +1562,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 121653,
         "name": null,
@@ -1718,6 +1722,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 124579,
         "name": null,
@@ -1877,6 +1882,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 142524,
         "name": null,
@@ -2036,6 +2042,7 @@
           "description": "granitegrey"
         }
       ],
+      "cooldown_ready_at": null,
       "raw": {
         "id": 154514,
         "name": "Dracula2-5",

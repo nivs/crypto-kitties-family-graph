@@ -1,0 +1,98 @@
+# CryptoKitties Family Graph - Apache Configuration
+# =================================================
+
+# Disable directory listing
+Options -Indexes
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Force HTTPS (uncomment if SSL is configured)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Remove www (optional - uncomment if desired)
+# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+# Security Headers
+<IfModule mod_headers.c>
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Allow embedding from any origin (for iframe embeds)
+    # Header always set X-Frame-Options "SAMEORIGIN"
+
+    # XSS Protection
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Content Security Policy (adjust as needed)
+    # Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.cryptokitties.co https://img.cryptokitties.co;"
+</IfModule>
+
+# CORS for JSON data files (allow cross-origin fetch)
+<FilesMatch "\.(json)$">
+    <IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, OPTIONS"
+        Header set Access-Control-Allow-Headers "Content-Type"
+    </IfModule>
+</FilesMatch>
+
+# Cache Control
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # HTML - short cache (may update frequently)
+    ExpiresByType text/html "access plus 1 hour"
+
+    # CSS/JS - medium cache
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+
+    # Images - long cache
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    # JSON data - short cache (may be updated)
+    ExpiresByType application/json "access plus 1 day"
+
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+# MIME Types
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType application/json .json
+    AddType image/svg+xml .svg
+    AddType text/css .css
+</IfModule>
+
+# Prevent access to hidden files (except .htaccess itself)
+<FilesMatch "^\.(?!htaccess)">
+    Require all denied
+</FilesMatch>
+
+# Block common attack patterns
+<IfModule mod_rewrite.c>
+    # Block requests with suspicious query strings
+    RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+    RewriteRule .* - [F,L]
+</IfModule>
+
+# Custom error pages (optional - create these files if desired)
+# ErrorDocument 404 /404.html
+# ErrorDocument 500 /500.html

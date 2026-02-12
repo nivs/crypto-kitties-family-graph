@@ -1244,12 +1244,12 @@
     clustered: {
       solver: "forceAtlas2Based",
       forceAtlas2Based: {
-        gravitationalConstant: -50,
-        centralGravity: 0.005,
+        gravitationalConstant: -80,
+        centralGravity: 0.01,
         springLength: 100,
-        springConstant: 0.1,
+        springConstant: 0.08,
         damping: 0.4,
-        avoidOverlap: 0.5
+        avoidOverlap: 0.8
       }
     },
     physics: {

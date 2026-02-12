@@ -1124,16 +1124,63 @@
     const existing = new Set(nodes.getIds().map(Number));
     const mainExisting = main.filter((id) => existing.has(Number(id)));
 
-    log("fitMainCluster:", { totalNodes: nodes.length, mainSize: mainExisting.length, roots: myKittyIds.size, physicsOn });
+    log("fitMainCluster:", { totalNodes: nodes.length, mainSize: mainExisting.length, roots: myKittyIds.size, currentLayout });
     if (!mainExisting.length) return;
 
+    const isLR = currentLayout === "hierarchicalLR";
+
+    // For LR layouts, use manual bounding box calculation (vis-network fit is buggy for LR)
+    if (isLR) {
+      try {
+        const positions = network.getPositions(mainExisting);
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+        for (const id of mainExisting) {
+          const pos = positions[id];
+          if (!pos) continue;
+          if (pos.x < minX) minX = pos.x;
+          if (pos.x > maxX) maxX = pos.x;
+          if (pos.y < minY) minY = pos.y;
+          if (pos.y > maxY) maxY = pos.y;
+        }
+
+        if (!isFinite(minX)) return;
+
+        const padding = 100;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const width = (maxX - minX) + padding * 2;
+        const height = (maxY - minY) + padding * 2;
+
+        const canvas = network.canvas.frame.canvas;
+        const canvasWidth = canvas.clientWidth;
+        const canvasHeight = canvas.clientHeight;
+
+        const scaleX = canvasWidth / width;
+        const scaleY = canvasHeight / height;
+        const scale = Math.min(scaleX, scaleY, 1.5); // Cap at 1.5 max zoom
+
+        log("fitMainCluster LR manual:", { centerX, centerY, width, height, scale });
+
+        network.moveTo({
+          position: { x: centerX, y: centerY },
+          scale: scale,
+          animation: { duration: 600, easingFunction: "easeInOutQuad" }
+        });
+      } catch (e) {
+        log("fitMainCluster LR error:", e);
+      }
+      return;
+    }
+
+    // Standard fit for other layouts
     try {
       network.fit({
         nodes: mainExisting,
         animation: { duration: 600, easingFunction: "easeInOutQuad" }
       });
 
-      // After fit completes, zoom in slightly and shift view up for visual balance
+      // After fit completes, zoom in slightly and adjust view for visual balance
       setTimeout(() => {
         try {
           const s = network.getScale();
@@ -1206,6 +1253,54 @@
 
     const btn = $("togglePhysicsBtn");
     if (btn) btn.textContent = `Physics: ${physicsOn ? "on" : "off"}`;
+  }
+
+  // Current layout mode
+  let currentLayout = "physics";
+
+  // Physics solver configurations
+  const PHYSICS_SOLVERS = {
+    physics: {
+      solver: "forceAtlas2Based",
+      forceAtlas2Based: {
+        gravitationalConstant: -120,
+        centralGravity: 0.002,
+        springLength: 120,
+        springConstant: 0.06,
+        damping: 0.4,
+        avoidOverlap: 0.9
+      }
+    },
+    barnesHut: {
+      solver: "barnesHut",
+      barnesHut: {
+        gravitationalConstant: -8000,
+        centralGravity: 0.3,
+        springLength: 120,
+        springConstant: 0.04,
+        damping: 0.09,
+        avoidOverlap: 0.5
+      }
+    },
+    repulsion: {
+      solver: "repulsion",
+      repulsion: {
+        nodeDistance: 150,
+        centralGravity: 0.2,
+        springLength: 200,
+        springConstant: 0.05,
+        damping: 0.09
+      }
+    }
+  };
+
+  function setLayout(layoutType) {
+    if (!network) return;
+    currentLayout = layoutType;
+    log("setLayout:", layoutType);
+
+    // Recreate network with new layout - this is the most reliable approach
+    renderNetworkWithLayout(layoutType);
   }
 
   async function fetchJson(url) {
@@ -1480,17 +1575,16 @@
       updateFilterControls();
       log("expandFamily post-merge:", { nodes: nodes.length, edges: edges.length });
 
-      // Run physics stabilization to rearrange nodes
+      // Run physics stabilization to rearrange nodes (don't fit - keep current view)
       network.setOptions({
         physics: {
           enabled: true,
-          stabilization: { enabled: true, iterations: 200, updateInterval: 25, fit: true }
+          stabilization: { enabled: true, iterations: 200, updateInterval: 25, fit: false }
         }
       });
       network.stabilize();
       physicsOn = true;
 
-      setTimeout(() => fitMainCluster(), 200);
       setStatus(`Expanded ${id}`, false);
     } catch (e) {
       console.error(e);
@@ -2917,45 +3011,70 @@
     logv("showSelected:", { id, owner_addr: displayOwnerAddr, owner_nick: displayOwnerNick, isOnAuction, auctionType, gems });
   }
 
-  function renderNetwork() {
-    const container = $("network");
-    if (!container) throw new Error("Missing #network element");
-
-    // Use improvedLayout for smaller graphs (cleaner initial positioning)
-    // Disable for larger graphs where the algorithm fails/is slow
+  function buildNetworkOptions(layoutType) {
     const nodeCount = nodes.length;
     const useImprovedLayout = nodeCount <= 100;
-    log("renderNetwork:", { nodeCount, useImprovedLayout });
 
-    // Use physics-based layout instead of hierarchical to avoid level issues
+    // Base options shared by all layouts
     const options = {
       layout: {
-        improvedLayout: useImprovedLayout,
-        hierarchical: { enabled: false }
-      },
-      physics: {
-        enabled: true,
-        stabilization: { enabled: true, iterations: 300, updateInterval: 25, fit: true },
-        solver: "forceAtlas2Based",
-        forceAtlas2Based: {
-          gravitationalConstant: -120,  // Stronger repulsion between nodes
-          centralGravity: 0.002,        // Much weaker pull to center (allows disconnected components to separate)
-          springLength: 120,            // Slightly longer springs
-          springConstant: 0.06,
-          damping: 0.4,
-          avoidOverlap: 0.9
-        }
+        improvedLayout: useImprovedLayout
       },
       nodes: {
-        chosen: false // Disable vis-network's automatic hover/select styling - we handle it manually
+        chosen: false
       },
       edges: {
         smooth: { enabled: true, type: "continuous", roundness: 0.5 },
         arrows: { to: { enabled: true, scaleFactor: 0.6 } },
-        chosen: false // Disable vis-network's automatic hover styling
+        chosen: false
       },
-      interaction: { hover: true, hoverConnectedEdges: false, dragNodes: true, dragView: true, zoomView: true }
+      interaction: { hover: true, hoverConnectedEdges: false, dragNodes: true, dragView: true, zoomView: true, zoomSpeed: 0.3 }
     };
+
+    // Apply layout-specific options
+    if (PHYSICS_SOLVERS[layoutType]) {
+      // Physics-based layout
+      options.layout.hierarchical = { enabled: false };
+      options.physics = {
+        enabled: true,
+        stabilization: { enabled: true, iterations: 300, updateInterval: 25, fit: true },
+        ...PHYSICS_SOLVERS[layoutType]
+      };
+    } else {
+      // Sugiyama hierarchical layout
+      const directionMap = {
+        hierarchicalUD: "UD",
+        hierarchicalDU: "DU",
+        hierarchicalLR: "LR"
+      };
+      const direction = directionMap[layoutType] || "UD";
+
+      options.layout.hierarchical = {
+        enabled: true,
+        direction: direction,
+        sortMethod: "directed",
+        levelSeparation: 150,
+        nodeSpacing: 120,
+        treeSpacing: 200,
+        blockShifting: true,
+        edgeMinimization: true,
+        parentCentralization: true
+      };
+      options.physics = { enabled: false };
+    }
+
+    return options;
+  }
+
+  function renderNetworkWithLayout(layoutType) {
+    const container = $("network");
+    if (!container) throw new Error("Missing #network element");
+
+    currentLayout = layoutType;
+    const options = buildNetworkOptions(layoutType);
+    const isPhysics = !!PHYSICS_SOLVERS[layoutType];
+
+    log("renderNetworkWithLayout:", { layoutType, isPhysics, nodeCount: nodes.length });
 
     if (network) {
       try { network.destroy(); } catch {}
@@ -2963,25 +3082,10 @@
     }
 
     network = new vis.Network(container, { nodes, edges }, options);
-    physicsOn = true;
+    physicsOn = isPhysics;
 
-    // Shadow drawing is tricky with circularImage nodes because:
-    // - beforeDrawing: draws under node background (hidden)
-    // - afterDrawing: draws on top of everything (covers cat)
-    //
-    // The CK website uses CSS ::before on a container, which isn't possible here.
-    // For now, shadows are disabled. To get proper shadows, we'd need to either:
-    // 1. Use 'image' shape instead of 'circularImage' and inject shadow into SVG
-    // 2. Create a custom node renderer
-    //
-    // Keeping this code for reference but disabled:
-    /*
-    network.on("beforeDrawing", (ctx) => {
-      const shadowToggle = $("showShadows");
-      if (!shadowToggle || shadowToggle.value !== "on") return;
-      // ... shadow drawing code ...
-    });
-    */
+    const physBtn = $("togglePhysicsBtn");
+    if (physBtn) physBtn.textContent = `Physics: ${physicsOn ? "on" : "off"}`;
 
     // Draw mewtation gems at the edge of nodes
     network.on("afterDrawing", (ctx) => {
@@ -2991,16 +3095,12 @@
         const base = nodeBaseStyle.get(Number(id));
         if (!base || !base.gems || base.gems.length === 0) continue;
 
-        // Get actual node size from the node data (accounts for hover enlargement)
         const node = nodes.get(Number(id));
         const nodeSize = node && node.size ? node.size : (base.size || 38);
-        const gemSize = nodeSize > 44 ? 20 : 16; // Larger gems when node is enlarged
+        const gemSize = nodeSize > 44 ? 20 : 16;
 
-        // Sort gems by priority (diamond > gold > silver > bronze)
         const gemPriority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
         const sortedGems = [...base.gems].sort((a, b) => (gemPriority[b.gem] || 0) - (gemPriority[a.gem] || 0));
-
-        // Show up to 3 gems, positioned around the bottom-right edge of the circle
         const gemsToShow = sortedGems.slice(0, 3);
 
         for (let i = 0; i < gemsToShow.length; i++) {
@@ -3008,9 +3108,7 @@
           const img = gemImageCache.get(gem.gem);
           if (!img) continue;
 
-          // Position gems at the edge of the circle (bottom-right quadrant)
-          // Use angle to place them along the circle's edge
-          const angle = Math.PI * 0.25 + (i * Math.PI * 0.2); // Start at ~45 degrees, spread 36 degrees apart
+          const angle = Math.PI * 0.25 + (i * Math.PI * 0.2);
           const edgeX = pos.x + Math.cos(angle) * nodeSize;
           const edgeY = pos.y + Math.sin(angle) * nodeSize;
 
@@ -3022,53 +3120,44 @@
     });
 
     network.on("click", (params) => {
-      hideContextMenu(); // Hide context menu on any click
+      hideContextMenu();
       const id = params.nodes && params.nodes[0];
       const prevSelected = selectedNodeId;
 
       if (id) {
         const clickedId = Number(id);
 
-        // Shortest path mode: clicking another node locks the path
         if (shortestPathMode && selectedNodeId && clickedId !== selectedNodeId) {
           lockedPathToId = clickedId;
           highlightShortestPath(selectedNodeId, lockedPathToId);
-          showSelected(selectedNodeId); // Keep showing the start node info
+          showSelected(selectedNodeId);
           return;
         }
 
-        // Normal click behavior
         selectedNodeId = clickedId;
-        lockedPathToId = null; // Clear any locked path when selecting a new start node
-        // Clear previous selection styling
+        lockedPathToId = null;
         if (prevSelected && prevSelected !== selectedNodeId) {
           clearSelectionStyle(prevSelected);
         }
-        // Apply selection styling to newly selected node
         applySelectionStyle(selectedNodeId);
-        // Show family edges for selected node
         highlightFamilyEdges(selectedNodeId);
         showSelected(selectedNodeId);
       } else {
-        // Clicked on empty space - clear selection and path lock
         selectedNodeId = null;
         lockedPathToId = null;
         if (prevSelected) {
           clearSelectionStyle(prevSelected);
         }
 
-        // Check if a filter is active
         const filterActive = generationHighlightActive || mewtationHighlightActive;
 
         if (filterActive) {
-          // Restore filter styling to the previously selected node
           if (prevSelected) {
             const filteredStyle = getFilteredNodeStyle(prevSelected);
             if (filteredStyle) {
               nodes.update(filteredStyle);
             }
           }
-          // Restore edges based on filter settings
           if (filterEdgeHighlight) {
             reapplyFilterEdges();
           } else {
@@ -3089,7 +3178,6 @@
       await expandFamily(Number(id));
     });
 
-    // Right-click context menu
     network.on("oncontext", (params) => {
       params.event.preventDefault();
       const nodeId = network.getNodeAt(params.pointer.DOM);
@@ -3106,18 +3194,14 @@
       const base = nodeBaseStyle.get(id);
       if (!base) return;
 
-      // Show tooltip
       showTooltip(id, params.event);
 
-      // Shortest path mode: highlight path from selected node to hovered node
       if (shortestPathMode && selectedNodeId && selectedNodeId !== id) {
         highlightShortestPath(selectedNodeId, id);
-        // Enlarge hovered node on top of path styling
         nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" }, borderWidth: 3 });
         return;
       }
 
-      // Normal mode: enlarge hovered node and highlight family edges
       nodes.update({ id, size: 50, color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" } });
       highlightFamilyEdges(id);
     });
@@ -3127,12 +3211,9 @@
       const base = nodeBaseStyle.get(id);
       if (!base) return;
 
-      // Hide tooltip
       hideTooltip();
 
-      // Shortest path mode: restore all nodes and restore locked path (if any)
       if (shortestPathMode && selectedNodeId) {
-        // Restore all nodes to base/filter state
         const filterActive = generationHighlightActive || mewtationHighlightActive;
         const nodeUpdates = [];
         for (const nodeId of nodes.getIds()) {
@@ -3161,7 +3242,6 @@
         }
         if (nodeUpdates.length) nodes.update(nodeUpdates);
 
-        // Restore locked path if set, otherwise show selected node's family edges
         if (lockedPathToId) {
           highlightShortestPath(selectedNodeId, lockedPathToId);
         } else {
@@ -3170,35 +3250,27 @@
         return;
       }
 
-      // Restore state - check selection first, then filters, then owner highlight
       if (id === selectedNodeId) {
-        // This node is selected - keep showing its family edges
         applySelectionStyle(id);
         highlightFamilyEdges(id);
       } else {
-        // Check if a filter is active
         const filterActive = generationHighlightActive || mewtationHighlightActive;
 
         if (filterActive) {
-          // Restore this node to its filtered state
           const filteredStyle = getFilteredNodeStyle(id);
           if (filteredStyle) {
             nodes.update(filteredStyle);
           }
-          // Restore edges: selected node > filter edges (if enabled) > owner edges > normal
           if (selectedNodeId) {
             highlightFamilyEdges(selectedNodeId);
           } else if (filterEdgeHighlight) {
             reapplyFilterEdges();
           } else {
-            // Filter active but edge highlight unchecked - show owner edges if pinned
             reapplyOwnerEdges();
           }
         } else {
-          // No filter active - restore to base style
           nodes.update({ id, size: base.size, color: { background: base.bg, border: base.border }, borderWidth: base.borderWidth });
 
-          // Restore edge state based on priority: selected node > pinned owner > normal
           if (selectedNodeId) {
             highlightFamilyEdges(selectedNodeId);
           } else if (ownerHighlightLocked) {
@@ -3212,10 +3284,24 @@
 
     setStats();
 
+    // Fit after layout stabilizes
+    // LR layouts need extra time and a second fit attempt
+    const isLR = layoutType === "hierarchicalLR";
+    const delay = isPhysics ? 400 : (isLR ? 300 : 150);
+
     setTimeout(() => {
-      focusOnRoots();
-      setStatus("Rendered graph", false);
-    }, 60);
+      fitMainCluster();
+      setStatus("Layout: " + layoutType, false);
+
+      // LR layouts often need a second fit
+      if (isLR) {
+        setTimeout(() => fitMainCluster(), 400);
+      }
+    }, delay);
+  }
+
+  function renderNetwork() {
+    renderNetworkWithLayout("physics");
   }
 
   function loadJsonObject(obj) {
@@ -3602,6 +3688,13 @@
 
     const physBtn = $("togglePhysicsBtn");
     if (physBtn) physBtn.addEventListener("click", () => setPhysics(!physicsOn));
+
+    const layoutSelect = $("layoutSelect");
+    if (layoutSelect) {
+      layoutSelect.addEventListener("change", () => {
+        setLayout(layoutSelect.value);
+      });
+    }
 
     const permalinkBtn = $("permalinkBtn");
     if (permalinkBtn) {

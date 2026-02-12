@@ -498,6 +498,7 @@
 
   // Shortest path mode
   let shortestPathMode = false;
+  let lockedPathToId = null; // Persisted path target (from URL params)
 
   // Track original dataUrl for permalink (null if loaded via kitty IDs)
   let loadedFromDataUrl = null;
@@ -900,18 +901,21 @@
   }
 
   // Highlight the shortest path between two nodes
+  // Returns true if path was found and highlighted, false if no path exists
   function highlightShortestPath(fromId, toId) {
     const path = findShortestPath(fromId, toId);
-    if (path.length === 0) {
+    const pathExists = path.length > 0;
+
+    if (!pathExists) {
       log("No path found between", fromId, "and", toId);
-      return;
+    } else {
+      log("Shortest path:", path.join(" -> "));
     }
 
-    log("Shortest path:", path.join(" -> "));
-    const pathEdgeIds = new Set(getPathEdgeIds(path));
-    const pathNodeIds = new Set(path);
+    const pathEdgeIds = pathExists ? new Set(getPathEdgeIds(path)) : new Set();
+    const pathNodeIds = pathExists ? new Set(path) : new Set();
 
-    // Highlight path nodes
+    // Update nodes - highlight path nodes, dim others
     const nodeUpdates = [];
     for (const id of nodes.getIds()) {
       const nid = Number(id);
@@ -924,6 +928,14 @@
           id: nid,
           size: base.size + 6,
           color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else if (nid === toId) {
+        // Target node - highlight even if no path (shows what we're hovering)
+        nodeUpdates.push({
+          id: nid,
+          size: 50,
+          color: { background: brightenHex(base.bg, 0.28), border: "#ffffff" },
           borderWidth: 3
         });
       } else if (pathNodeIds.has(nid)) {
@@ -946,7 +958,7 @@
     }
     if (nodeUpdates.length) nodes.update(nodeUpdates);
 
-    // Highlight path edges - preserve matron/sire colors but make them brighter
+    // Update edges - highlight path edges, dim all others
     const edgeUpdates = [];
     for (const edge of edges.get()) {
       if (pathEdgeIds.has(edge.id)) {
@@ -962,7 +974,7 @@
           arrows: { to: { enabled: true, scaleFactor: 1.2, type: "arrow" } }
         });
       } else {
-        // Dim other edges
+        // Dim all other edges (including when no path exists)
         const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
         edgeUpdates.push({
           id: edge.id,
@@ -973,6 +985,8 @@
       }
     }
     if (edgeUpdates.length) edges.update(edgeUpdates);
+
+    return pathExists;
   }
 
   function reachableFromRoots() {
@@ -2546,6 +2560,7 @@
         lockedOwnerNick = null;
         loadedFromDataUrl = null;
         shortestPathMode = false;
+        lockedPathToId = null;
         const spToggle = $("shortestPathMode");
         if (spToggle) spToggle.checked = false;
         loadKittiesById([nodeId]);
@@ -2892,12 +2907,12 @@
         stabilization: { enabled: true, iterations: 300, updateInterval: 25, fit: true },
         solver: "forceAtlas2Based",
         forceAtlas2Based: {
-          gravitationalConstant: -80,
-          centralGravity: 0.01,
-          springLength: 100,
-          springConstant: 0.08,
+          gravitationalConstant: -120,  // Stronger repulsion between nodes
+          centralGravity: 0.002,        // Much weaker pull to center (allows disconnected components to separate)
+          springLength: 120,            // Slightly longer springs
+          springConstant: 0.06,
           damping: 0.4,
-          avoidOverlap: 0.8
+          avoidOverlap: 0.9
         }
       },
       nodes: {
@@ -2981,7 +2996,19 @@
       const prevSelected = selectedNodeId;
 
       if (id) {
-        selectedNodeId = Number(id);
+        const clickedId = Number(id);
+
+        // Shortest path mode: clicking another node locks the path
+        if (shortestPathMode && selectedNodeId && clickedId !== selectedNodeId) {
+          lockedPathToId = clickedId;
+          highlightShortestPath(selectedNodeId, lockedPathToId);
+          showSelected(selectedNodeId); // Keep showing the start node info
+          return;
+        }
+
+        // Normal click behavior
+        selectedNodeId = clickedId;
+        lockedPathToId = null; // Clear any locked path when selecting a new start node
         // Clear previous selection styling
         if (prevSelected && prevSelected !== selectedNodeId) {
           clearSelectionStyle(prevSelected);
@@ -2992,8 +3019,9 @@
         highlightFamilyEdges(selectedNodeId);
         showSelected(selectedNodeId);
       } else {
-        // Clicked on empty space - clear selection
+        // Clicked on empty space - clear selection and path lock
         selectedNodeId = null;
+        lockedPathToId = null;
         if (prevSelected) {
           clearSelectionStyle(prevSelected);
         }
@@ -3071,7 +3099,7 @@
       // Hide tooltip
       hideTooltip();
 
-      // Shortest path mode: restore all nodes and show selected node's family edges
+      // Shortest path mode: restore all nodes and restore locked path (if any)
       if (shortestPathMode && selectedNodeId) {
         // Restore all nodes to base/filter state
         const filterActive = generationHighlightActive || mewtationHighlightActive;
@@ -3102,8 +3130,12 @@
         }
         if (nodeUpdates.length) nodes.update(nodeUpdates);
 
-        // Restore edges to selected node's family
-        highlightFamilyEdges(selectedNodeId);
+        // Restore locked path if set, otherwise show selected node's family edges
+        if (lockedPathToId) {
+          highlightShortestPath(selectedNodeId, lockedPathToId);
+        } else {
+          highlightFamilyEdges(selectedNodeId);
+        }
         return;
       }
 
@@ -3173,6 +3205,7 @@
     highlightedGemTypes.clear();
     filterEdgeHighlight = false;
     shortestPathMode = false;
+    lockedPathToId = null;
 
     // Reset filter UI
     const genMinInput = $("generationMin");
@@ -3723,6 +3756,13 @@
         if (shortestPathMode) {
           setStatus("Shortest path mode: hover over a kitty to see path from selected", false);
         } else {
+          lockedPathToId = null;
+          // Restore normal edge highlighting
+          if (selectedNodeId) {
+            highlightFamilyEdges(selectedNodeId);
+          } else {
+            restoreEdgeColors();
+          }
           setStatus("Shortest path mode disabled", false);
         }
       });
@@ -3751,6 +3791,7 @@
         // Reset shortest path mode
         if (shortestPathToggle) shortestPathToggle.checked = false;
         shortestPathMode = false;
+        lockedPathToId = null;
 
         // Note: Owner highlight is preserved - use the owner highlight button to clear it
 
@@ -3772,6 +3813,7 @@
         // Disable shortest path mode
         if (shortestPathMode) {
           shortestPathMode = false;
+          lockedPathToId = null;
           const spToggle = $("shortestPathMode");
           if (spToggle) spToggle.checked = false;
           setStatus("Shortest path mode disabled", false);
@@ -3960,9 +4002,10 @@
     const defaultUrl = (jsonUrlEl && jsonUrlEl.value ? jsonUrlEl.value : "").trim();
     const hasDataToLoad = kittyIds.length > 0 || dataUrlParam || defaultUrl;
 
-    // Collapse examples panel if loading data, expand if no data
+    // Collapse examples panel if loading data (unless examples=open param is set)
+    const keepExamplesOpen = params.get("examples") === "open";
     if (examplesToggle && examplesBody) {
-      if (hasDataToLoad) {
+      if (hasDataToLoad && !keepExamplesOpen) {
         examplesToggle.classList.add("collapsed");
         examplesBody.classList.add("collapsed");
       } else {
@@ -3979,6 +4022,10 @@
     const genMaxParam = params.get("genMax");
     const mewtationsParam = params.get("mewtations");
     const filterEdgesParam = params.get("filterEdges") === "true" || params.get("filterEdges") === "1";
+
+    // Check for pathFrom/pathTo params (auto-highlight shortest path)
+    const pathFromParam = params.get("pathFrom");
+    const pathToParam = params.get("pathTo");
 
     // Helper to apply filters after graph loads
     const applyFiltersFromParams = () => {
@@ -4063,6 +4110,27 @@
     const applyPostLoadParams = () => {
       applyOwnerHighlight();
       applyFiltersFromParams();
+
+      // Apply pathFrom/pathTo highlighting
+      if (pathFromParam && pathToParam) {
+        setTimeout(() => {
+          const fromId = Number(pathFromParam);
+          const toId = Number(pathToParam);
+          if (kittyById.has(fromId) && kittyById.has(toId)) {
+            // Enable shortest path mode and update UI toggle
+            shortestPathMode = true;
+            lockedPathToId = toId; // Persist path target
+            const toggle = $("shortestPathMode");
+            if (toggle) toggle.checked = true;
+            // Select the "from" node and highlight path to "to" node
+            selectedNodeId = fromId;
+            highlightShortestPath(fromId, toId);
+            log("Path highlighting from query params:", { from: fromId, to: toId });
+          } else {
+            console.warn("pathFrom/pathTo: kitty not found in graph", { fromId, toId });
+          }
+        }, 700); // After filters (600ms)
+      }
     };
 
     // Check for noExpand param (skip embedded parent/child extraction)

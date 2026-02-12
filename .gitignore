@@ -16,3 +16,5 @@ __pycache__/
 
 # Local data (uncomment if you don't want to track your kitty data)
 # nivs/
+/dist/example/nivs/svg_full_parents
+/dist/example/milestones/svg_1M

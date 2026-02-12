@@ -38,6 +38,7 @@ Examples
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import logging
 import os
@@ -198,12 +199,19 @@ class CKClient:
                 logging.debug("GET %s", url)
                 resp = self.session.get(url, timeout=self.cfg.request_timeout_s)
                 if resp.status_code == 429:
+                    last_err = RuntimeError(f"429 rate limited: {url}")
                     sleep = self.cfg.backoff_base_s * (2**attempt)
                     logging.warning("429 rate limited, sleeping %.2fs", sleep)
                     time.sleep(sleep)
                     continue
+                if resp.status_code == 404:
+                    # Don't retry 404s - they're permanent
+                    raise RuntimeError(f"404 Not Found: {url}")
                 resp.raise_for_status()
                 return resp.json()
+            except RuntimeError:
+                # Re-raise our 404 error without retry
+                raise
             except Exception as e:
                 last_err = e
                 sleep = self.cfg.backoff_base_s * (2**attempt)
@@ -414,6 +422,18 @@ def normalize_kitty(kitty: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
 
     kitty_color, shadow_color = compute_colors(color_name, background_color, cfg.shadow_mode, cfg.shadow_factor)
 
+    # Compute stable cooldown timestamp and strip unstable dynamic_cooldown
+    status = kitty.get("status") or {}
+    cooldown_ready_at = None
+    if not status.get("is_ready", True):
+        # Kitty is on cooldown - use the base cooldown timestamp (stable)
+        cooldown_ready_at = status.get("cooldown")
+
+    # Deep copy raw to avoid mutating original, then strip dynamic_cooldown
+    raw_copy = copy.deepcopy(kitty)
+    if isinstance(raw_copy.get("status"), dict):
+        raw_copy["status"].pop("dynamic_cooldown", None)
+
     return {
         "id": kid,
         "name": name,
@@ -435,7 +455,8 @@ def normalize_kitty(kitty: Dict[str, Any], cfg: Config) -> Dict[str, Any]:
         "image_url": image_url,
         "traits": traits,
         "enhanced_cattributes": enhanced if isinstance(enhanced, list) else [],
-        "raw": kitty,
+        "cooldown_ready_at": cooldown_ready_at,
+        "raw": raw_copy,
     }
 
 
@@ -625,7 +646,7 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=30, help="Request timeout seconds (default 30)")
     ap.add_argument("--sleep", type=float, default=0.15, help="Sleep seconds between requests (default 0.15)")
     ap.add_argument("--max-total", type=int, default=5000, help="Hard cap on total kitties (default 5000)")
-    ap.add_argument("--retries", type=int, default=4, help="Max retries per request (default 4)")
+    ap.add_argument("--retries", type=int, default=8, help="Max retries per request (default 8)")
     ap.add_argument("--backoff", type=float, default=0.75, help="Backoff base seconds (default 0.75)")
     ap.add_argument("--out", default="cryptokitties_aggregation.json", help="Output JSON path")
 

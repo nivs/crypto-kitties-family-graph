@@ -53,6 +53,8 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 | `genMax` | Filter: maximum generation (inclusive) | `?genMax=10` |
 | `mewtations` | Filter: mewtation gems (`all` or comma-separated: `diamond,gold,silver,bronze`) | `?mewtations=diamond,gold` |
 | `filterEdges` | Highlight edges between filtered kitties | `?filterEdges=true` |
+| `pathFrom` | Shortest path: source kitty ID | `?pathFrom=174756` |
+| `pathTo` | Shortest path: target kitty ID | `?pathTo=275808` |
 
 **Examples:**
 ```
@@ -67,6 +69,9 @@ http://localhost:8001/?embed=true&kitties=124653,129868
 
 # With filters (generation 0-5, gold mewtations, owner highlight)
 http://localhost:8001/?kitties=896775&genMin=0&genMax=5&mewtations=gold&owner=nivs
+
+# Shortest path between two kitties
+http://localhost:8001/?dataUrl=./example/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808
 ```
 
 ## Embedding
@@ -137,64 +142,28 @@ crypto-kitties-family-graph/
 
 ## Generating Kitty Data
 
-Use `tools/ck_fetch.py` to generate a JSON file with your kitties:
+Use the tools in `tools/` to fetch kitty data and download images.
 
-```bash
-# Install dependencies
-pip install requests
-
-# Fetch kitties with their parents and children (recursive mode)
-python3 tools/ck_fetch.py \
-  --ids "124653,129868,148439" \
-  --parents 2 \
-  --children 1 \
-  --out my_kitties.json \
-  -v
-
-# Embedded-only mode (matches JS viewer behavior)
-# Only extracts parents/children embedded in API response, no extra API calls
-python3 tools/ck_fetch.py \
-  --ids "1,4,18" \
-  --embedded-only \
-  --out founders.json \
-  -v
-```
-
-**Modes:**
-- **Default (recursive)**: Makes separate API calls to fetch all parents/children up to specified depth
-- **`--embedded-only`**: Only extracts data embedded in each kitty's API response (faster, matches `?kitties=...` URL behavior)
-
-See `python3 tools/ck_fetch.py --help` for all options.
-
-## Downloading SVG Images
-
-Use `tools/download_svgs.py` to download kitty SVG images from a JSON file:
-
-```bash
-# Basic usage
-python3 tools/download_svgs.py kitties.json -o ./svg/
-
-# Skip existing files (for incremental downloads)
-python3 tools/download_svgs.py kitties.json -o ./svg/ --skip-existing
-
-# With custom delay between requests (default: 0.5s)
-python3 tools/download_svgs.py kitties.json -o ./svg/ --delay 1.0
-```
-
-**Example workflow:**
 ```bash
 cd tools
+pip install requests
 
-# 1. Fetch kitty data
-python3 ck_fetch.py --ids 896775 --parents 2 --children 1 \
-  --out ../dist/example/dragon/dragon.json -v
+# Fetch kitties with parents/children
+python3 ck_fetch.py --ids "124653,129868" --parents 2 --children 1 --out my_kitties.json
 
-# 2. Download SVGs
-python3 download_svgs.py ../dist/example/dragon/dragon.json \
-  -o ../dist/example/dragon/svg/ --skip-existing
+# Download SVGs
+python3 download_svgs.py my_kitties.json -o ./svg/ --skip-existing
 ```
 
-Then load with: `?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
+Then load with: `?dataUrl=./my_kitties.json&svgBaseUrl=./svg/`
+
+See **[tools/README.md](tools/README.md)** for full documentation including:
+- `ck_fetch.py` - Fetch kitty data with ancestry/children
+- `download_svgs.py` - Download kitty images
+- `gene_analysis.py` - Analyze genetic inheritance and mewtations
+- `genome_visualizer.py` - Create visual genome charts
+- `fancy_detector.py` - Detect fancy cats and potential matches
+- `find_rare_traits.py` - Search API for rare trait kitties (Tier II-IIII)
 
 ## CORS Proxy
 
@@ -214,29 +183,26 @@ When hosting on a web server, you may need the CORS proxy for API calls. Deploy 
 
 ## Example Graphs
 
-Notable kitties that make interesting demo graphs:
+Notable kitties and curated datasets are available on [ck.innerlogics.com](https://ck.innerlogics.com).
 
-| Kitty | ID | Description |
-|-------|-----|-------------|
-| Dragon | 896775 | Sold for 600 ETH (~$170k at the time) - the most expensive CryptoKitty ever |
-| Genesis | 1 | The first CryptoKitty ever created |
-| Founder Cat #4 | 4 | Gen 0 founder cat from the early days |
-| Founder Cat #18 | 18 | Gen 0 founder cat from the early days |
-| Kitty #100,000 | 100000 | The 100,000th kitty - ecosystem milestone |
-| Cathena | 500000 | Exclusive special edition kitty |
-| First Mistletoe | 174756 | First holiday Fancy cat (Christmas 2017) |
-| First SantaClaws | 275808 | First SantaClaws Fancy cat |
+See **[docs/NOTABLE_KITTIES.md](docs/NOTABLE_KITTIES.md)** for the complete catalog with live links.
 
 ### Live Demo Links
 
-Try these examples on [ck.innerlogics.com](https://ck.innerlogics.com):
+**Historical:**
+- [Dragon](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/) - 600 ETH (~$170k) ・ [API](https://ck.innerlogics.com/?kitties=896775)
+- [Founders](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/) - Genesis + Gen 0 ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
+- [Milestones](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/) - #100k, #500k ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
+- [Holidays](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/) - Mistletoe & SantaClaws
 
-- [Dragon](https://ck.innerlogics.com/?kitties=896775) - sold for 600 ETH (~$170k)
-- [Founders](https://ck.innerlogics.com/?kitties=1,4,18) - Genesis + early Gen 0 cats
-- [Milestones](https://ck.innerlogics.com/?kitties=100000,500000) - 100k and 500k kitties
-- [Holiday Fancies](https://ck.innerlogics.com/?kitties=174756,275808) - First Mistletoe & SantaClaws
-- [All-in showcase](https://ck.innerlogics.com/?kitties=896775,1,4,18,100000,174756,275808,500000) - all notable kitties
-- [Embed mode](https://ck.innerlogics.com/?embed=true&dataUrl=./example/nivs/nivs.json&svgBaseUrl=./example/nivs/svg/&owner=nivs) - with owner highlight pinned
+**Rare Mewtations:**
+- [Tier IIII](https://ck.innerlogics.com/?dataUrl=./example/tier_iiii/tier_iiii.json) - Rarest traits (liger, moonrise)
+- [Tier III](https://ck.innerlogics.com/?dataUrl=./example/tier_iii/tier_iii.json) - Very rare (lykoi, avatar)
+- [Diamonds](https://ck.innerlogics.com/?dataUrl=./example/diamonds/diamonds.json&mewtations=all&filterEdges=true) - First discoverers
+
+**Shortest Paths:**
+- [Mistletoe → Santa](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) - Holiday fancy connection
+- [Mulberry → Dragon](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) - Cross-collection path
 
 **Quick-start presets** (paste into the Kitty ID field or use as `?kitties=...`):
 
@@ -247,58 +213,6 @@ Try these examples on [ck.innerlogics.com](https://ck.innerlogics.com):
 | Milestones | `100000,500000` |
 | Holiday Fancies | `174756,275808` |
 | All-in showcase | `896775,1,4,18,100000,174756,275808,500000` |
-
-### Generating Example Data
-
-From the `tools/` folder:
-
-**Dragon (most expensive):**
-```bash
-python3 ck_fetch.py --ids 896775 --parents 1 --children 0 -v \
-  --out ../dist/example/dragon/dragon.json
-python3 download_svgs.py ../dist/example/dragon/dragon.json \
-  -o ../dist/example/dragon/svg/ --skip-existing
-```
-- [Live (API)](https://ck.innerlogics.com/?kitties=896775) ・ [Live (cached JSON+SVGs)](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/)
-- Local test:
-  - API: `http://localhost:8001/?kitties=896775`
-  - JSON: `http://localhost:8001/?dataUrl=./example/dragon/dragon.json&svgBaseUrl=./example/dragon/svg/`
-
-**Founders (origin story):**
-```bash
-python3 ck_fetch.py --ids "1,4,18" --embedded-only -v \
-  --out ../dist/example/founders/founders.json
-python3 download_svgs.py ../dist/example/founders/founders.json \
-  -o ../dist/example/founders/svg/ --skip-existing
-```
-- [Live (API)](https://ck.innerlogics.com/?kitties=1,4,18) ・ [Live (cached JSON+SVGs)](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/)
-- Local test:
-  - API: `http://localhost:8001/?kitties=1,4,18`
-  - JSON: `http://localhost:8001/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/`
-
-**Milestones:**
-```bash
-python3 ck_fetch.py --ids "100000,500000" --parents 1 --children 1 --embedded-only -v \
-  --out ../dist/example/milestones/milestones.json
-python3 download_svgs.py ../dist/example/milestones/milestones.json \
-  -o ../dist/example/milestones/svg/ --skip-existing
-```
-- [Live (API)](https://ck.innerlogics.com/?kitties=100000,500000) ・ [Live (cached JSON+SVGs)](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/)
-- Local test:
-  - API: `http://localhost:8001/?kitties=100000,500000`
-  - JSON: `http://localhost:8001/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/`
-
-**Holiday Fancies:**
-```bash
-python3 ck_fetch.py --ids "174756,275808" --embedded-only -v \
-  --out ../dist/example/holidays/holidays.json
-python3 download_svgs.py ../dist/example/holidays/holidays.json \
-  -o ../dist/example/holidays/svg/ --skip-existing
-```
-- [Live (API)](https://ck.innerlogics.com/?kitties=174756,275808) ・ [Live (cached JSON+SVGs)](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/)
-- Local test:
-  - API: `http://localhost:8001/?kitties=174756,275808`
-  - JSON: `http://localhost:8001/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/`
 
 ## Screen Recordings
 

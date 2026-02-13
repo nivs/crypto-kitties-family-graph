@@ -13,8 +13,8 @@ Usage:
     python3 fancy_detector.py kitties.json --check-potential
 
 Examples:
-    python3 fancy_detector.py ../dist/example/founders/founders.json
-    python3 fancy_detector.py ../dist/example/nivs/nivs_full_parents.json --verbose
+    python3 fancy_detector.py ../dist/examples/founders/founders.json
+    python3 fancy_detector.py ../dist/examples/nivs/nivs_full_parents.json --verbose
 """
 
 import argparse

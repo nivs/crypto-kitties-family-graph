@@ -47,7 +47,7 @@
 
 # GitHub Linguist overrides
 # Mark vendored/generated files
-dist/example/** linguist-generated
+dist/examples/** linguist-generated
 *.min.js linguist-vendored
 
 # Tools are utilities, not the main project language

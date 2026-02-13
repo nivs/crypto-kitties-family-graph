@@ -14,11 +14,8 @@ __pycache__/
 *.swp
 *.swo
 
-# Local data (uncomment if you don't want to track your kitty data)
-# nivs/
-/dist/example/nivs/svg_full_parents
-/dist/example/milestones/svg_1M
-
 # Example SVGs (hosted on webserver, not in repo)
-/dist/example/*/svg/
-!/dist/example/nivs/svg/
+/dist/examples/*/svg/
+/dist/examples/nivs/svg_full_parents
+/dist/examples/milestones/svg_1M
+!/dist/examples/nivs/svg/

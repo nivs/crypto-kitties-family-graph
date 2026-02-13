@@ -64,8 +64,8 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 # Load specific kitties from API
 http://localhost:8001/?kitties=124653,129868,148439
 
-# Load from local JSON with local SVGs
-http://localhost:8001/?dataUrl=./example/nivs/nivs.json&svgBaseUrl=./example/nivs/svg/
+# Load from local JSON
+http://localhost:8001/?dataUrl=./examples/nivs/nivs.json
 
 # Embed mode with specific kitties
 http://localhost:8001/?embed=true&kitties=124653,129868
@@ -74,7 +74,7 @@ http://localhost:8001/?embed=true&kitties=124653,129868
 http://localhost:8001/?kitties=896775&genMin=0&genMax=5&mewtations=gold&owner=nivs
 
 # Shortest path between two kitties
-http://localhost:8001/?dataUrl=./example/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808
+http://localhost:8001/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808
 ```
 
 ## Embedding
@@ -136,7 +136,7 @@ crypto-kitties-family-graph/
 │   ├── js/
 │   │   └── ck-family-graph.js  # Graph visualization logic
 │   ├── images/                 # Logos, mewtation gem badges
-│   └── example/                # Pre-generated kitty data with SVGs (most expensive, fancy cats)
+│   └── examples/                # Pre-generated kitty data with SVGs (most expensive, fancy cats)
 ├── images/                     # README assets
 ├── assets/                     # Source assets (not deployed)
 ├── proxy/                      # CORS proxy (deploy separately if needed)
@@ -158,7 +158,7 @@ python3 ck_fetch.py --ids "124653,129868" --parents 2 --children 1 --out my_kitt
 python3 download_svgs.py my_kitties.json -o ./svg/ --skip-existing
 ```
 
-Then load with: `?dataUrl=./my_kitties.json&svgBaseUrl=./svg/`
+Then load with: `?dataUrl=./my_kitties.json`
 
 See **[tools/README.md](tools/README.md)** for full documentation including:
 - `ck_fetch.py` - Fetch kitty data with ancestry/children
@@ -193,19 +193,19 @@ See **[docs/NOTABLE_KITTIES.md](docs/NOTABLE_KITTIES.md)** for the complete cata
 ### Live Demo Links
 
 **Historical:**
-- [Dragon](https://ck.innerlogics.com/?dataUrl=./example/dragon/dragon_extended.json&svgBaseUrl=./example/dragon/svg/&selected=896775) - 600 ETH (~$170k) ・ [API](https://ck.innerlogics.com/?kitties=896775)
-- [Founders](https://ck.innerlogics.com/?dataUrl=./example/founders/founders.json&svgBaseUrl=./example/founders/svg/) - Genesis + Gen 0 ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
-- [Milestones](https://ck.innerlogics.com/?dataUrl=./example/milestones/milestones.json&svgBaseUrl=./example/milestones/svg/) - #100k, #500k ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
-- [Holidays](https://ck.innerlogics.com/?dataUrl=./example/holidays/holidays.json&svgBaseUrl=./example/holidays/svg/) - Mistletoe & SantaClaws
+- [Dragon](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) - 600 ETH (~$170k) ・ [API](https://ck.innerlogics.com/?kitties=896775)
+- [Founders](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json) - Genesis + Gen 0 ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
+- [Milestones](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json) - #100k, #500k ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
+- [Holidays](https://ck.innerlogics.com/?dataUrl=./examples/holidays/holidays.json) - Mistletoe & SantaClaws
 
 **Rare Mewtations:**
-- [Tier IIII](https://ck.innerlogics.com/?dataUrl=./example/tier_iiii/tier_iiii.json) - Rarest traits (liger, moonrise)
-- [Tier III](https://ck.innerlogics.com/?dataUrl=./example/tier_iii/tier_iii.json) - Very rare (lykoi, avatar)
-- [Diamonds](https://ck.innerlogics.com/?dataUrl=./example/diamonds/diamonds.json&mewtations=all&filterEdges=true) - First discoverers
+- [Tier IIII](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json) - Rarest traits (liger, moonrise)
+- [Tier III](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json) - Very rare (lykoi, avatar)
+- [Diamonds](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdges=true) - First discoverers
 
 **Shortest Paths:**
-- [Mistletoe → Santa](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) - Holiday fancy connection
-- [Mulberry → Dragon](https://ck.innerlogics.com/?dataUrl=./example/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) - Cross-collection path
+- [Mistletoe → Santa](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) - Holiday fancy connection
+- [Mulberry → Dragon](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) - Cross-collection path
 
 **Quick-start presets** (paste into the Kitty ID field or use as `?kitties=...`):
 

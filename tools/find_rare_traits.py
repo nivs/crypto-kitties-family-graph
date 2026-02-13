@@ -12,7 +12,7 @@ Usage:
 
 Save IDs for use with ck_fetch.py:
     python3 find_rare_traits.py --tier IIII --limit 10 --ids-file tier_iiii_ids.txt
-    python3 ck_fetch.py --ids-file tier_iiii_ids.txt --parents 3 --out ../dist/example/tier_iiii/tier_iiii.json
+    python3 ck_fetch.py --ids-file tier_iiii_ids.txt --parents 3 --out ../dist/examples/tier_iiii/tier_iiii.json
 """
 
 import argparse

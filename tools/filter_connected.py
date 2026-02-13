@@ -59,8 +59,8 @@ def main():
         epilog="""
 Examples:
     # Filter using root_ids from the JSON file
-    python3 filter_connected.py ../dist/example/dragon/dragon_extended.json \\
-        -o ../dist/example/dragon/dragon_connected.json
+    python3 filter_connected.py ../dist/examples/dragon/dragon_extended.json \\
+        -o ../dist/examples/dragon/dragon_connected.json
 
     # Filter using a specific root
     python3 filter_connected.py data.json --root 896775 -o connected.json

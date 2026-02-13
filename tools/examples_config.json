@@ -1,0 +1,363 @@
+{
+  "base_url": "https://ck.innerlogics.com",
+  "sections": [
+    {
+      "title": "Historical Collections",
+      "description": "Notable CryptoKitties from the game's history",
+      "examples": [
+        {
+          "name": "Dragon",
+          "description": "600 ETH (~$170k) kitty - most expensive ever",
+          "directory": "dragon",
+          "variations": [
+            {
+              "label": "Basic (3 kitties)",
+              "file": "dragon.json",
+              "params": "selected=896775"
+            },
+            {
+              "label": "Extended ancestry (76 kitties)",
+              "file": "dragon_extended.json",
+              "params": "selected=896775"
+            },
+            {
+              "label": "Shortest path mode (31 kitties)",
+              "file": "dragon_connected.json",
+              "params": "selected=896775&shortestPath=true",
+              "note": "Hover any kitty to see path from Dragon"
+            }
+          ]
+        },
+        {
+          "name": "Founders",
+          "description": "Genesis (#1), Fluffy (#4), and #18",
+          "directory": "founders",
+          "variations": [
+            {
+              "label": "Basic (10 kitties)",
+              "file": "founders.json"
+            },
+            {
+              "label": "Extended (26 kitties)",
+              "file": "founders_extended.json"
+            },
+            {
+              "label": "Connected only (6 kitties)",
+              "file": "founders_connected.json",
+              "note": "Filtered to connected nodes"
+            },
+            {
+              "label": "View (founders_children.json)",
+              "file": "founders_children.json"
+            },
+            {
+              "label": "View (founders_deep_dynasty_builders.json)",
+              "file": "founders_deep_dynasty_builders.json"
+            },
+            {
+              "label": "View (founders_early_prestige.json)",
+              "file": "founders_early_prestige.json"
+            },
+            {
+              "label": "View (founders_huge_amounts.json)",
+              "file": "founders_huge_amounts.json"
+            },
+            {
+              "label": "View (founders_legendary_auction_era.json)",
+              "file": "founders_legendary_auction_era.json"
+            },
+            {
+              "label": "View (dragon_connected.json)",
+              "file": "dragon_connected.json"
+            }
+          ]
+        },
+        {
+          "name": "Milestones",
+          "description": "#100k, #500k, and other milestone kitties",
+          "directory": "milestones",
+          "variations": [
+            {
+              "label": "Basic (15 kitties)",
+              "file": "milestones.json"
+            },
+            {
+              "label": "Extended to 1M (43 kitties)",
+              "file": "milestones1M.json"
+            }
+          ]
+        },
+        {
+          "name": "Holidays",
+          "description": "Mistletoe & SantaClaws",
+          "directory": "holidays",
+          "variations": [
+            {
+              "label": "View (13 kitties)",
+              "file": "holidays.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Rare Mewtations",
+      "description": "Kitties with rare trait discoveries",
+      "examples": [
+        {
+          "name": "Tier IIII",
+          "description": "Rarest mewtations (liger, moonrise)",
+          "directory": "tier_iiii",
+          "variations": [
+            {
+              "label": "All kitties (158)",
+              "file": "tier_iiii.json"
+            },
+            {
+              "label": "Diamond gems only",
+              "file": "tier_iiii.json",
+              "params": "mewtations=diamond&filterEdges=true"
+            }
+          ]
+        },
+        {
+          "name": "Tier III",
+          "description": "Very rare mewtations (lykoi, avatar)",
+          "directory": "tier_iii",
+          "variations": [
+            {
+              "label": "All kitties (139)",
+              "file": "tier_iii.json"
+            },
+            {
+              "label": "Gold+ gems",
+              "file": "tier_iii.json",
+              "params": "mewtations=diamond,gold&filterEdges=true"
+            }
+          ]
+        },
+        {
+          "name": "Diamonds",
+          "description": "First discoverers of mewtation traits",
+          "directory": "diamonds",
+          "variations": [
+            {
+              "label": "With ancestry (150 kitties)",
+              "file": "diamonds.json"
+            },
+            {
+              "label": "All gems highlighted",
+              "file": "diamonds.json",
+              "params": "mewtations=all&filterEdges=true"
+            },
+            {
+              "label": "Diamonds only (50 kitties)",
+              "file": "diamonds_only.json"
+            }
+          ]
+        },
+        {
+          "name": "Gen-0 Diamonds",
+          "description": "Gen 0 kitties that discovered traits",
+          "directory": "gen0_diamonds",
+          "variations": [
+            {
+              "label": "View (40 kitties)",
+              "file": "gen0_diamonds.json"
+            },
+            {
+              "label": "Diamond filter",
+              "file": "gen0_diamonds.json",
+              "params": "mewtations=diamond&filterEdges=true"
+            }
+          ]
+        },
+        {
+          "name": "Liger",
+          "description": "Single Tier IIII trait (body: liger)",
+          "directory": "liger",
+          "variations": [
+            {
+              "label": "View (92 kitties)",
+              "file": "liger.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Special Cat Types",
+      "description": "Fancy, Purrstige, and Exclusive cats",
+      "examples": [
+        {
+          "name": "Fancies",
+          "description": "Bred from specific trait recipes",
+          "directory": "fancies",
+          "variations": [
+            {
+              "label": "View (42 kitties)",
+              "file": "fancies.json"
+            }
+          ]
+        },
+        {
+          "name": "Purrstiges",
+          "description": "Time-limited breeding events",
+          "directory": "purrstiges",
+          "variations": [
+            {
+              "label": "View (59 kitties)",
+              "file": "purrstiges.json"
+            }
+          ]
+        },
+        {
+          "name": "Exclusives",
+          "description": "Celebrity and promotional cats",
+          "directory": "exclusives",
+          "variations": [
+            {
+              "label": "View (317 kitties)",
+              "file": "exclusives.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Shortest Path Examples",
+      "description": "Demonstrating path-finding between kitties",
+      "examples": [
+        {
+          "name": "Holiday Fancies Path",
+          "description": "Mistletoe \u2192 Santa Claws",
+          "directory": "shortest_path",
+          "variations": [
+            {
+              "label": "View path",
+              "file": "holiday_fancies.json",
+              "params": "pathFrom=174756&pathTo=275808"
+            },
+            {
+              "label": "View (dragon_siblings.json)",
+              "file": "dragon_siblings.json"
+            },
+            {
+              "label": "View (founders_descendants.json)",
+              "file": "founders_descendants.json"
+            },
+            {
+              "label": "View (nivs_simpatico_mulberry.json)",
+              "file": "nivs_simpatico_mulberry.json"
+            }
+          ]
+        },
+        {
+          "name": "Nivs + Dragon Path",
+          "description": "Personal collection connecting to Dragon",
+          "directory": "shortest_path",
+          "variations": [
+            {
+              "label": "View path",
+              "file": "nivs_plus_dragon.json",
+              "params": "pathFrom=149343&pathTo=896775"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Personal Collection (nivs)",
+      "description": "Complete ancestry traced to Gen 0",
+      "examples": [
+        {
+          "name": "Root Kitties",
+          "description": "15 base kitties",
+          "directory": "nivs",
+          "variations": [
+            {
+              "label": "View",
+              "file": "nivs.json",
+              "params": "owner=nivs"
+            }
+          ]
+        },
+        {
+          "name": "Full Ancestry",
+          "description": "Complete ancestry to Gen 0",
+          "directory": "nivs",
+          "variations": [
+            {
+              "label": "All kitties (878)",
+              "file": "nivs_full_parents.json",
+              "params": "owner=nivs"
+            },
+            {
+              "label": "Gen 0-5 only",
+              "file": "nivs_full_parents.json",
+              "params": "owner=nivs&genMin=0&genMax=5"
+            },
+            {
+              "label": "All mewtation gems",
+              "file": "nivs_full_parents.json",
+              "params": "owner=nivs&mewtations=all"
+            }
+          ]
+        },
+        {
+          "name": "Lineage Views",
+          "description": "Pruned ancestry views",
+          "directory": "nivs",
+          "variations": [
+            {
+              "label": "Matron line (70 kitties)",
+              "file": "nivs_matron_line.json",
+              "params": "owner=nivs"
+            },
+            {
+              "label": "Sire line (51 kitties)",
+              "file": "nivs_sire_line.json",
+              "params": "owner=nivs"
+            },
+            {
+              "label": "Shortest path (55 kitties)",
+              "file": "nivs_shortest_path.json",
+              "params": "owner=nivs&selected=149343&shortestPath=true",
+              "note": "Hover any kitty to see path"
+            }
+          ]
+        },
+        {
+          "name": "With Children",
+          "description": "Full ancestry plus one level of children",
+          "directory": "nivs",
+          "variations": [
+            {
+              "label": "View (894 kitties)",
+              "file": "nivs_full_parents_plus_one_child.json",
+              "params": "owner=nivs"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "layout_variations": [
+    {
+      "name": "clustered",
+      "label": "Clustered Layout"
+    },
+    {
+      "name": "circle",
+      "label": "Circle Layout"
+    },
+    {
+      "name": "hierarchicalUD",
+      "label": "Hierarchical (Top-Down)"
+    },
+    {
+      "name": "hierarchicalLR",
+      "label": "Hierarchical (Left-Right)"
+    }
+  ]
+}

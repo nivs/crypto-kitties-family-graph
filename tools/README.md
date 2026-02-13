@@ -24,6 +24,11 @@ pip install requests matplotlib numpy
 | `find_rare_traits.py` | Search API for rare trait kitties (Tier II-IIII) |
 | `ck_traits.py` | Trait name mappings and mewtation tier data |
 | `filter_connected.py` | Filter dataset to connected nodes only |
+| `prune_json.py` | Reduce JSON file size by removing unused fields |
+| **Documentation Tools** | |
+| `generate_examples_md.py` | Generate docs/EXAMPLES.md from config |
+| `sync_examples_config.py` | Sync config with actual JSON files |
+| `update_examples.sh` | Run both sync and generate (unified workflow) |
 
 > **Example Datasets:** See [docs/EXAMPLE_GENERATION.md](../docs/EXAMPLE_GENERATION.md) for commands to generate all example datasets.
 
@@ -99,9 +104,9 @@ python3 gene_analysis.py kitties.json --diversity
 ### Example Output: Genome Trace
 
 ```
-$ python3 gene_analysis.py ../dist/example/tier_iiii/tier_iiii.json --trace 1098467
+$ python3 gene_analysis.py ../dist/examples/tier_iiii/tier_iiii.json --trace 1098467
 
-Loaded 158 kitties from ../dist/example/tier_iiii/tier_iiii.json
+Loaded 158 kitties from ../dist/examples/tier_iiii/tier_iiii.json
 Root IDs: [1098467, 1099023, 1099479, 1099487, 1099579, ...]
 Generations: 1 to 4848
 
@@ -137,9 +142,9 @@ Mewtations in dominant genes: 1/12
 ### Example Output: Mewtation Analysis
 
 ```
-$ python3 gene_analysis.py ../dist/example/tier_iiii/tier_iiii.json --mewtations
+$ python3 gene_analysis.py ../dist/examples/tier_iiii/tier_iiii.json --mewtations
 
-Loaded 158 kitties from ../dist/example/tier_iiii/tier_iiii.json
+Loaded 158 kitties from ../dist/examples/tier_iiii/tier_iiii.json
 Generations: 1 to 4848
 
 === MEWTATION ANALYSIS ===
@@ -189,7 +194,7 @@ purrstige          16        0        0        0
 ### Example Output: Inheritance Analysis
 
 ```
-$ python3 gene_analysis.py ../dist/example/nivs/nivs_full_parents.json --mutations
+$ python3 gene_analysis.py ../dist/examples/nivs/nivs_full_parents.json --mutations
 
 Loaded 878 kitties
 Generations: 0 to 22
@@ -257,7 +262,7 @@ python3 genome_visualizer.py kitties.json --mutations -o mutations.png
 ### Example Output (ASCII mode)
 
 ```
-$ python3 genome_visualizer.py ../dist/example/founders/founders.json --strip 1 --ascii
+$ python3 genome_visualizer.py ../dist/examples/founders/founders.json --strip 1 --ascii
 
 ======================================================================
   Genesis (Gen 0)
@@ -343,9 +348,9 @@ python3 fancy_detector.py kitties.json --check-potential
 ### Example Output
 
 ```
-$ python3 fancy_detector.py ../dist/example/founders/founders.json
+$ python3 fancy_detector.py ../dist/examples/founders/founders.json
 
-Loaded 10 kitties from ../dist/example/founders/founders.json
+Loaded 10 kitties from ../dist/examples/founders/founders.json
 
 === FANCY CAT ANALYSIS ===
 
@@ -482,6 +487,84 @@ mutation_gene = (gene1 / 2) + 16
 ```
 
 Example: Breeding `savannah` (1) + `selkirk` (2) can produce `norwegianforest` (h).
+
+---
+
+## Documentation Tools
+
+### update_examples.sh
+
+Unified workflow script to sync configuration and regenerate documentation.
+
+**Usage:**
+```bash
+# Scan for changes and update
+./update_examples.sh
+
+# Also remove config entries for deleted files
+./update_examples.sh --remove-missing
+```
+
+**What it does:**
+1. Runs `sync_examples_config.py` in dry-run mode to detect changes
+2. Warns and prompts for confirmation if changes detected
+3. Updates `examples_config.json` with new/removed files
+4. Regenerates `docs/EXAMPLES.md` from updated config
+
+**When to use:**
+- After adding new JSON files to `dist/examples/`
+- After removing example datasets
+- To ensure documentation is up to date
+
+---
+
+### generate_examples_md.py
+
+Generates `docs/EXAMPLES.md` from `examples_config.json`.
+
+**Usage:**
+```bash
+python3 generate_examples_md.py
+```
+
+**Output:**
+- Creates `docs/EXAMPLES.md` with links to live website
+- Each example includes base link and variations
+- Organized by sections with table of contents
+
+**Note:** Normally you'd use `update_examples.sh` instead of calling this directly.
+
+---
+
+### sync_examples_config.py
+
+Scans `dist/examples/` for JSON files and syncs with configuration.
+
+**Usage:**
+```bash
+# Scan and add missing files
+python3 sync_examples_config.py
+
+# Also remove config entries for files that no longer exist
+python3 sync_examples_config.py --remove-missing
+
+# Preview changes without modifying config
+python3 sync_examples_config.py --dry-run
+```
+
+**What it does:**
+- Discovers new JSON files and adds to config with default metadata
+- Optionally removes config entries for deleted files
+- New files added as variations to existing examples (same directory)
+- Creates new example groups for new directories
+
+**After running:** Manually edit `examples_config.json` to:
+- Update variation labels (changes `"View (filename.json)"` to meaningful text)
+- Add descriptions for new examples
+- Add URL parameters for specific views
+- Reorganize sections if needed
+
+**Note:** Normally you'd use `update_examples.sh` instead of calling this directly.
 
 ---
 

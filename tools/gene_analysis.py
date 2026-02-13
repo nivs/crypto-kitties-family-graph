@@ -16,9 +16,9 @@ Usage:
     python3 gene_analysis.py kitties.json --all
 
 Examples:
-    python3 gene_analysis.py ../dist/example/nivs/nivs_full_parents.json --all
-    python3 gene_analysis.py ../dist/example/nivs/nivs_full_parents.json --trace 124653
-    python3 gene_analysis.py ../dist/example/nivs/nivs_full_parents.json --mewtations
+    python3 gene_analysis.py ../dist/examples/nivs/nivs_full_parents.json --all
+    python3 gene_analysis.py ../dist/examples/nivs/nivs_full_parents.json --trace 124653
+    python3 gene_analysis.py ../dist/examples/nivs/nivs_full_parents.json --mewtations
 """
 
 import argparse

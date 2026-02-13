@@ -2,14 +2,14 @@
 
 Example datasets for demonstrating the "Find Shortest Path" feature.
 
-Data files are in `dist/examples/shortest_path/`.
+> **Note:** For basic generation commands, see [docs/EXAMPLE_GENERATION.md](../../../docs/EXAMPLE_GENERATION.md). This file contains detailed workflow examples for path-finding.
 
 ## How to Generate
 
 Run these commands from the `tools/` directory with the venv activated:
 
 ```bash
-cd tools
+cd /Users/nivs/Documents/Personal/Projects/crypto-kitties-family-graph/tools
 source .venv/bin/activate
 ```
 
@@ -114,13 +114,12 @@ if common:
 "
 ```
 
-Common ancestors found:
-```
+!!!
 Mistletoe ancestors: 138
 Santa ancestors: 115
 Common ancestors: 4
 Common ancestor IDs: [15315, 101959, 104301, 110586]...
-```
+!!!
 
 **Visualizer URL:**
 [Mistletoe → Santa Claws](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808)

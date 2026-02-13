@@ -82,7 +82,7 @@ Rarest mewtations (liger, moonrise)
 **Variations:**
 
 - **[All kitties (158)](https://ck.innerlogics.com?dataUrl=./examples/tier_iiii/tier_iiii.json)**
-- **[Diamond gems only](https://ck.innerlogics.com?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdges=true)**
+- **[Diamond gems only](https://ck.innerlogics.com?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true)**
 
 ### Tier III
 
@@ -93,7 +93,7 @@ Very rare mewtations (lykoi, avatar)
 **Variations:**
 
 - **[All kitties (139)](https://ck.innerlogics.com?dataUrl=./examples/tier_iii/tier_iii.json)**
-- **[Gold+ gems](https://ck.innerlogics.com?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdges=true)**
+- **[Gold+ gems](https://ck.innerlogics.com?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true)**
 
 ### Diamonds
 
@@ -104,7 +104,7 @@ First discoverers of mewtation traits
 **Variations:**
 
 - **[With ancestry (150 kitties)](https://ck.innerlogics.com?dataUrl=./examples/diamonds/diamonds.json)**
-- **[All gems highlighted](https://ck.innerlogics.com?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdges=true)**
+- **[All gems highlighted](https://ck.innerlogics.com?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true)**
 - **[Diamonds only (50 kitties)](https://ck.innerlogics.com?dataUrl=./examples/diamonds/diamonds_only.json)**
 
 ### Gen-0 Diamonds
@@ -116,7 +116,7 @@ Gen 0 kitties that discovered traits
 **Variations:**
 
 - **[View (40 kitties)](https://ck.innerlogics.com?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json)**
-- **[Diamond filter](https://ck.innerlogics.com?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdges=true)**
+- **[Diamond filter](https://ck.innerlogics.com?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true)**
 
 ### Liger
 

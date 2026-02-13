@@ -191,8 +191,8 @@
       </div>
 
       <div class="card">
-        <h3 class="collapsible" id="filtersToggle">Filters</h3>
-        <div class="card-body" id="filtersBody">
+        <h3 class="collapsible collapsed" id="filtersToggle">Filters</h3>
+        <div class="card-body collapsed" id="filtersBody">
           <div class="filter-controls">
             <div class="filter-row">
               <label class="filter-label">Generation Range</label>
@@ -285,9 +285,9 @@
           <div class="examples-list">
             <a href="?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&examples=open" class="example-link">Dragon</a>
             <span class="example-desc">600 ETH (~$170k)</span>
-
-            <a href="?dataUrl=./examples/founders/founders.json&examples=open" class="example-link">Founders</a>
-            <span class="example-desc">Genesis + Gen 0</span>
+            
+            <a href="?dataUrl=./examples/founders/founders_children.json&genMax=0&examples=open" class="example-link">Founders</a>
+            <span class="example-desc">Founder Core Set</span>
 
             <a href="?dataUrl=./examples/milestones/milestones.json&examples=open" class="example-link">Milestones</a>
             <span class="example-desc">100k & 500k</span>
@@ -296,34 +296,31 @@
             <span class="example-desc">Mistletoe & SantaClaws</span>
 
             <a href="?dataUrl=./examples/fancies/fancies.json&examples=open" class="example-link">Fancies</a>
-            <span class="example-desc">42 bred from recipes</span>
+            <span class="example-desc">42 bred from specific trait recipes</span>
 
             <a href="?dataUrl=./examples/purrstiges/purrstiges.json&examples=open" class="example-link">Purrstiges</a>
-            <span class="example-desc">59 time-limited cats</span>
-
-            <a href="?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdges=true&examples=open" class="example-link">Tier III</a>
-            <span class="example-desc">Very rare mewtations</span>
-
-            <a href="?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdges=true&examples=open" class="example-link">Tier IIII</a>
-            <span class="example-desc">Rarest mewtations</span>
-
-            <a href="?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdges=true&examples=open" class="example-link">Diamonds</a>
-            <span class="example-desc">First discoverers</span>
-
-            <a href="?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdges=true&examples=open" class="example-link">Gen-0 Diamonds</a>
-            <span class="example-desc">40 trait discoverers</span>
+            <span class="example-desc">59 time-limited breeding events</span>
 
             <a href="?dataUrl=./examples/exclusives/exclusives.json&examples=open" class="example-link">Exclusives</a>
-            <span class="example-desc">317 celebrity cats</span>
+            <span class="example-desc">317 celebrity and promotional cats</span>
 
-            <a href="?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&examples=open" class="example-link">Path Demo</a>
+            <a href="?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true&examples=open" class="example-link">Tier III</a>
+            <span class="example-desc">Very rare mewtations</span>
+
+            <a href="?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true&examples=open" class="example-link">Tier IIII</a>
+            <span class="example-desc">Rarest mewtations</span>
+
+            <a href="?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true&examples=open" class="example-link">Diamonds</a>
+            <span class="example-desc">First discoverers of mewtation traits</span>
+
+            <a href="?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true&examples=open" class="example-link">Gen-0 Diamonds</a>
+            <span class="example-desc">40 trait discoverers</span>
+
+            <a href="?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&examples=open" class="example-link">Holiday Fancies Path Demo</a>
             <span class="example-desc">Mistletoe → Santa</span>
 
             <a href="?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true&examples=open" class="example-link">Dragon Path</a>
             <span class="example-desc">Hover for paths</span>
-
-            <a href="?kitties=896775,1,4,18,100000,174756,275808,500000&examples=open" class="example-link">All Notable</a>
-            <span class="example-desc">Full showcase (API)</span>
           </div>
         </div>
       </div>

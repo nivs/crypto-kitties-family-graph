@@ -12,8 +12,8 @@ Example datasets are in `dist/examples/` for testing and demonstrating the analy
 |---------|---------|------|---------|
 | **Tier IIII** (liger, moonrise) | 158 | [View](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json) | [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond) |
 | **Tier III** (lykoi, avatar) | 139 | [View](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json) | [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold) |
-| **Diamonds** (first discoverers) | 150 | [View](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json) | [All gems](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdges=true) |
-| **Gen-0 Diamonds** | 40 | [View](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json) | [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdges=true) |
+| **Diamonds** (first discoverers) | 150 | [View](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json) | [All gems](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true) |
+| **Gen-0 Diamonds** | 40 | [View](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json) | [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true) |
 | **Liger** (single IIII trait) | 92 | [View](https://ck.innerlogics.com/?dataUrl=./examples/liger/liger.json) | |
 
 ### Historical Collections
@@ -77,7 +77,7 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 | `owner` | Pin owner highlight | `&owner=nivs` or `&owner=0x1234...` |
 | `genMin` / `genMax` | Filter by generation range | `&genMin=0&genMax=10` |
 | `mewtations` | Filter by gem type | `&mewtations=diamond,gold` or `&mewtations=all` |
-| `filterEdges` | Highlight edges between filtered kitties | `&filterEdges=true` |
+| `filterEdgeHighlight` | Highlight edges between filtered kitties | `&filterEdgeHighlight=true` |
 | `noExpand` | Skip embedded parent/child extraction | `&noExpand=true` |
 | `pathFrom` / `pathTo` | Highlight shortest path | `&pathFrom=174756&pathTo=275808` |
 | `layout` | Graph layout type | `&layout=circle` |
@@ -86,7 +86,7 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 
 ## Tier IIII Kitties (`tier_iiii/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json)** ・ [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdges=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json)** ・ [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true)
 
 The rarest mewtation tier. Only ~0.1% of all CryptoKitties have Tier IIII dominant traits.
 
@@ -114,7 +114,7 @@ The rarest mewtation tier. Only ~0.1% of all CryptoKitties have Tier IIII domina
 
 ## Tier III Kitties (`tier_iii/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json)** ・ [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdges=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json)** ・ [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true)
 
 Very rare mewtations, one tier below the rarest.
 
@@ -127,7 +127,7 @@ Very rare mewtations, one tier below the rarest.
 
 ## Diamond Gem Kitties (`diamonds/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json)** ・ [All gems highlighted](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdges=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json)** ・ [All gems highlighted](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true)
 
 Kitties that were the **first to discover** a mewtation trait. These receive a diamond gem badge on CryptoKitties.
 
@@ -244,7 +244,7 @@ Personal collection with complete ancestry traced to Gen 0.
 
 ## Gen-0 Diamonds (`gen0_diamonds/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json)** ・ [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdges=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json)** ・ [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true)
 
 Gen 0 kitties that were the **first to discover** mewtation traits (diamond gem discoverers). These are some of the most valuable CryptoKitties as they combine Gen 0 status with trait discovery.
 

@@ -55,7 +55,7 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 | `genMin` | Filter: minimum generation (inclusive) | `?genMin=0` |
 | `genMax` | Filter: maximum generation (inclusive) | `?genMax=10` |
 | `mewtations` | Filter: mewtation gems (`all` or comma-separated: `diamond,gold,silver,bronze`) | `?mewtations=diamond,gold` |
-| `filterEdges` | Highlight edges between filtered kitties | `?filterEdges=true` |
+| `filterEdgeHighlight` | Highlight edges between filtered kitties | `?filterEdgeHighlight=true` |
 | `pathFrom` | Shortest path: source kitty ID | `?pathFrom=174756` |
 | `pathTo` | Shortest path: target kitty ID | `?pathTo=275808` |
 
@@ -193,19 +193,25 @@ See **[docs/NOTABLE_KITTIES.md](docs/NOTABLE_KITTIES.md)** for the complete cata
 ### Live Demo Links
 
 **Historical:**
-- [Dragon](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) - 600 ETH (~$170k) ・ [API](https://ck.innerlogics.com/?kitties=896775)
-- [Founders](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json) - Genesis + Gen 0 ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
-- [Milestones](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json) - #100k, #500k ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
+- [Dragon](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) - 600 ETH (~$170k)
+- [Founders](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_children.json&genMax=0) - Founder Core Set
+- [Milestones](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json) - #100k & #500k
 - [Holidays](https://ck.innerlogics.com/?dataUrl=./examples/holidays/holidays.json) - Mistletoe & SantaClaws
 
+**Special Cats:**
+- [Fancies](https://ck.innerlogics.com/?dataUrl=./examples/fancies/fancies.json) - 42 bred from specific trait recipes
+- [Purrstiges](https://ck.innerlogics.com/?dataUrl=./examples/purrstiges/purrstiges.json) - 59 time-limited breeding events
+- [Exclusives](https://ck.innerlogics.com/?dataUrl=./examples/exclusives/exclusives.json) - 317 celebrity and promotional cats
+
 **Rare Mewtations:**
-- [Tier IIII](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json) - Rarest traits (liger, moonrise)
-- [Tier III](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json) - Very rare (lykoi, avatar)
-- [Diamonds](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdges=true) - First discoverers
+- [Tier III](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true) - Very rare mewtations
+- [Tier IIII](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true) - Rarest mewtations
+- [Diamonds](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true) - First discoverers of mewtation traits
+- [Gen-0 Diamonds](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true) - 40 trait discoverers
 
 **Shortest Paths:**
-- [Mistletoe → Santa](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) - Holiday fancy connection
-- [Mulberry → Dragon](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) - Cross-collection path
+- [Holiday Fancies Path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) - Mistletoe → Santa
+- [Dragon Path](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true) - Hover for paths
 
 **Quick-start presets** (paste into the Kitty ID field or use as `?kitties=...`):
 

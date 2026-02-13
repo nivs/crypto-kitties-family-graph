@@ -116,7 +116,7 @@
             {
               "label": "Diamond gems only",
               "file": "tier_iiii.json",
-              "params": "mewtations=diamond&filterEdges=true"
+              "params": "mewtations=diamond&filterEdgeHighlight=true"
             }
           ]
         },
@@ -132,7 +132,7 @@
             {
               "label": "Gold+ gems",
               "file": "tier_iii.json",
-              "params": "mewtations=diamond,gold&filterEdges=true"
+              "params": "mewtations=diamond,gold&filterEdgeHighlight=true"
             }
           ]
         },
@@ -148,7 +148,7 @@
             {
               "label": "All gems highlighted",
               "file": "diamonds.json",
-              "params": "mewtations=all&filterEdges=true"
+              "params": "mewtations=all&filterEdgeHighlight=true"
             },
             {
               "label": "Diamonds only (50 kitties)",
@@ -168,7 +168,7 @@
             {
               "label": "Diamond filter",
               "file": "gen0_diamonds.json",
-              "params": "mewtations=diamond&filterEdges=true"
+              "params": "mewtations=diamond&filterEdgeHighlight=true"
             }
           ]
         },

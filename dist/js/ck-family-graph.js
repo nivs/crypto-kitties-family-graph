@@ -3721,7 +3721,7 @@
 
     // Add edge highlight toggle if enabled
     if (filterEdgeHighlight) {
-      url += `&filterEdges=true`;
+      url += `&filterEdgeHighlight=true`;
     }
 
     // Add shortest path if active and locked
@@ -4260,7 +4260,7 @@
     const genMinParam = params.get("genMin");
     const genMaxParam = params.get("genMax");
     const mewtationsParam = params.get("mewtations");
-    const filterEdgesParam = params.get("filterEdges") === "true" || params.get("filterEdges") === "1";
+    const filterEdgeHighlightParam = params.get("filterEdgeHighlight") === "true" || params.get("filterEdgeHighlight") === "1";
 
     // Check for pathFrom/pathTo params (auto-highlight shortest path)
     const pathFromParam = params.get("pathFrom");
@@ -4271,6 +4271,14 @@
 
     // Check for shortest path mode param
     const shortestPathParam = params.get("shortestPath") === "true" || params.get("shortestPath") === "1";
+
+    // Expand filters panel if any filter/path params are present
+    const hasFilterParams = genMinParam || genMaxParam || mewtationsParam || filterEdgeHighlightParam ||
+      shortestPathParam || pathFromParam || pathToParam;
+    if (hasFilterParams && filtersToggle && filtersBody) {
+      filtersToggle.classList.remove("collapsed");
+      filtersBody.classList.remove("collapsed");
+    }
 
     // Helper to apply filters after graph loads
     const applyFiltersFromParams = () => {
@@ -4321,7 +4329,7 @@
         }
 
         // Apply edge highlight toggle
-        if (filterEdgesParam) {
+        if (filterEdgeHighlightParam) {
           const edgeHighlightToggle = $("filterEdgeHighlight");
           if (edgeHighlightToggle) edgeHighlightToggle.checked = true;
           filterEdgeHighlight = true;

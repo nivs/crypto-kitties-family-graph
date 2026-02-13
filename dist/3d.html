@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Interactive 3D family tree visualizer for CryptoKitties. Explore breeding relationships in three dimensions." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CryptoKitties Family Graph - 3D View" />
+  <meta property="og:description" content="Interactive 3D family tree visualizer for CryptoKitties." />
+  <meta property="og:image" content="https://ck.innerlogics.com/images/og-image.png" />
+  <meta property="og:url" content="https://ck.innerlogics.com/3d.html" />
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>CryptoKitties Family Graph - 3D</title>
+
+  <!-- Import map for module resolution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <!-- Three.js (required for custom node objects and 3d-force-graph) -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <!-- 3d-force-graph -->
+  <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+  <!-- Viewport Gizmo -->
+  <script type="module">
+    import { ViewportGizmo } from 'https://unpkg.com/three-viewport-gizmo@2.2.0/dist/three-viewport-gizmo.js';
+    window.ViewportGizmo = ViewportGizmo;
+  </script>
+
+  <link rel="stylesheet" href="./css/shared.css">
+  <link rel="stylesheet" href="./css/styles-3d.css">
+
+  <script>
+    window.CK_GRAPH_DEFAULTS = {
+      debugLevel: 2,
+      useProxy: false,
+      proxyUrl: "",
+      svgBaseUrl: "",
+      dataUrl: "",
+      svgFromApi: true,
+      siteBaseUrl: "https://www.cryptokitties.co",
+      githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
+    };
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="title"><a href="./index.html">CryptoKitties Family Graph</a> - 3D</div>
+    <div class="controls">
+      <div class="input-with-btn">
+        <input id="jsonUrl" class="input-in-group" placeholder="JSON URL or drag file" />
+        <button class="btn-in-input" id="loadJsonBtn" title="Load from URL or select file">Load</button>
+      </div>
+      <input type="file" id="jsonFilePicker" accept=".json,application/json" style="display:none;" />
+      <span class="separator">|</span>
+      <div class="input-with-btn">
+        <input id="kittyIdInput" class="input-in-group-wide" placeholder="Kitty ID(s)" />
+        <button class="btn-in-input-left" id="addKittyBtn" title="Add kitties to existing graph">Add</button>
+        <button class="btn-in-input" id="loadKittyBtn" title="Load kitties (replaces graph)">Load</button>
+      </div>
+      <span class="separator">|</span>
+      <button class="btn" id="permalinkBtn" title="Copy permalink to clipboard">Permalink</button>
+      <button class="btn" id="embedBtn" title="Generate embed code">Embed</button>
+      <a href="./index.html" class="btn" id="view2dBtn" title="Switch to 2D view">2D</a>
+      <span class="pill" id="statsPill">No data loaded</span>
+    </div>
+  </header>
+
+  <div id="graph-container"></div>
+  <div id="banner"></div>
+  <div id="tooltip" class="tooltip"></div>
+
+  <!-- Floating panel for embed mode -->
+  <div class="floating-panel" id="floatingPanel">
+    <div class="floating-panel-header" id="floatingPanelDragHandle">
+      <span class="floating-panel-title">CryptoKitties Family Graph</span>
+      <a href="./index.html" class="btn btn-small" id="floatingView2dBtn" title="Switch to 2D view" style="padding:4px 8px;font-size:11px;">2D</a>
+      <button class="floating-panel-close" id="floatingPanelClose">×</button>
+    </div>
+    <div class="floating-panel-body" id="floatingPanelBody">
+      <div id="floatingSelectedBox">Click a kitty to select</div>
+    </div>
+  </div>
+
+  <div class="controls-panel" id="controlsPanel">
+    <div class="controls-section" id="selectedSection" style="display:none">
+      <h3 id="selectedToggle">Selected Kitty</h3>
+      <div id="selectedBody">
+        <div id="selectedBox">Click a kitty to select</div>
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <h3 id="zAxisToggle">Z-Axis</h3>
+      <div id="zAxisBody">
+        <div class="control-row">
+          <select id="zAxisSelect" class="select" style="width:100%">
+            <option value="generation">Generation (older = higher)</option>
+            <option value="birthday">Birthday (older = higher)</option>
+            <option value="rarity">Rarity (rarer = higher)</option>
+            <option value="flat">Flat (no Z variance)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <h3 id="filtersToggle">Filters</h3>
+      <div id="filtersBody">
+        <div class="control-row">
+          <span class="control-label">Generation</span>
+          <input type="number" id="generationMin" class="input" placeholder="Min" style="width:60px" />
+          <span style="color:var(--muted)">-</span>
+          <input type="number" id="generationMax" class="input" placeholder="Max" style="width:60px" />
+        </div>
+        <div class="control-row">
+          <span class="control-label">Mewtations</span>
+          <div style="display:flex;gap:3px;flex-wrap:wrap;flex:1">
+            <button class="filter-btn" id="mewtationFilterAll" title="All gems">All</button>
+            <button class="filter-btn" id="mewtationFilterDiamond" title="Diamond (1st discovery)">
+              <img src="./images/cattributes/mewtation-gems/diamond.svg" class="gem-icon" />
+            </button>
+            <button class="filter-btn" id="mewtationFilterGold" title="Gold (2-10)">
+              <img src="./images/cattributes/mewtation-gems/gold.svg" class="gem-icon" />
+            </button>
+            <button class="filter-btn" id="mewtationFilterSilver" title="Silver (11-100)">
+              <img src="./images/cattributes/mewtation-gems/silver.svg" class="gem-icon" />
+            </button>
+            <button class="filter-btn" id="mewtationFilterBronze" title="Bronze (101-500)">
+              <img src="./images/cattributes/mewtation-gems/bronze.svg" class="gem-icon" />
+            </button>
+          </div>
+        </div>
+        <div class="control-row">
+          <label style="font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="shortestPathMode" style="width:14px;height:14px" />
+            <span>Shortest path mode</span>
+          </label>
+        </div>
+        <div class="control-row">
+          <button class="btn btn-small" id="clearFiltersBtn" style="width:100%;padding:6px;font-size:12px">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <h3 id="settingsToggle" class="collapsed">Settings</h3>
+      <div id="settingsBody" style="display:none">
+        <div class="control-row">
+          <span class="control-label">Pre-fetch</span>
+          <input type="checkbox" id="prefetchChildren" checked style="width:16px;height:16px" />
+        </div>
+        <div class="control-row">
+          <span class="control-label">Auto-connect</span>
+          <input type="checkbox" id="autoConnect" checked style="width:16px;height:16px" />
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-section">
+      <h3 id="examplesToggle">Examples</h3>
+      <div id="examplesBody">
+        <div class="examples-list">
+          <a href="3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&examples=open" class="example-link">Dragon</a>
+          <span class="example-desc">600 ETH (~$170k)</span>
+
+          <a href="3d.html?dataUrl=./examples/founders/founders_children.json&genMax=0&zAxis=rarity&examples=open" class="example-link">Founders</a>
+          <span class="example-desc">Founder Core Set</span>
+
+          <a href="3d.html?dataUrl=./examples/milestones/milestones.json&zAxis=rarity&examples=open" class="example-link">Milestones</a>
+          <span class="example-desc">100k & 500k</span>
+
+          <a href="3d.html?dataUrl=./examples/holidays/holidays.json&zAxis=rarity&examples=open" class="example-link">Holidays</a>
+          <span class="example-desc">Mistletoe & SantaClaws</span>
+
+          <a href="3d.html?dataUrl=./examples/fancies/fancies.json&zAxis=generation&examples=open" class="example-link">Fancies</a>
+          <span class="example-desc">42 bred from specific trait recipes</span>
+
+          <a href="3d.html?dataUrl=./examples/purrstiges/purrstiges.json&zAxis=generation&examples=open" class="example-link">Purrstiges</a>
+          <span class="example-desc">59 time-limited breeding events</span>
+
+          <a href="3d.html?dataUrl=./examples/exclusives/exclusives.json&zAxis=generation&examples=open" class="example-link">Exclusives</a>
+          <span class="example-desc">317 celebrity and promotional cats</span>
+
+          <a href="3d.html?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true&zAxis=rarity&examples=open" class="example-link">Tier III</a>
+          <span class="example-desc">Very rare mewtations</span>
+
+          <a href="3d.html?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true&zAxis=rarity&examples=open" class="example-link">Tier IIII</a>
+          <span class="example-desc">Rarest mewtations</span>
+
+          <a href="3d.html?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true&zAxis=rarity&examples=open" class="example-link">Diamonds</a>
+          <span class="example-desc">First discoverers of mewtation traits</span>
+
+          <a href="3d.html?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true&zAxis=rarity&examples=open" class="example-link">Gen-0 Diamonds</a>
+          <span class="example-desc">40 trait discoverers</span>
+
+          <a href="3d.html?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&zAxis=rarity&examples=open" class="example-link">Holiday Fancies Path Demo</a>
+          <span class="example-desc">Mistletoe → Santa</span>
+
+          <a href="3d.html?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true&zAxis=rarity&examples=open" class="example-link">Dragon Path</a>
+          <span class="example-desc">Hover for paths</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Embed Code Modal -->
+  <div id="embedModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Embed Code</h3>
+        <button class="modal-close" id="embedModalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="embed-options">
+          <div class="embed-option-row">
+            <label>Viewer:</label>
+            <select id="embedViewer" class="embed-select" style="width:80px;">
+              <option value="2d">2D</option>
+              <option value="3d" selected>3D</option>
+            </select>
+            <label style="margin-left:16px;">
+              <input type="checkbox" id="embedSwitcher" checked />
+              Show 2D/3D switcher
+            </label>
+            <label style="margin-left:16px;">
+              <input type="checkbox" id="embedViewport" />
+              Preserve viewport
+            </label>
+          </div>
+          <div class="embed-option-row">
+            <label>Width:</label>
+            <input type="text" id="embedWidth" class="embed-input" value="" style="width:80px;" placeholder="800" />
+            <label style="margin-left:16px;">Height:</label>
+            <input type="text" id="embedHeight" class="embed-input" value="" style="width:80px;" placeholder="600" />
+          </div>
+        </div>
+        <div class="embed-code-wrapper">
+          <textarea id="embedCodeOutput" class="embed-code" readonly></textarea>
+        </div>
+        <button class="btn primary" id="embedCopyBtn">Copy to Clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/shared.js"></script>
+  <script src="./js/ck-family-graph-3d.js"></script>
+</body>
+</html>

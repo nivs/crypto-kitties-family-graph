@@ -16,6 +16,16 @@
     .btn.primary{border-color:rgba(122,162,255,0.45);}
     .pill{border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:7px 9px;border-radius:999px;font-size:12px;line-height:1;}
     .input{border:1px solid var(--border);background:var(--panel);color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px;outline:none;width:320px;max-width:70vw;}
+    .input-with-btn{position:relative;display:inline-block;}
+    .input-in-group{border:1px solid var(--border);background:var(--panel);color:var(--text);padding:8px 70px 8px 10px;border-radius:10px;font-size:13px;outline:none;width:260px;}
+    .input-in-group-wide{border:1px solid var(--border);background:var(--panel);color:var(--text);padding:8px 130px 8px 10px;border-radius:10px;font-size:13px;outline:none;width:260px;}
+    .input-in-group:focus{border-color:rgba(255,255,255,0.22);}
+    .input-in-group-wide:focus{border-color:rgba(255,255,255,0.22);}
+    .input-in-group.drag-over{border-color:var(--accent);background:rgba(122,162,255,0.05);}
+    .btn-in-input{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;line-height:1;user-select:none;}
+    .btn-in-input:hover{border-color:rgba(255,255,255,0.30);background:var(--panel);}
+    .btn-in-input-left{position:absolute;right:62px;top:50%;transform:translateY(-50%);border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;line-height:1;user-select:none;}
+    .btn-in-input-left:hover{border-color:rgba(255,255,255,0.30);background:var(--panel);}
 
     main{display:grid;grid-template-columns:1fr 420px;gap:12px;padding:12px;}
     #networkWrap{
@@ -335,4 +345,94 @@
       .nav-controls .nav-row{gap:3px;}
       .nav-btn{width:26px;height:26px;border-radius:6px;}
       .nav-btn svg{width:12px;height:12px;}
+    }
+
+    /* Embed Modal */
+    .modal{
+      display:none;
+      position:fixed;
+      z-index:1000;
+      left:0;
+      top:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(4px);
+    }
+    .modal.show{display:flex;align-items:center;justify-content:center;}
+    .modal-content{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.5);
+      width:600px;
+      max-width:calc(100vw - 32px);
+      max-height:calc(100vh - 32px);
+      display:flex;
+      flex-direction:column;
+    }
+    .modal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:16px 20px;
+      border-bottom:1px solid var(--border);
+    }
+    .modal-header h3{margin:0;font-size:16px;font-weight:600;}
+    .modal-close{
+      background:none;
+      border:none;
+      color:var(--muted);
+      font-size:28px;
+      line-height:1;
+      cursor:pointer;
+      padding:0;
+      width:28px;
+      height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+    }
+    .modal-close:hover{background:rgba(255,255,255,0.08);color:var(--text);}
+    .modal-body{padding:20px;overflow-y:auto;}
+    .embed-options{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+    .embed-option-row{display:flex;align-items:center;gap:10px;}
+    .embed-option-row label{min-width:80px;color:var(--muted);font-size:13px;}
+    .embed-option-row input[type="checkbox"]{width:16px;height:16px;cursor:pointer;}
+    .embed-select{
+      border:1px solid var(--border);
+      background:var(--panel2);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      outline:none;
+      cursor:pointer;
+      flex:1;
+    }
+    .embed-input{
+      border:1px solid var(--border);
+      background:var(--panel2);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      outline:none;
+      flex:1;
+    }
+    .embed-unit{color:var(--muted);font-size:12px;}
+    .embed-code-wrapper{margin-bottom:16px;}
+    .embed-code{
+      width:100%;
+      height:200px;
+      border:1px solid var(--border);
+      background:var(--panel2);
+      color:var(--text);
+      padding:12px;
+      border-radius:8px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      font-size:12px;
+      resize:vertical;
+      outline:none;
     }

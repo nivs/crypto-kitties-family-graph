@@ -26,8 +26,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/vis-network@10.0.2/standalone/umd/vis-network.min.js"></script>
 
-
-  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/shared.css">
+  <link rel="stylesheet" href="./css/styles-2d.css">
 
   <script>
     // Edit these defaults. No query params are used.
@@ -57,16 +57,22 @@
   <header>
     <div class="title">CryptoKitties Family Graph</div>
     <div class="controls">
-      <input id="jsonUrl" class="input" placeholder="JSON URL (or leave blank and use file picker)" />
-      <button class="btn primary" id="loadFromUrlBtn">Load JSON URL</button>
-      <input id="filePicker" class="hidden" type="file" accept="application/json" />
-      <button class="btn" id="loadFileBtn">Load JSON File</button>
+      <div class="input-with-btn">
+        <input id="jsonUrl" class="input-in-group" placeholder="JSON URL or drag file" />
+        <button class="btn-in-input" id="loadJsonBtn" title="Load from URL or select file">Load</button>
+      </div>
+      <input type="file" id="jsonFilePicker" accept=".json,application/json" style="display:none;" />
       <span class="separator">|</span>
-      <input id="kittyIdInput" class="input input-narrow" placeholder="Kitty ID(s)" />
-      <button class="btn" id="loadKittyBtn">Load Kitty(s)</button>
+      <div class="input-with-btn">
+        <input id="kittyIdInput" class="input-in-group-wide" placeholder="Kitty ID(s)" />
+        <button class="btn-in-input-left" id="addKittyBtn" title="Add kitties to existing graph">Add</button>
+        <button class="btn-in-input" id="loadKittyBtn" title="Load kitties (replaces graph)">Load</button>
+      </div>
       <span class="separator">|</span>
       <button class="btn" id="togglePhysicsBtn">Physics: on</button>
       <button class="btn" id="permalinkBtn" title="Copy permalink to clipboard">Permalink</button>
+      <button class="btn" id="embedBtn" title="Generate embed code">Embed</button>
+      <a href="./3d.html" class="btn" id="view3dBtn" title="Open 3D view">3D</a>
       <span class="pill" id="statsPill">No data loaded</span>
     </div>
   </header>
@@ -153,6 +159,7 @@
       <div id="floatingPanel" class="floating-panel">
         <div class="floating-panel-header" id="floatingPanelHeader">
           <span class="panel-title">Selected Kitty</span>
+          <a href="./3d.html" class="panel-btn" id="floatingView3dBtn" title="Switch to 3D view" style="padding:4px 8px;font-size:11px;text-decoration:none;">3D</a>
           <button class="panel-btn" id="floatingPanelCollapse" title="Collapse">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
           </button>
@@ -334,6 +341,46 @@
     </aside>
   </main>
 
+  <!-- Embed Code Modal -->
+  <div id="embedModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Embed Code</h3>
+        <button class="modal-close" id="embedModalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="embed-options">
+          <div class="embed-option-row">
+            <label>Viewer:</label>
+            <select id="embedViewer" class="embed-select" style="width:80px;">
+              <option value="2d">2D</option>
+              <option value="3d">3D</option>
+            </select>
+            <label style="margin-left:16px;">
+              <input type="checkbox" id="embedSwitcher" checked />
+              Show 2D/3D switcher
+            </label>
+            <label style="margin-left:16px;">
+              <input type="checkbox" id="embedViewport" />
+              Preserve viewport
+            </label>
+          </div>
+          <div class="embed-option-row">
+            <label>Width:</label>
+            <input type="text" id="embedWidth" class="embed-input" value="" style="width:80px;" placeholder="800" />
+            <label style="margin-left:16px;">Height:</label>
+            <input type="text" id="embedHeight" class="embed-input" value="" style="width:80px;" placeholder="600" />
+          </div>
+        </div>
+        <div class="embed-code-wrapper">
+          <textarea id="embedCodeOutput" class="embed-code" readonly></textarea>
+        </div>
+        <button class="btn primary" id="embedCopyBtn">Copy to Clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/shared.js"></script>
   <script src="./js/ck-family-graph.js"></script>
 </body>
 </html>

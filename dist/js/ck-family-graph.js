@@ -1,120 +1,11 @@
 /* global vis */
 (() => {
-  const $ = (id) => document.getElementById(id);
-
-  // CryptoKitties official color mappings (extracted from CK CSS)
-  // Format: colorName -> [backgroundColor, accentColor, shadowColor]
-  const CK_COLORS = {
-    // Primary colors
-    mintgreen:       ["#cdf5d4", "#43edac", "#9ad7a5"],
-    sizzurp:         ["#dfdffa", "#7c40ff", "#c1c1ea"],
-    chestnut:        ["#efe1da", "#a56429", "#d4beb3"],
-    strawberry:      ["#ffe0e5", "#ef4b62", "#efbaba"],
-    sapphire:        ["#d3e8ff", "#4c7aef", "#a2c2eb"],
-    forgetmenot:     ["#dcebfc", "#4eb4f9", "#a7caea"],
-    dahlia:          ["#e6eafd", "#b8bdff", "#bec5e7"],
-    coralsunrise:    ["#fde9e4", "#ff9088", "#e7c3bb"],
-    olive:           ["#ecf4e0", "#729100", "#c8d6b4"],
-    pinefresh:       ["#dbf0d0", "#177a25", "#adcf9b"],
-    oasis:           ["#e6faf3", "#ccffef", "#bee1d4"],
-    dioscuri:        ["#e5e7ef", "#484c5b", "#cdd1e0"],
-    palejade:        ["#e7f1ed", "#c3d8cf", "#c0d1ca"],
-    parakeet:        ["#e5f3e2", "#49b749", "#bcd4b8"],
-    cyan:            ["#c5eefa", "#45f0f4", "#83cbe0"],
-    topaz:           ["#d1eeeb", "#0ba09c", "#a8d5d1"],
-    limegreen:       ["#d9f5cb", "#aef72f", "#b4d9a2"],
-    isotope:         ["#effdca", "#e4ff73", "#cde793"],
-    babypuke:        ["#eff1e0", "#bcba5e", "#cfd4b0"],
-    bubblegum:       ["#fadff4", "#ef52d1", "#eebce3"],
-    twilightsparkle: ["#ede2f5", "#ba8aff", "#dcc7ec"],
-    doridnudibranch: ["#faeefa", "#fa9fff", "#e1cce1"],
-    pumpkin:         ["#fae1ca", "#ffa039", "#efc8a4"],
-    autumnmoon:      ["#fdf3e0", "#ffe8bb", "#e7d4b4"],
-    bridesmaid:      ["#ffd5e5", "#ffc2df", "#eba3bc"],
-    thundergrey:     ["#eee9e8", "#828282", "#dbccc7"],
-    greymatter:      ["#e5e7ef", "#828282", "#cdd1e0"],
-    // Additional colors from CK CSS
-    downbythebay:    ["#cde5d1", "#4e8b57", "#97bc9c"],
-    eclipse:         ["#e5e7ef", "#484c5b", "#cdd1e0"],
-    // Neutrals
-    gold:            ["#faf4cf", "#fcdf35", "#e3daa1"],
-    shadowgrey:      ["#b1aeb9", "#575553", "#8a8792"],
-    salmon:          ["#fde9e4", "#ef4b62", "#efbaba"],
-    cottoncandy:     ["#ffd5e5", "#ffc2df", "#eba3bc"],
-    cloudwhite:      ["#f9f8f6", "#e7e6e4", "#d5d4d2"],
-    mauveover:       ["#ede2f5", "#ba8aff", "#dcc7ec"],
-    hintomint:       ["#cdf5d4", "#43edac", "#9ad7a5"],
-    bananacream:     ["#fdf3e0", "#ffe8bb", "#e7d4b4"],
-    // Fallback
-    default:         ["#23283b", "#000000", "#1a1d2a"]
-  };
-
-  function getKittyColors(kitty) {
-    const colorName = (kitty.color || "").toLowerCase();
-    const hasKnownColor = colorName && CK_COLORS[colorName];
-    const colors = CK_COLORS[colorName] || CK_COLORS.default;
-    const background = kitty.background_color || kitty.kitty_color || colors[0];
-    // Shadow color: use kitty's shadow_color if available, or from CK_COLORS, or darken background
-    const shadow = kitty.shadow_color || colors[2] || darkenColor(background, 0.35);
-    return {
-      background,
-      shadow,
-      isUnknown: !kitty.background_color && !kitty.kitty_color && !hasKnownColor
-    };
-  }
-
-  function darkenColor(hex, amount) {
-    const m = /^#?([0-9a-f]{6})$/i.exec(hex || "");
-    if (!m) return "rgba(0,0,0,0.3)";
-    const n = parseInt(m[1], 16);
-    let r = (n >> 16) & 255;
-    let g = (n >> 8) & 255;
-    let b = n & 255;
-    r = Math.max(0, Math.round(r * (1 - amount)));
-    g = Math.max(0, Math.round(g * (1 - amount)));
-    b = Math.max(0, Math.round(b * (1 - amount)));
-    return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
-  }
-
-  // Mewtation gem types based on discovery position
-  // Diamond: position 1 (first ever)
-  // Gold: position 2-10 (gilded)
-  // Silver: position 11-100 (amethyst)
-  // Bronze: position 101-500 (lapis)
-  function getMewtationGems(kitty) {
-    const gems = [];
-    const raw = kitty.raw || kitty;
-    const enhanced = raw.enhanced_cattributes || [];
-    const id = Number(kitty.id);
-
-    for (const attr of enhanced) {
-      // Only count if this kitty discovered the trait (kittyId matches)
-      if (attr.kittyId === id && typeof attr.position === "number" && attr.position > 0 && attr.position <= 500) {
-        let gemType;
-        if (attr.position === 1) gemType = "diamond";
-        else if (attr.position <= 10) gemType = "gold";
-        else if (attr.position <= 100) gemType = "silver";
-        else gemType = "bronze";
-
-        gems.push({
-          type: attr.type,
-          description: attr.description,
-          position: attr.position,
-          gem: gemType
-        });
-      }
+  // Preload gem images
+  function preloadGemImages() {
+    for (const gemType of Object.keys(GEM_IMAGES)) {
+      loadGemImage(gemType);
     }
-
-    return gems;
   }
-
-  // Gem image URLs
-  const GEM_IMAGES = {
-    diamond: "./images/cattributes/mewtation-gems/diamond.svg",
-    gold: "./images/cattributes/mewtation-gems/gold.svg",
-    silver: "./images/cattributes/mewtation-gems/silver.svg",
-    bronze: "./images/cattributes/mewtation-gems/bronze.svg"
-  };
 
   // Cache loaded gem images
   const gemImageCache = new Map();
@@ -140,42 +31,18 @@
     }
   }
 
-  // Preload gem images
-  function preloadGemImages() {
-    for (const gemType of Object.keys(GEM_IMAGES)) {
-      loadGemImage(gemType);
-    }
-  }
-
   const statusText = $("statusText");
   const bannerEl = $("banner");
   const statsPill = $("statsPill");
   const selectedBox = $("selectedBox");
 
-  function getDefaultsRaw() {
-    return (window.CK_GRAPH_DEFAULTS && typeof window.CK_GRAPH_DEFAULTS === "object") ? window.CK_GRAPH_DEFAULTS : {};
-  }
-
-  function debugLevel() {
-    const d = getDefaultsRaw();
-    const n = Number(d.debugLevel);
-    return Number.isFinite(n) ? n : 1;
-  }
-
-  function log(...args) { if (debugLevel() >= 1) console.log("[CKGRAPH]", ...args); }
-  function logv(...args) { if (debugLevel() >= 2) console.log("[CKGRAPH:VV]", ...args); }
-
-  function setStatus(msg, isError = false) {
+  // Override setStatus to also update statusText element (2D viewer specific)
+  const sharedSetStatus = setStatus;
+  setStatus = function(msg, isError = false) {
     if (statusText) statusText.textContent = msg;
-    if (bannerEl) {
-      bannerEl.textContent = msg;
-      bannerEl.style.display = "block";
-      bannerEl.style.borderColor = isError ? "rgba(255,107,107,0.55)" : "rgba(122,162,255,0.45)";
-      bannerEl.style.color = isError ? "rgba(255,200,200,0.95)" : "rgba(151,163,182,0.95)";
-      clearTimeout(setStatus._t);
-      setStatus._t = setTimeout(() => { bannerEl.style.display = "none"; }, 2400);
-    }
-  }
+    sharedSetStatus(msg, isError);
+  };
+
 
   function assertVisLoaded() {
     if (!window.vis || !vis.DataSet || !vis.Network) {
@@ -252,38 +119,12 @@
     return p + encodeURIComponent(url);
   }
 
-  function safeText(v) {
-    if (v === null || v === undefined) return "";
-    if (typeof v === "object") {
-      try { return JSON.stringify(v); } catch { return String(v); }
-    }
-    return String(v);
-  }
-
-  function shortAddr(a) {
-    if (!a || typeof a !== "string") return "";
-    if (a.length <= 12) return a;
-    return a.slice(0, 6) + "…" + a.slice(-4);
-  }
-
   function formatDateOnly(dateStr) {
     if (!dateStr) return "";
     try {
       const d = new Date(dateStr);
       if (isNaN(d.getTime())) return dateStr;
       return d.toLocaleDateString();
-    } catch {
-      return dateStr;
-    }
-  }
-
-  function formatDatePretty(dateStr) {
-    if (!dateStr) return "";
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return `${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`;
     } catch {
       return dateStr;
     }
@@ -332,17 +173,7 @@
     }
   }
 
-  function normalizeOwner(ownerField) {
-    if (!ownerField) return null;
-    if (typeof ownerField === "string") return ownerField;
-    if (typeof ownerField === "object") {
-      if (typeof ownerField.address === "string") return ownerField.address;
-      if (typeof ownerField.wallet_address === "string") return ownerField.wallet_address;
-      if (typeof ownerField.id === "string" && ownerField.id.startsWith("0x")) return ownerField.id;
-    }
-    return null;
-  }
-
+  // Extended version of normalizeOwnerNickname with owner_profile support
   function normalizeOwnerNickname(k) {
     if (!k || typeof k !== "object") return null;
     const owner = k.owner;
@@ -403,19 +234,6 @@
     return el ? el.checked : true;
   }
 
-  function brightenHex(hex, amt = 0.22) {
-    const m = /^#?([0-9a-f]{6})$/i.exec(hex || "");
-    if (!m) return hex;
-    const n = parseInt(m[1], 16);
-    let r = (n >> 16) & 255;
-    let g = (n >> 8) & 255;
-    let b = n & 255;
-    r = Math.min(255, Math.round(r + (255 - r) * amt));
-    g = Math.min(255, Math.round(g + (255 - g) * amt));
-    b = Math.min(255, Math.round(b + (255 - b) * amt));
-    return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
-  }
-
   function placeholderDataUri(label, bg) {
     // Use Array.from to properly handle emoji (surrogate pairs) before truncating
     const text = encodeURIComponent(Array.from(String(label || "")).slice(0, 16).join(""));
@@ -447,8 +265,6 @@
       `</svg>`;
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
   }
-
-  function nodeLabel(k) { return k.name ? k.name : `Kitty ${k.id}`; }
 
   function localImageUrl(id, imageUrl) {
     const el = $("svgBaseUrl");
@@ -1303,11 +1119,6 @@
     return await res.json();
   }
 
-  function unwrapKitty(obj) {
-    if (obj && typeof obj === "object" && obj.kitty && typeof obj.kitty === "object") return obj.kitty;
-    return obj;
-  }
-
   function unwrapKittiesList(obj) {
     if (obj && typeof obj === "object") {
       for (const k of ["kitties", "items", "results"]) if (Array.isArray(obj[k])) return obj[k];
@@ -1898,6 +1709,91 @@
     if (edgeUpdates.length) edges.update(edgeUpdates);
   }
 
+  // Highlight kitties that have a specific gem type
+  function highlightByGemType(gemType) {
+    if (!gemType) return;
+    const matchingIds = new Set();
+
+    // Find all kitties with this gem type
+    for (const [id, k] of kittyById.entries()) {
+      const gems = getMewtationGems(k);
+      if (gems.some(g => g.gem === gemType)) {
+        matchingIds.add(id);
+      }
+    }
+
+    log("highlightByGemType:", { gemType, count: matchingIds.size });
+
+    // Gem-specific border colors
+    const gemColors = {
+      diamond: "#00ffff",
+      gold: "#ffd700",
+      silver: "#c0c0c0",
+      bronze: "#cd7f32"
+    };
+    const borderColor = gemColors[gemType] || "#ffcc00";
+
+    // Highlight matching nodes, dim others (preserve selection styling)
+    const nodeUpdates = [];
+    for (const id of nodes.getIds()) {
+      const nid = Number(id);
+      const base = nodeBaseStyle.get(nid);
+      if (!base) continue;
+
+      if (nid === selectedNodeId) {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size + 6,
+          color: { background: base.bg, border: "#ffffff" },
+          borderWidth: 3
+        });
+      } else if (matchingIds.has(nid)) {
+        nodeUpdates.push({
+          id: nid,
+          size: 48,
+          color: { background: brightenHex(base.bg, 0.25), border: borderColor },
+          borderWidth: 3
+        });
+      } else {
+        nodeUpdates.push({
+          id: nid,
+          size: base.size,
+          color: { background: base.bg, border: "rgba(255,255,255,0.1)" },
+          borderWidth: 1
+        });
+      }
+    }
+    if (nodeUpdates.length) nodes.update(nodeUpdates);
+
+    // Dim edges not between matching kitties
+    const edgeUpdates = [];
+    for (const edge of edges.get()) {
+      const match = edge.id.match(/^([ms]):(\d+)->(\d+)$/);
+      if (match) {
+        const fromId = Number(match[2]);
+        const toId = Number(match[3]);
+        const dimColor = edge.id.startsWith("m:") ? EDGE_COLORS.matronDimmed : EDGE_COLORS.sireDimmed;
+
+        if (matchingIds.has(fromId) && matchingIds.has(toId)) {
+          edgeUpdates.push({
+            id: edge.id,
+            color: getEdgeColor(edge.id),
+            width: 2,
+            arrows: { to: { enabled: true, scaleFactor: 1.0, type: "arrow" } }
+          });
+        } else {
+          edgeUpdates.push({
+            id: edge.id,
+            color: dimColor,
+            width: 1.5,
+            arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+          });
+        }
+      }
+    }
+    if (edgeUpdates.length) edges.update(edgeUpdates);
+  }
+
   // Filter state
   let filterEdgeHighlight = false; // Whether to highlight edges between filtered kitties
 
@@ -2411,7 +2307,7 @@
     if (compact) {
       // Compact version for tooltip - just show icons and count
       return sortedGems.map(g =>
-        `<span class="gem-badge gem-${g.gem}" title="${safeText(g.description)} #${g.position}">
+        `<span class="gem-badge gem-${g.gem}" data-gem="${g.gem}" title="${safeText(g.description)} #${g.position}">
           <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-md" />
         </span>`
       ).join("");
@@ -2419,7 +2315,7 @@
 
     // Full version for right pane
     return sortedGems.map(g =>
-      `<div class="gem-item">
+      `<div class="gem-item" data-gem="${g.gem}">
         <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-lg" />
         <span class="gem-label">${gemDisplayName(g.gem)}</span>
         <span class="gem-detail">${safeText(g.type)}: <a href="${cattributeUrl(g.description)}" target="_blank" rel="noopener" class="trait-link">${safeText(g.description)}</a> (#${g.position})</span>
@@ -2888,7 +2784,7 @@
       const traitLink = `<a href="${cattributeUrl(traitValue)}" target="_blank" rel="noopener" class="trait-link">${safeText(traitValue)}</a>`;
       const gem = gems.find(g => g.type === t);
       if (gem) {
-        return `<span class="tag tag-mewtation tag-trait" data-trait="${safeText(traitValue)}" title="${gemDisplayName(gem.gem)} #${gem.position}">
+        return `<span class="tag tag-mewtation" data-gem="${gem.gem}" data-trait="${safeText(traitValue)}" title="${gemDisplayName(gem.gem)} #${gem.position}">
           <img src="${GEM_IMAGES[gem.gem]}" alt="" class="gem-icon gem-icon-sm" />
           ${t}: ${traitLink}
         </span>`;
@@ -3018,6 +2914,49 @@
 
     setupTraitHighlightHandlers(selectedBox);
 
+    // Set up gem highlight handlers
+    function setupGemHighlightHandlers(container) {
+      const gemBadges = container.querySelectorAll(".gem-badge, .gem-item, .tag-mewtation");
+      gemBadges.forEach(badge => {
+        badge.addEventListener("mouseenter", () => {
+          const gemType = badge.dataset.gem;
+          if (gemType) highlightByGemType(gemType);
+        });
+        badge.addEventListener("mouseleave", () => {
+          // Restore to previous state
+          if (selectedNodeId) {
+            highlightFamilyEdges(selectedNodeId);
+            // Restore node styles
+            const nodeUpdates = [];
+            for (const nid of nodes.getIds()) {
+              const base = nodeBaseStyle.get(Number(nid));
+              if (!base) continue;
+              if (Number(nid) === selectedNodeId) {
+                nodeUpdates.push({
+                  id: Number(nid),
+                  size: base.size + 6,
+                  color: { background: base.bg, border: "#ffffff" },
+                  borderWidth: 3
+                });
+              } else {
+                nodeUpdates.push({
+                  id: Number(nid),
+                  size: base.size,
+                  color: { background: base.bg, border: base.border },
+                  borderWidth: base.borderWidth
+                });
+              }
+            }
+            if (nodeUpdates.length) nodes.update(nodeUpdates);
+          } else {
+            restoreAllNodes();
+          }
+        });
+      });
+    }
+
+    setupGemHighlightHandlers(selectedBox);
+
     // Also update floating panel (for embed mode)
     const floatingBox = $("floatingSelectedBox");
     if (floatingBox) {
@@ -3025,6 +2964,7 @@
       // Set up handlers for floating panel
       setupOwnerHighlightHandlers(floatingBox);
       setupTraitHighlightHandlers(floatingBox);
+      setupGemHighlightHandlers(floatingBox);
       // Show floating panel if hidden
       const floatingPanel = $("floatingPanel");
       if (floatingPanel) floatingPanel.classList.remove("panel-hidden");
@@ -3670,7 +3610,107 @@
     }
   }
 
-  function generatePermalinkUrl() {
+  async function addKittiesById(ids, noExpand = false) {
+    if (!ids || ids.length === 0) return;
+    log("addKittiesById:", ids, "noExpand:", noExpand);
+    setStatus(`Adding ${ids.length} kitty(s)...`, false);
+
+    const kittiesToAdd = [];
+    const requestedIds = new Set(ids.map(Number));
+    const fetchedIds = new Set();
+    const embeddedData = new Map();
+
+    try {
+      // Fetch requested kitties
+      for (const id of ids) {
+        const numId = Number(id);
+
+        // Skip if already in graph
+        if (kittyById.has(numId)) {
+          log("addKittiesById: skipping already loaded", numId);
+          continue;
+        }
+
+        if (fetchedIds.has(numId)) continue;
+        fetchedIds.add(numId);
+
+        log("addKittiesById: fetching", numId);
+        const kitty = await fetchJson(apiUrl(`/kitties/${numId}`));
+        const kObj = unwrapKitty(kitty);
+        const normalized = normalizeFromApi(kObj);
+        kittiesToAdd.push(normalized);
+
+        // Collect embedded parents/children (skip if noExpand)
+        if (!noExpand) {
+          if (kObj.matron && typeof kObj.matron === "object" && kObj.matron.id) {
+            const matronId = Number(kObj.matron.id);
+            if (!kittyById.has(matronId) && !requestedIds.has(matronId) && !embeddedData.has(matronId)) {
+              embeddedData.set(matronId, normalizeFromApi(kObj.matron));
+            }
+          }
+          if (kObj.sire && typeof kObj.sire === "object" && kObj.sire.id) {
+            const sireId = Number(kObj.sire.id);
+            if (!kittyById.has(sireId) && !requestedIds.has(sireId) && !embeddedData.has(sireId)) {
+              embeddedData.set(sireId, normalizeFromApi(kObj.sire));
+            }
+          }
+
+          if (Array.isArray(kObj.children) && kObj.children.length > 0) {
+            for (const child of kObj.children) {
+              if (child && typeof child === "object" && child.id) {
+                const childId = Number(child.id);
+                if (!kittyById.has(childId) && !requestedIds.has(childId) && !embeddedData.has(childId)) {
+                  const childNorm = normalizeFromApi(child);
+                  if (!childNorm.matron_id) childNorm.matron_id = numId;
+                  else if (!childNorm.sire_id) childNorm.sire_id = numId;
+                  embeddedData.set(childId, childNorm);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Add embedded data
+      for (const [embId, embKitty] of embeddedData) {
+        if (!kittyById.has(embId) && !fetchedIds.has(embId)) {
+          kittiesToAdd.push(embKitty);
+        }
+      }
+
+      if (kittiesToAdd.length === 0) {
+        setStatus("All kitties already in graph", false);
+        return;
+      }
+
+      log("addKittiesById: adding", kittiesToAdd.length, "kitties to existing graph");
+
+      // Add to existing graph
+      mergeJson({ kitties: kittiesToAdd }, true);
+      rebuildAllEdges();
+      setStats();
+      updateFilterControls();
+
+      network.setOptions({
+        physics: {
+          enabled: true,
+          stabilization: { enabled: true, iterations: 200, updateInterval: 25, fit: false }
+        }
+      });
+      network.stabilize();
+      physicsOn = true;
+      const physBtn = $("togglePhysicsBtn");
+      if (physBtn) physBtn.textContent = "Physics: on";
+
+      setTimeout(() => fitMainCluster(), 200);
+      setStatus(`Added ${kittiesToAdd.length} kitty(s) to graph`, false);
+    } catch (e) {
+      console.error(e);
+      setStatus(`Failed to add kitties: ${e.message}`, true);
+    }
+  }
+
+  function generatePermalinkUrl(includeViewport = true) {
     const svgBaseEl = $("svgBaseUrl");
     const svgBase = svgBaseEl && svgBaseEl.value ? svgBaseEl.value.trim() : "";
 
@@ -3741,6 +3781,15 @@
       url += `&layout=${encodeURIComponent(currentLayout)}`;
     }
 
+    // Add viewport parameters (zoom and position) - only for same viewer type
+    if (includeViewport && network) {
+      const zoom = network.getScale();
+      const pos = network.getViewPosition();
+      url += `&zoom=${zoom.toFixed(3)}`;
+      url += `&viewX=${pos.x.toFixed(1)}`;
+      url += `&viewY=${pos.y.toFixed(1)}`;
+    }
+
     return url;
   }
 
@@ -3750,29 +3799,75 @@
   }
 
   function wireControls() {
-    const fileBtn = $("loadFileBtn");
-    const picker = $("filePicker");
-    if (fileBtn && picker) {
-      fileBtn.addEventListener("click", () => picker.click());
-      picker.addEventListener("change", async (e) => {
+    // JSON loading: URL or file picker
+    const jsonBtn = $("loadJsonBtn");
+    const jsonInput = $("jsonUrl");
+    const jsonFilePicker = $("jsonFilePicker");
+
+    if (jsonBtn && jsonInput && jsonFilePicker) {
+      jsonBtn.addEventListener("click", async () => {
+        const url = jsonInput.value.trim();
+        if (url) {
+          // Load from URL
+          loadedFromDataUrl = url;
+          try { await loadJsonFromUrl(url); }
+          catch (e) { console.error(e); setStatus("Failed to load JSON URL", true); }
+        } else {
+          // Open file picker
+          jsonFilePicker.click();
+        }
+      });
+
+      // Handle file selection
+      jsonFilePicker.addEventListener("change", async (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
-        log("load from file:", file.name, file.size);
-        loadedFromDataUrl = null; // Local files can't be shared via URL
-        const text = await file.text();
-        loadJsonObject(JSON.parse(text));
+        try {
+          log("load from file:", file.name, file.size);
+          loadedFromDataUrl = null; // Local files can't be shared via URL
+          const text = await file.text();
+          loadJsonObject(JSON.parse(text));
+          jsonFilePicker.value = ""; // Reset for re-selection
+        } catch (err) {
+          console.error(err);
+          setStatus("Failed to load JSON file", true);
+        }
       });
-    }
 
-    const urlBtn = $("loadFromUrlBtn");
-    const urlInput = $("jsonUrl");
-    if (urlBtn && urlInput) {
-      urlBtn.addEventListener("click", async () => {
-        const url = urlInput.value.trim();
-        if (!url) { setStatus("Enter a JSON URL or use Load JSON File", true); return; }
-        loadedFromDataUrl = url;
-        try { await loadJsonFromUrl(url); }
-        catch (e) { console.error(e); setStatus("Failed to load JSON URL", true); }
+      // Drag-and-drop support
+      jsonInput.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        jsonInput.classList.add("drag-over");
+      });
+
+      jsonInput.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        jsonInput.classList.remove("drag-over");
+      });
+
+      jsonInput.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        jsonInput.classList.remove("drag-over");
+
+        const file = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (!file) return;
+        if (!file.name.endsWith(".json")) {
+          setStatus("Please drop a JSON file", true);
+          return;
+        }
+
+        try {
+          log("load from dropped file:", file.name, file.size);
+          loadedFromDataUrl = null;
+          const text = await file.text();
+          loadJsonObject(JSON.parse(text));
+        } catch (err) {
+          console.error(err);
+          setStatus("Failed to load dropped JSON file", true);
+        }
       });
     }
 
@@ -3802,6 +3897,119 @@
           // Fallback: show URL in prompt
           window.prompt("Copy this permalink:", url);
         });
+      });
+    }
+
+    // Embed button - show embed code modal
+    const embedBtn = $("embedBtn");
+    const embedModal = $("embedModal");
+    const embedModalClose = $("embedModalClose");
+    const embedViewer = $("embedViewer");
+    const embedSwitcher = $("embedSwitcher");
+    const embedViewport = $("embedViewport");
+    const embedWidth = $("embedWidth");
+    const embedHeight = $("embedHeight");
+    const embedCodeOutput = $("embedCodeOutput");
+    const embedCopyBtn = $("embedCopyBtn");
+
+    if (embedBtn && embedModal) {
+      embedBtn.addEventListener("click", () => {
+        generateEmbedCode();
+        embedModal.classList.add("show");
+      });
+
+      // Close modal
+      if (embedModalClose) {
+        embedModalClose.addEventListener("click", () => {
+          embedModal.classList.remove("show");
+        });
+      }
+
+      // Close on background click
+      embedModal.addEventListener("click", (e) => {
+        if (e.target === embedModal) {
+          embedModal.classList.remove("show");
+        }
+      });
+
+      // Update embed code when options change
+      if (embedViewer) embedViewer.addEventListener("change", generateEmbedCode);
+      if (embedSwitcher) embedSwitcher.addEventListener("change", generateEmbedCode);
+      if (embedViewport) embedViewport.addEventListener("change", generateEmbedCode);
+      if (embedWidth) embedWidth.addEventListener("input", generateEmbedCode);
+      if (embedHeight) embedHeight.addEventListener("input", generateEmbedCode);
+
+      // Copy button
+      if (embedCopyBtn && embedCodeOutput) {
+        embedCopyBtn.addEventListener("click", () => {
+          embedCodeOutput.select();
+          navigator.clipboard.writeText(embedCodeOutput.value).then(() => {
+            embedCopyBtn.textContent = "Copied!";
+            setTimeout(() => {
+              embedCopyBtn.textContent = "Copy to Clipboard";
+            }, 2000);
+          }).catch(() => {
+            // Fallback
+            embedCodeOutput.select();
+            document.execCommand("copy");
+          });
+        });
+      }
+    }
+
+    function generateEmbedCode() {
+      const viewer = embedViewer.value;
+      const showSwitcher = embedSwitcher.checked;
+      const preserveViewport = embedViewport ? embedViewport.checked : false;
+      const width = embedWidth.value.trim();
+      const height = embedHeight.value.trim();
+
+      // Get current URL and modify it for embed mode
+      // Only include viewport params if generating for same viewer type
+      const includeViewport = viewer === "2d";
+      let embedUrl = generatePermalinkUrl(window.location.origin + (viewer === "3d" ? "/3d.html" : "/index.html"), includeViewport);
+
+      // Add embed=true parameter
+      const url = new URL(embedUrl);
+      url.searchParams.set("embed", "true");
+
+      // Add switcher parameter if disabled
+      if (!showSwitcher) {
+        url.searchParams.set("switcher", "false");
+      }
+
+      // Remove viewport parameters if not preserving
+      if (!preserveViewport) {
+        url.searchParams.delete("zoom");
+        url.searchParams.delete("viewX");
+        url.searchParams.delete("viewY");
+      }
+
+      // Note: For 3D viewport from 2D viewer, we can't preserve since we don't have camera data
+      // User will need to switch to 3D and generate embed from there
+
+      embedUrl = url.toString();
+
+      // Generate iframe code with optional width/height
+      let iframeCode = `<iframe src="${embedUrl}"`;
+      if (width) iframeCode += ` width="${width}"`;
+      if (height) iframeCode += ` height="${height}"`;
+      iframeCode += ` frameborder="0" allowfullscreen></iframe>`;
+
+      if (embedCodeOutput) {
+        embedCodeOutput.value = iframeCode;
+      }
+    }
+
+    // 3D view button - pass current query params to 3d.html
+    const view3dBtn = $("view3dBtn");
+    if (view3dBtn) {
+      view3dBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const permalinkUrl = generatePermalinkUrl(false); // Don't include 2D viewport params
+        // Replace origin with 3d.html path
+        const url3d = permalinkUrl.replace(window.location.origin, window.location.origin + "/3d.html");
+        window.location.href = url3d;
       });
     }
 
@@ -3852,14 +4060,30 @@
     // Load kitty by ID(s)
     const kittyIdInput = $("kittyIdInput");
     const loadKittyBtn = $("loadKittyBtn");
-    if (loadKittyBtn && kittyIdInput) {
+    const addKittyBtn = $("addKittyBtn");
+
+    if (kittyIdInput) {
       const doLoadKitties = async () => {
         const ids = parseKittyIds(kittyIdInput.value);
         if (!ids.length) { setStatus("Enter valid kitty ID(s)", true); return; }
         loadedFromDataUrl = null;
         await loadKittiesById(ids);
       };
-      loadKittyBtn.addEventListener("click", doLoadKitties);
+
+      const doAddKitties = async () => {
+        const ids = parseKittyIds(kittyIdInput.value);
+        if (!ids.length) { setStatus("Enter valid kitty ID(s)", true); return; }
+        await addKittiesById(ids);
+      };
+
+      if (loadKittyBtn) {
+        loadKittyBtn.addEventListener("click", doLoadKitties);
+      }
+
+      if (addKittyBtn) {
+        addKittyBtn.addEventListener("click", doAddKitties);
+      }
+
       kittyIdInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") doLoadKitties();
       });
@@ -4089,6 +4313,8 @@
 
     // Embed mode
     const isEmbedMode = params.get("embed") === "true" || params.get("embed") === "1";
+    const showSwitcher = params.get("switcher") !== "false" && params.get("switcher") !== "0";
+
     if (isEmbedMode) {
       document.body.classList.add("embed-mode");
       log("Embed mode enabled");
@@ -4101,6 +4327,12 @@
     const floatingPanelClose = $("floatingPanelClose");
     const floatingGithubLink = $("floatingGithubLink");
     const floatingViewerLink = $("floatingViewerLink");
+    const floatingView3dBtn = $("floatingView3dBtn");
+
+    // Hide 3D switcher if disabled
+    if (!showSwitcher && floatingView3dBtn) {
+      floatingView3dBtn.style.display = "none";
+    }
 
     // Set up GitHub link
     if (floatingGithubLink) {
@@ -4204,6 +4436,15 @@
       });
     }
 
+    // 3D view button - pass current query params with embed=true
+    if (floatingView3dBtn) {
+      floatingView3dBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const url3d = generatePermalinkUrl(window.location.origin + "/3d.html", false); // Don't include 2D viewport params
+        window.location.href = url3d;
+      });
+    }
+
     // Apply svgBaseUrl from query param if provided
     const svgBaseUrlParam = params.get("svgBaseUrl");
     if (svgBaseUrlParam) {
@@ -4271,6 +4512,11 @@
 
     // Check for shortest path mode param
     const shortestPathParam = params.get("shortestPath") === "true" || params.get("shortestPath") === "1";
+
+    // Check for viewport params
+    const zoomParam = params.get("zoom");
+    const viewXParam = params.get("viewX");
+    const viewYParam = params.get("viewY");
 
     // Expand filters panel if any filter/path params are present
     const hasFilterParams = genMinParam || genMaxParam || mewtationsParam || filterEdgeHighlightParam ||
@@ -4416,6 +4662,24 @@
             console.warn("selected: kitty not found in graph", selId);
           }
         }, 700);
+      }
+
+      // Apply viewport parameters if present
+      if (zoomParam || (viewXParam && viewYParam)) {
+        setTimeout(() => {
+          if (network) {
+            const targetZoom = zoomParam ? parseFloat(zoomParam) : network.getScale();
+            const targetX = viewXParam ? parseFloat(viewXParam) : 0;
+            const targetY = viewYParam ? parseFloat(viewYParam) : 0;
+
+            network.moveTo({
+              scale: targetZoom,
+              position: { x: targetX, y: targetY },
+              animation: { duration: 600, easingFunction: "easeInOutQuad" }
+            });
+            log("Viewport from query params:", { zoom: targetZoom, x: targetX, y: targetY });
+          }
+        }, 800); // After selection (700ms)
       }
     };
 

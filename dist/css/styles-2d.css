@@ -1,0 +1,388 @@
+/* 2D Viewer specific styles */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+header .title {
+  margin-right: auto;
+}
+
+header .controls {
+  justify-content: flex-end;
+}
+
+.input {
+  width: 320px;
+  max-width: 70vw;
+}
+
+/* Main layout */
+main {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 12px;
+  padding: 12px;
+}
+
+/* Network container */
+#networkWrap {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  height: calc(100vh - 74px);
+  min-height: 560px;
+}
+
+#network {
+  position: absolute;
+  inset: 0;
+  outline: none;
+}
+
+#network canvas {
+  outline: none;
+}
+
+#banner {
+  position: absolute;
+  left: 80px;
+  right: 160px;
+  bottom: 16px;
+  z-index: 4;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 10;
+}
+
+/* Sidebar */
+aside {
+  height: calc(100vh - 74px);
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Cards */
+.card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.card h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+  color: var(--text);
+}
+
+.card h3.collapsible {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -12px -12px 0 -12px;
+  padding: 12px;
+  border-radius: 14px 14px 0 0;
+}
+
+.card h3.collapsible:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.card h3.collapsible.collapsed {
+  border-radius: 14px;
+  margin-bottom: -12px;
+}
+
+.card h3.collapsible::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--muted);
+  transition: transform 0.2s;
+}
+
+.card h3.collapsible.collapsed::after {
+  transform: rotate(-90deg);
+}
+
+.card .card-body {
+  overflow: hidden;
+  transition: max-height 0.3s ease, margin-top 0.3s ease;
+  max-height: 500px;
+  margin-top: 8px;
+}
+
+.card .card-body.collapsed {
+  max-height: 0;
+  margin-top: 0;
+}
+
+.card-bottom {
+  margin-top: auto;
+}
+
+/* Context menu */
+.context-menu {
+  position: absolute;
+  min-width: 180px;
+  background: rgba(18,22,34,0.98);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  padding: 6px 0;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+  z-index: 30;
+  display: none;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.context-menu-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.context-menu-item.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+.context-menu-item.active .menu-icon svg {
+  color: var(--accent);
+}
+
+.context-menu-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.context-menu-item .menu-icon {
+  display: flex;
+  align-items: center;
+}
+
+.context-menu-item .menu-icon svg {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+/* Settings */
+.input-narrow {
+  width: 140px;
+  margin-left: 8px;
+}
+
+.input-full {
+  width: 100%;
+}
+
+.label-muted {
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+.settings-kv {
+  align-items: center;
+}
+
+.settings-kv .k {
+  padding-top: 0;
+}
+
+.settings-kv input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.noscript-msg {
+  padding: 14px;
+  color: #ffb3b3;
+}
+
+/* Filter controls */
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-select {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filter-select:hover {
+  border-color: var(--accent);
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(122,162,255,0.2);
+}
+
+/* 2D specific: use --card background for filter buttons */
+.filter-btn {
+  background: var(--card);
+}
+
+.filter-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-input {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text);
+  font-size: 12px;
+  width: 80px;
+  text-align: center;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.filter-input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.filter-range-sep {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.filter-row-inline {
+  margin-top: 4px;
+}
+
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.filter-checkbox-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.filter-checkbox-label:hover {
+  color: var(--text);
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+/* Embed mode */
+body.embed-mode header,
+body.embed-mode aside {
+  display: none;
+}
+
+body.embed-mode main {
+  grid-template-columns: 1fr;
+  padding: 0;
+}
+
+body.embed-mode #networkWrap {
+  height: 100vh;
+  min-height: 100vh;
+  border: none;
+  border-radius: 0;
+}
+
+/* Responsive */
+@media (max-width: 1020px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  aside {
+    height: auto;
+    min-height: auto;
+  }
+
+  #networkWrap {
+    height: 70vh;
+  }
+
+  header .controls {
+    justify-content: flex-start;
+  }
+
+  .input {
+    width: 280px;
+  }
+}

@@ -18,6 +18,7 @@ pip install requests matplotlib numpy
 | `ck_fetch.py` | Fetch kitty data from CryptoKitties API |
 | `download_svgs.py` | Download kitty SVG/PNG images |
 | `gene_analysis.py` | Analyze genetic inheritance and mewtations |
+| `analyze_datasets.py` | Analyze datasets and recommend optimal 3D viewer settings |
 | `genome_visualizer.py` | Create visual genome charts |
 | `prune_to_ancestors.py` | Prune JSON to direct ancestors only |
 | `fancy_detector.py` | Detect fancy cats and potential matches |
@@ -230,6 +231,113 @@ Kitty #3002 (Gen 1)
   Matron alleles: {'6', '8'}
   Sire alleles: {'7', '8'}
 ```
+
+---
+
+## analyze_datasets.py
+
+Analyze CryptoKitties dataset JSON files to understand data ranges and recommend optimal Z-axis settings for 3D visualization.
+
+### Usage
+
+```bash
+# Analyze all JSON files in the examples directory
+python3 analyze_datasets.py ../dist/examples
+
+# Analyze a specific directory
+python3 analyze_datasets.py /path/to/datasets
+
+# Make it executable and run directly
+chmod +x analyze_datasets.py
+./analyze_datasets.py ../dist/examples
+```
+
+### What It Analyzes
+
+For each dataset, the script analyzes:
+
+- **Kitty count**: Total number of kitties in the dataset
+- **Generation range**: Min, max, range, and unique generation values
+- **Dates**: Number of unique birth/creation dates
+- **Mewtation gems**: Total count, position range, and breakdown by type (diamond/gold/silver/bronze)
+
+### Recommendations
+
+Based on the analysis, the script recommends:
+
+1. **Best Z-axis mode**:
+   - `generation`: For family trees with reasonable generation ranges (<100)
+   - `birthday`: For time-based analysis or tight generation ranges
+   - `rarity`: For mewtation-focused datasets (tier III/IIII, diamonds)
+   - `flat`: For 2D-like layout
+
+2. **Parameters**:
+   - `maxZSpread`: Recommended maximum Z-axis range (600-1000)
+     - Automatically adjusted based on dataset size
+     - Small datasets (<50): 600 units
+     - Medium datasets (50-500): 800 units
+     - Large datasets (>500): 1000 units
+
+3. **URL parameters**: Ready-to-use query string for the 3D viewer
+
+### Algorithm
+
+#### Z-Axis Mode Selection
+
+The script uses these rules to recommend the best mode:
+
+1. **Wide generation range (>100)**: Usually means gen-0 founders + distant descendants
+   - Has mewtations → `rarity` (shows discoverers at top)
+   - No mewtations → `birthday` (time-based spread)
+
+2. **Tight generation range (<20)**: Specific subset or breeding experiment
+   - Many mewtations (>30%) → `rarity` (focus on discoveries)
+   - Few mewtations → `birthday` (better visual separation)
+
+3. **Medium range (20-100)**: Typical family tree
+   - Good distribution (>50% of range filled) → `generation` (shows ancestry)
+   - Sparse distribution → `generation` (default for family trees)
+
+#### Normalization
+
+All Z-axis modes use automatic normalization:
+
+- **Generation mode**: Maps actual min-max generation range to 0-maxZSpread
+  - Gen 0-24 → Same spread as 0-4848
+  - Prevents excessive gaps from outliers
+
+- **Birthday mode**: Maps actual min-max dates to 0-maxZSpread
+  - Uses actual dataset date range
+  - Older = higher Z position
+
+- **Rarity mode**: Uses mewtation discovery position (1-500)
+  - Position 1 (first discoverer) → top (maxZSpread)
+  - Position 500 (last of rare tier) → bottom (0)
+  - Provides 500 discrete Z levels
+
+### Example Output
+
+```
+📁 tier_iiii/tier_iiii.json
+   Kitties: 158
+   Generation: 1-4848 (range: 4848, unique: 20)
+   Dates: 55 unique dates
+   Mewtations: 380 gems (pos: 1-499)
+              bronze:157, silver:139, gold:72, diamond:12
+   ✨ Recommended Z-axis: rarity
+      Reason: Wide generation range with mewtations - use rarity
+      Parameters: maxZSpread=800
+      URL param: ?zAxis=rarity
+```
+
+### Integration with 3D Viewer
+
+The 3D viewer automatically:
+1. Normalizes all data based on actual loaded kitties
+2. Adjusts `maxZSpread` based on dataset size (grows with node expansion)
+3. Recalculates Z positions when data changes
+
+This means the visualization adapts as users expand nodes and load more data.
 
 ---
 

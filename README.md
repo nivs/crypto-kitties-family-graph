@@ -6,7 +6,9 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 
 **[Try the live demo →](https://ck.innerlogics.com/?kitties=896775,1,4,18,100000,174756,275808,500000)**
 
-## Features
+## Viewers
+
+### 2D Viewer (Primary)
 
 - **Interactive Graph**: Physics-based layout with drag, zoom, and pan
 - **Family Visualization**: Pink edges for matron (mother), blue edges for sire (father)
@@ -22,6 +24,22 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 - **Live API**: Fetch kitty data directly from CryptoKitties API
 - **Embed Mode**: Embeddable graph with responsive floating panel and "Open in viewer" link
 
+### 3D Viewer (Proof of Concept)
+
+**[→ Full 3D Documentation](docs/3D_VIEWER.md)**
+
+Experimental 3D visualization layer using WebGL and Three.js:
+
+- **3D Force-Directed Graph**: Nodes in 3D space with physics simulation
+- **Z-Axis Modes**: Generation, birthday, rarity (mewtation position), or flat
+- **3D Gem Indicators**: Realistic materials with transparency, reflectivity, and clearcoat
+- **Interactive Camera**: Orbit controls + viewport gizmo for quick navigation
+- **Filter Highlighting**: Emissive glow for matching nodes, darkening for dimmed nodes
+- **Embed Support**: Fullscreen mode with floating panel and 2D/3D switcher
+- **Smart Defaults**: Auto-recommends Z-axis mode based on dataset analysis
+
+**Status**: Proof of concept - use 2D viewer for primary analysis, 3D for exploration.
+
 ## Quick Start
 
 1. Start a local server from the `dist` folder:
@@ -35,76 +53,21 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
    ```
 
 3. Load kitties by:
-   - Entering kitty ID(s) in the textbox
-   - Loading a JSON file
-   - Using query parameters (see below)
+   - Entering kitty ID(s) in the textbox (try `896775` for the most expensive kitty)
+   - Loading a JSON file from the `examples/` folder
+   - Using [query parameters](docs/QUERY_PARAMETERS.md) (e.g., `?kitties=1,4,18` for origin story)
 
-## Query Parameters
+## Documentation
 
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `kitty` or `kitties` | Comma-separated kitty IDs to load from API | `?kitties=124653,129868` |
-| `dataUrl` | URL to a JSON file with kitty data | `?dataUrl=./my_kitties.json` |
-| `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
-| `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
-| `selected` | Pre-select a kitty (shows details, centers view) | `?selected=896775` |
-| `shortestPath` | Enable shortest path mode (use with `selected`) | `?shortestPath=true` |
-| `owner` | Pin owner highlight (address or nickname) | `?owner=0x1234...` or `?owner=nivs` |
-| `noExpand` | Skip embedded parent/child extraction (faster, exact IDs only) | `?noExpand=true` |
-| `layout` | Graph layout (`clustered`, `physics`, `barnesHut`, `repulsion`, `circle`, `hierarchicalUD`, `hierarchicalDU`, `hierarchicalLR`) | `?layout=circle` |
-| `genMin` | Filter: minimum generation (inclusive) | `?genMin=0` |
-| `genMax` | Filter: maximum generation (inclusive) | `?genMax=10` |
-| `mewtations` | Filter: mewtation gems (`all` or comma-separated: `diamond,gold,silver,bronze`) | `?mewtations=diamond,gold` |
-| `filterEdgeHighlight` | Highlight edges between filtered kitties | `?filterEdgeHighlight=true` |
-| `pathFrom` | Shortest path: source kitty ID | `?pathFrom=174756` |
-| `pathTo` | Shortest path: target kitty ID | `?pathTo=275808` |
+**[→ Query Parameters Reference](docs/QUERY_PARAMETERS.md)** - Complete guide to URL parameters for data loading, filtering, viewport control, and more
 
-**Examples:**
-```
-# Load specific kitties from API
-http://localhost:8001/?kitties=124653,129868,148439
+**[→ Embedding Guide](docs/EMBEDDING.md)** - How to embed the graph in other pages with iframe examples and best practices
 
-# Load from local JSON
-http://localhost:8001/?dataUrl=./examples/nivs/nivs.json
+**[→ 3D Viewer](docs/3D_VIEWER.md)** - Full documentation for the experimental 3D visualization layer
 
-# Embed mode with specific kitties
-http://localhost:8001/?embed=true&kitties=124653,129868
+**[→ Notable Kitties](docs/NOTABLE_KITTIES.md)** - Catalog of historically significant and expensive CryptoKitties
 
-# With filters (generation 0-5, gold mewtations, owner highlight)
-http://localhost:8001/?kitties=896775&genMin=0&genMax=5&mewtations=gold&owner=nivs
-
-# Shortest path between two kitties
-http://localhost:8001/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808
-```
-
-## Embedding
-
-The graph can be embedded in other pages using an iframe with embed mode enabled.
-
-**Embed mode features:**
-- Full viewport graph (no header or sidebar)
-- Floating panel for selected kitty details (draggable, collapsible, closable)
-- Responsive compact mode for small viewports (panel and nav buttons shrink automatically)
-- "Open in viewer" link to open current graph in standalone viewer
-- Links to GitHub repo
-
-**Basic iframe embed:**
-```html
-<iframe
-  src="https://ck.innerlogics.com/?embed=true&kitties=124653,129868"
-  width="100%"
-  height="600"
-  frameborder="0">
-</iframe>
-```
-
-**Configuration for embeds:**
-```javascript
-window.CK_GRAPH_DEFAULTS = {
-  // ... other options ...
-  githubUrl: "https://github.com/nivs/crypto-kitties-family-graph"
-};
-```
+**[→ Tools](tools/README.md)** - Scripts for fetching kitty data, downloading images, and analyzing genetics
 
 ## Configuration
 
@@ -145,28 +108,17 @@ crypto-kitties-family-graph/
 
 ## Generating Kitty Data
 
-Use the tools in `tools/` to fetch kitty data and download images.
+Use the tools in `tools/` to fetch kitty data and download images:
 
 ```bash
 cd tools
-pip install requests
-
-# Fetch kitties with parents/children
 python3 ck_fetch.py --ids "124653,129868" --parents 2 --children 1 --out my_kitties.json
-
-# Download SVGs
 python3 download_svgs.py my_kitties.json -o ./svg/ --skip-existing
 ```
 
 Then load with: `?dataUrl=./my_kitties.json`
 
-See **[tools/README.md](tools/README.md)** for full documentation including:
-- `ck_fetch.py` - Fetch kitty data with ancestry/children
-- `download_svgs.py` - Download kitty images
-- `gene_analysis.py` - Analyze genetic inheritance and mewtations
-- `genome_visualizer.py` - Create visual genome charts
-- `fancy_detector.py` - Detect fancy cats and potential matches
-- `find_rare_traits.py` - Search API for rare trait kitties (Tier II-IIII)
+See **[tools/README.md](tools/README.md)** for complete documentation of all available tools (data fetching, genetic analysis, fancy detection, rare trait search, and more).
 
 ## CORS Proxy
 

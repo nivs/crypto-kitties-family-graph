@@ -206,12 +206,11 @@ header .controls {
   grid-template-columns: 90px 1fr;
   gap: 6px 10px;
   font-size: 12px;
-  align-items: start;
+  align-items: center;
 }
 
 .kv .k {
   color: var(--muted);
-  padding-top: 4px;
 }
 
 .kv .v {
@@ -219,7 +218,7 @@ header .controls {
   word-break: break-word;
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
 }
 
@@ -502,6 +501,19 @@ header .controls {
 .trait-link {
   color: var(--accent);
   text-decoration: none;
+}
+
+.github-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.github-link:hover {
+  color: var(--text);
 }
 
 /* Filter buttons */
@@ -799,19 +811,6 @@ body.embed-mode .floating-panel {
   color: var(--text);
 }
 
-.floating-panel-body {
-  padding: 12px;
-  overflow-y: auto;
-  flex: 1;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-}
-
-.floating-panel.collapsed .floating-panel-body {
-  max-height: 0;
-  padding: 0 12px;
-  overflow: hidden;
-}
-
 .floating-panel-footer {
   padding: 10px 12px;
   border-top: 1px solid var(--border);
@@ -841,6 +840,204 @@ body.embed-mode .floating-panel {
 .floating-panel-footer a:hover,
 .floating-panel-footer .link-btn:hover {
   color: var(--text);
+}
+
+/* Floating Panel - Accordion Sections */
+.floating-panel-body {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  transition: max-height 0.3s ease;
+}
+
+.floating-panel.panel-collapsed .floating-panel-body {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.accordion-section {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-section:last-child {
+  border-bottom: none;
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(255,255,255,0.02);
+  transition: background 0.15s ease;
+}
+
+.accordion-header:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.accordion-title {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.accordion-chevron {
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.accordion-section.collapsed .accordion-chevron {
+  transform: rotate(-90deg);
+}
+
+.accordion-body {
+  padding: 12px;
+  transition: max-height 0.25s ease, padding 0.25s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.accordion-section.collapsed .accordion-body {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+}
+
+/* Floating Filters Panel (embed mode) */
+.floating-filters-panel {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  background: rgba(18,22,34,0.96);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+  z-index: 20;
+  display: none;
+  overflow: hidden;
+}
+
+body.embed-mode .floating-filters-panel {
+  display: block;
+}
+
+.floating-filters-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.floating-filters-header .panel-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.floating-filters-header .panel-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: transform 0.3s ease;
+}
+
+.floating-filters-header .panel-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+
+.floating-filters-panel.expanded .floating-filters-header .panel-btn {
+  transform: rotate(180deg);
+}
+
+.floating-filters-body {
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+/* Filter controls (used in both floating panel and sidebar) */
+.filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-row-inline {
+  flex-direction: row;
+  align-items: center;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-input {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.filter-range-sep {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.filter-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.filter-checkbox-label:hover {
+  color: var(--text);
+}
+
+.filter-checkbox-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--accent);
 }
 
 /* Embed Modal */
@@ -985,6 +1182,70 @@ body.embed-mode .floating-panel {
   outline: none;
 }
 
+/* Context Menu */
+.context-menu {
+  position: absolute;
+  min-width: 180px;
+  background: rgba(18,22,34,0.98);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  padding: 6px 0;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+  z-index: 30;
+  display: none;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.context-menu-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.context-menu-item.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+.context-menu-item.active .menu-icon svg {
+  color: var(--accent);
+}
+
+.context-menu-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.context-menu-item .menu-icon {
+  display: flex;
+  align-items: center;
+}
+
+.context-menu-item .menu-icon svg {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
 /* Responsive - Compact mode for small viewports (embeds) */
 @media (max-width: 800px) {
   #banner {
@@ -1020,10 +1281,11 @@ body.embed-mode .floating-panel {
   .floating-panel .kv {
     grid-template-columns: 70px 1fr;
     gap: 4px 8px;
+    align-items: center;
   }
 
   .floating-panel .kv .k {
-    padding-top: 2px;
+    padding-top: 0;
   }
 
   .floating-panel .tag {
@@ -1103,4 +1365,73 @@ body.embed-mode .floating-panel {
     width: 12px;
     height: 12px;
   }
+}
+
+/* Utility classes for replacing inline styles */
+.hidden-input {
+  display: none;
+}
+
+.switcher-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.embed-input-sm {
+  width: 80px;
+}
+
+.ml-3 {
+  margin-left: 16px;
+}
+
+.filter-sep {
+  color: var(--muted);
+}
+
+.filter-input-sm {
+  width: 60px;
+}
+
+.filter-row-wrap {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.control-label-checkbox {
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checkbox-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.checkbox-md {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-block {
+  width: 100%;
+  padding: 6px;
+  font-size: 12px;
+}
+
+.input-full,
+.select-full {
+  width: 100%;
+}
+
+.controls-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
 }

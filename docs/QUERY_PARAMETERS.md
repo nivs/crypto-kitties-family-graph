@@ -14,21 +14,27 @@ Complete reference for URL parameters supported by both 2D and 3D viewers.
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `zoom` | Zoom level (scale factor) | `?zoom=1.500` |
-| `viewX` | Horizontal center position (canvas x-coordinate) | `?viewX=150.5` |
-| `viewY` | Vertical center position (canvas y-coordinate) | `?viewY=-200.3` |
+| `cam2d` | Camera state: `zoom,x,y` (compact) | `?cam2d=1.500,150.5,-200.3` |
 
-**Automatically included in permalinks.** When generating embed code, use "Preserve viewport" checkbox to include these.
+The `cam2d` parameter encodes the 2D viewport state:
+- `zoom` - Zoom level (scale factor)
+- `x` - Horizontal center position (canvas x-coordinate)
+- `y` - Vertical center position (canvas y-coordinate)
+
+**Automatically included in permalinks.** When generating embed code, use "Preserve viewport" checkbox to include.
 
 ## Viewport (3D Viewer)
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `cameraX` | Camera x-position (3D space) | `?cameraX=250.0` |
-| `cameraY` | Camera y-position (3D space) | `?cameraY=300.0` |
-| `cameraZ` | Camera z-position (3D space) | `?cameraZ=400.0` |
+| `cam3d` | Camera state: `posX,posY,posZ,upX,upY,upZ,zoom` (compact) | `?cam3d=-25,487,76,0,1,0,1` |
 
-**Automatically included in permalinks.** When generating embed code, use "Preserve viewport" checkbox to include these.
+The `cam3d` parameter encodes the full 3D camera state:
+- `posX,posY,posZ` - Camera position in 3D space
+- `upX,upY,upZ` - Camera up vector (orientation, values -1 to 1)
+- `zoom` - Camera zoom level (0.01 to 100)
+
+**Automatically included in permalinks.** When generating embed code, use "Preserve viewport" checkbox to include.
 
 ## Display Options
 
@@ -81,10 +87,10 @@ Complete reference for URL parameters supported by both 2D and 3D viewers.
 ### With Viewport
 ```
 # 2D with custom zoom and position
-?kitties=896775&zoom=1.500&viewX=150.5&viewY=-200.3
+?kitties=896775&cam2d=1.500,150.5,-200.3
 
-# 3D with custom camera position
-?kitties=896775&cameraX=250.0&cameraY=300.0&cameraZ=400.0
+# 3D with custom camera state (position + orientation + zoom)
+?kitties=896775&cam3d=-25,487,76,0,1,0,1
 ```
 
 ### Embed Mode
@@ -96,7 +102,10 @@ Complete reference for URL parameters supported by both 2D and 3D viewers.
 ?embed=true&kitties=124653,129868&switcher=false
 
 # Embed with preserved viewport (2D)
-?embed=true&kitties=124653&zoom=1.5&viewX=100&viewY=-50
+?embed=true&kitties=124653&cam2d=1.5,100,-50
+
+# Embed with preserved viewport (3D)
+?embed=true&kitties=124653&cam3d=-25,487,76,0,1,0,1
 ```
 
 ### With Filters
@@ -128,8 +137,8 @@ Complete reference for URL parameters supported by both 2D and 3D viewers.
 # With Z-axis mode
 ?kitties=896775&zAxis=rarity
 
-# Full 3D setup with filters and camera position
-?kitties=896775&zAxis=rarity&mewtations=diamond&cameraX=250&cameraY=300&cameraZ=400
+# Full 3D setup with filters and camera state
+?kitties=896775&zAxis=rarity&mewtations=diamond&cam3d=-25,487,76,0,1,0,1
 ```
 
 ## Parameter Interaction

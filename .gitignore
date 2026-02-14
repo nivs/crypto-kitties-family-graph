@@ -19,3 +19,10 @@ __pycache__/
 /dist/examples/nivs/svg_full_parents
 /dist/examples/milestones/svg_1M
 !/dist/examples/nivs/svg/
+
+# Node.js / Build artifacts
+node_modules/
+dist/js/3d.js
+dist/js/*-*.js
+*.log
+.vite/

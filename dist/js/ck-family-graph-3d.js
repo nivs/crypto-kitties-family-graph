@@ -1,5 +1,11 @@
 /* CryptoKitties Family Graph - 3D Version */
-/* global ForceGraph3D, THREE, SpriteText */
+import { ForceGraph3D, THREE, ViewportGizmo } from './vendor-3d.js';
+
+// Make available globally for debugging
+window.ForceGraph3D = ForceGraph3D;
+window.THREE = THREE;
+window.ViewportGizmo = ViewportGizmo;
+
 (() => {
   // ===================== GLOBALS =====================
   const bannerEl = $("banner");
@@ -12,68 +18,57 @@
   log = (...args) => { if (debugLevel() >= 1) console.log("[CKGRAPH3D]", ...args); };
   logv = (...args) => { if (debugLevel() >= 2) console.log("[CKGRAPH3D:VV]", ...args); };
 
-  // ===================== DATA STATE =====================
-  let graph = null;
-  let viewportGizmo = null;
-  let kittyById = new Map();
-  let graphData = { nodes: [], links: [] };
-  let myKittyIds = new Set();
-  let expandedIds = new Set();
+  // ===================== 3D-SPECIFIC STATE =====================
+  // Shared state is in CKGraph (base.js) - create local aliases for convenience
+  const kittyById = CKGraph.kittyById;
+  const expandedIds = CKGraph.expandedIds;
+  const cachedApiResponses = CKGraph.cachedApiResponses;
 
-  // Selection and highlight state
+  // Local state variables that shadow CKGraph properties for easier access
+  // Note: These need to be kept in sync with CKGraph when modified
   let selectedNodeId = null;
   let shortestPathMode = false;
   let lockedPathToId = null;
-  let zAxisMode = "generation";
-
-  // Filters
+  let ownerHighlightLocked = false;
+  let lockedOwnerAddr = null;
+  let lockedOwnerNick = null;
   let generationHighlightActive = false;
   let generationRangeMin = null;
   let generationRangeMax = null;
   let mewtationHighlightActive = false;
   let highlightedGemTypes = new Set();
+  let myKittyIds = new Set();
+  let loadedFromDataUrl = null;
+  let foreignCam2d = null; // Store 2D viewport for round-trip preservation
+  let highlightedTraitGemNodes = new Set();
+
+  let graph = null;
+  let viewportGizmo = null;
+  let graphData = { nodes: [], links: [] };
+  let zAxisMode = "generation";
+
+  // Context menu state
+  let contextMenuNodeId = null;
+
+  // Double-click detection state
+  let lastClickTime = 0;
+  let lastClickNodeId = null;
+  const DOUBLE_CLICK_THRESHOLD = 300; // milliseconds
+
+  // Track mouse position for context menu
+  let lastMouseX = 0;
+  let lastMouseY = 0;
 
   // Texture cache for node sprites
   const textureCache = new Map();
-  const textureLoader = new THREE.TextureLoader();
+
+  // 3D-specific path highlighting (uses findShortestPath from base.js)
+  let highlightedPath = new Set();
+  let highlightedPathLinks = new Set();
 
   // ===================== API / DATA LOADING =====================
   // (fetchJson, unwrapKitty, normalizeFromApi imported from shared.js)
-
-  // ===================== MEWTATIONS DISPLAY =====================
-  function gemDisplayName(gemType) {
-    const names = { diamond: "Diamond", gold: "Gilded", silver: "Amethyst", bronze: "Lapis" };
-    return names[gemType] || gemType;
-  }
-
-  function cattributeUrl(traitValue) {
-    return `${siteBase()}/catalogue/cattribute/${encodeURIComponent(traitValue)}`;
-  }
-
-  function gemsHtml(gems, compact = false) {
-    if (!gems || gems.length === 0) return "";
-
-    const gemPriority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
-    const sortedGems = [...gems].sort((a, b) => (gemPriority[b.gem] || 0) - (gemPriority[a.gem] || 0));
-
-    if (compact) {
-      // Compact version for tooltip - just show icons
-      return sortedGems.map(g =>
-        `<span class="gem-badge gem-${g.gem}" data-gem="${g.gem}" title="${safeText(g.description)} #${g.position}">
-          <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-md" />
-        </span>`
-      ).join("");
-    }
-
-    // Full version for selected panel
-    return sortedGems.map(g =>
-      `<div class="gem-item" data-gem="${g.gem}">
-        <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-lg" />
-        <span class="gem-label">${gemDisplayName(g.gem)}</span>
-        <span class="gem-detail">${safeText(g.type)}: <a href="${cattributeUrl(g.description)}" target="_blank" rel="noopener" class="trait-link">${safeText(g.description)}</a> (#${g.position})</span>
-      </div>`
-    ).join("");
-  }
+  // formatDateTimeFull, gemDisplayName, cattributeUrl, gemsHtml are in base.js
 
   // ===================== Z-AXIS CALCULATION =====================
   function calculateZPosition(kitty) {
@@ -207,14 +202,29 @@
   }
 
   // ===================== TEXTURE LOADING =====================
+  // Determine texture resolution based on graph size to balance quality and performance
+  function getTextureSize() {
+    const nodeCount = kittyById.size;
+    let size;
+    if (nodeCount < 50) {
+      size = 512;      // High quality for small graphs
+    } else if (nodeCount < 150) {
+      size = 256;     // Medium quality for moderate graphs
+    } else {
+      size = 128;     // Lower quality for large graphs (memory efficiency)
+    }
+    log(`Texture resolution: ${size}x${size} (${nodeCount} nodes)`);
+    return size;
+  }
+
   function loadKittyTexture(imageUrl, bgColor) {
     if (!imageUrl) return createColorTexture(bgColor);
 
-    const cacheKey = `${imageUrl}|${bgColor}`;
+    const size = getTextureSize();
+    const cacheKey = `${imageUrl}|${bgColor}|${size}`;
     if (textureCache.has(cacheKey)) return textureCache.get(cacheKey);
 
     // Create a canvas texture with background color, then draw image on top
-    const size = 128;
     const canvas = document.createElement("canvas");
     canvas.width = size;
     canvas.height = size;
@@ -225,12 +235,22 @@
     ctx.fillRect(0, 0, size, size);
 
     const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    // Set anisotropy to max supported by GPU (will be set after graph is initialized)
+    if (graph && graph.renderer()) {
+      texture.anisotropy = graph.renderer().capabilities.getMaxAnisotropy();
+    }
     textureCache.set(cacheKey, texture);
 
     // Load image and draw on top of background
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
+      // Use high-quality image smoothing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, size, size);
       texture.needsUpdate = true;
       if (graph) graph.refresh();
@@ -262,6 +282,7 @@
     return texture;
   }
 
+
   // ===================== NODE RENDERING =====================
   function createNodeObject(node) {
     const size = 16;
@@ -273,14 +294,22 @@
     const isInPath = pathModeActive && highlightedPath.has(node.id);
     const isDimmedByPath = pathModeActive && !isInPath;
 
-    // Check for trait/gem hover highlighting (takes priority over filters)
+    // Check for owner highlighting (second priority)
+    const ownerModeActive = ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick);
+    const isOwnedByHighlightedOwner = ownerModeActive && doesKittyMatchOwner(k,
+      lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+      lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+    );
+    const isDimmedByOwner = ownerModeActive && !isOwnedByHighlightedOwner;
+
+    // Check for trait/gem hover highlighting (third priority)
     const traitGemHoverActive = highlightedTraitGemNodes.size > 0;
     const isTraitGemHighlighted = traitGemHoverActive && highlightedTraitGemNodes.has(node.id);
     const isTraitGemDimmed = traitGemHoverActive && !isTraitGemHighlighted;
 
-    // Check if this node matches active filters for highlighting
+    // Check if this node matches active filters for highlighting (fourth priority)
     const filterActive = generationHighlightActive || mewtationHighlightActive;
-    const isHighlighted = filterActive && doesKittyMatchFilters(k);
+    const isHighlighted = filterActive && CKGraph.doesKittyMatchFilters(k);
     const isDimmed = filterActive && !isHighlighted;
 
     // Create sphere geometry
@@ -294,7 +323,7 @@
       roughness: 0.7
     };
 
-    // Apply highlighting: path mode > trait/gem hover > filters
+    // Apply highlighting: path mode > owner highlight > trait/gem hover > filters
     if (isInPath) {
       // Brighten nodes in the path with strong emissive glow
       const rgb = hexToRgb(colors.background);
@@ -306,6 +335,17 @@
       materialConfig.emissive = new THREE.Color(0, 0, 0);
       materialConfig.emissiveIntensity = 0;
       materialConfig.color = new THREE.Color(0.25, 0.25, 0.25);
+    } else if (isOwnedByHighlightedOwner) {
+      // Brighten owned kitties with blue-tinted glow
+      const rgb = hexToRgb(colors.background);
+      materialConfig.emissive = new THREE.Color(rgb.r / 255, rgb.g / 255, rgb.b / 255);
+      materialConfig.emissiveIntensity = node.id === selectedNodeId ? 0.3 : 0.4;
+      materialConfig.color = new THREE.Color(1.15, 1.15, 1.2); // Slight blue tint
+    } else if (isDimmedByOwner) {
+      // Dim non-owned kitties during owner highlight mode
+      materialConfig.emissive = new THREE.Color(0, 0, 0);
+      materialConfig.emissiveIntensity = 0;
+      materialConfig.color = new THREE.Color(0.3, 0.3, 0.3);
     } else if (isTraitGemDimmed) {
       // Dim non-matching nodes during trait/gem hover
       materialConfig.emissive = new THREE.Color(0, 0, 0);
@@ -330,6 +370,11 @@
     const material = new THREE.MeshStandardMaterial(materialConfig);
     const sphere = new THREE.Mesh(geometry, material);
 
+    // Rotate sphere so edges connect at the sides (left-right) instead of front-back
+    // X rotation tilts the texture, Y rotation orients the face toward camera
+    sphere.rotation.x = Math.PI / 2;
+    sphere.rotation.y = Math.PI / 2;
+
     // Store node ID in userData for hover highlighting
     sphere.userData.nodeId = node.id;
 
@@ -343,6 +388,8 @@
         emissiveIntensity: 0.5
       });
       const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      // Rotate ring 90 degrees around Y axis
+      ring.rotation.y = Math.PI / 2;
       sphere.add(ring);
     }
 
@@ -446,31 +493,7 @@
   }
 
   // ===================== HIGHLIGHTING / FILTERING =====================
-  function doesKittyMatchFilters(k) {
-    if (!k) return false;
-
-    if (generationHighlightActive) {
-      if (typeof k.generation !== "number") return false;
-      const inRange =
-        (generationRangeMin === null || k.generation >= generationRangeMin) &&
-        (generationRangeMax === null || k.generation <= generationRangeMax);
-      if (!inRange) return false;
-    }
-
-    if (mewtationHighlightActive) {
-      const gems = getMewtationGems(k);
-      if (gems.length === 0) return false;
-      if (highlightedGemTypes.size > 0) {
-        let hasMatch = false;
-        for (const gem of gems) {
-          if (highlightedGemTypes.has(gem.gem)) { hasMatch = true; break; }
-        }
-        if (!hasMatch) return false;
-      }
-    }
-
-    return true;
-  }
+  // doesKittyMatchFilters, buildAdjacency, findShortestPath are in base.js
 
   function getNodeOpacity(node) {
     // Always return full opacity - we use color darkening instead for dimming
@@ -485,52 +508,11 @@
     const targetNode = graphData.nodes.find(n => n.id === (typeof link.target === "object" ? link.target.id : link.target));
 
     if (sourceNode && targetNode) {
-      const sourceMatch = doesKittyMatchFilters(sourceNode.kitty);
-      const targetMatch = doesKittyMatchFilters(targetNode.kitty);
+      const sourceMatch = CKGraph.doesKittyMatchFilters(sourceNode.kitty);
+      const targetMatch = CKGraph.doesKittyMatchFilters(targetNode.kitty);
       if (sourceMatch && targetMatch) return 0.8;
     }
     return 0.1;
-  }
-
-  // ===================== SHORTEST PATH =====================
-  function buildAdjacency() {
-    const adj = new Map();
-    const add = (a, b) => {
-      if (!adj.has(a)) adj.set(a, new Set());
-      if (!adj.has(b)) adj.set(b, new Set());
-      adj.get(a).add(b);
-      adj.get(b).add(a);
-    };
-    for (const k of kittyById.values()) {
-      if (k.matron_id) add(k.id, k.matron_id);
-      if (k.sire_id) add(k.id, k.sire_id);
-    }
-    return adj;
-  }
-
-  function findShortestPath(fromId, toId) {
-    if (fromId === toId) return [fromId];
-    const adj = buildAdjacency();
-    if (!adj.has(fromId) || !adj.has(toId)) return [];
-
-    const visited = new Set([fromId]);
-    const queue = [[fromId]];
-
-    while (queue.length > 0) {
-      const path = queue.shift();
-      const current = path[path.length - 1];
-      const neighbors = adj.get(current);
-      if (!neighbors) continue;
-
-      for (const neighbor of neighbors) {
-        if (neighbor === toId) return [...path, neighbor];
-        if (!visited.has(neighbor)) {
-          visited.add(neighbor);
-          queue.push([...path, neighbor]);
-        }
-      }
-    }
-    return [];
   }
 
   // ===================== TOOLTIP =====================
@@ -548,7 +530,7 @@
       if (node.id === selectedNodeId) {
         sub += ` · <span style="color:#7aa2ff">Selected</span>`;
       } else {
-        const path = findShortestPath(selectedNodeId, node.id);
+        const path = CKGraph.findShortestPath(selectedNodeId, node.id);
         if (path.length > 0) {
           const hops = path.length - 1;
           const hopWord = hops === 1 ? "hop" : "hops";
@@ -602,7 +584,204 @@
     if (tooltipEl) tooltipEl.style.display = "none";
   }
 
+  // ===================== CONTEXT MENU =====================
+  const contextMenuEl = $("contextMenu");
+
+  function showContextMenu(nodeId, event) {
+    if (!contextMenuEl) return;
+    if (!event || (!event.clientX && event.clientX !== 0)) {
+      console.warn("showContextMenu: invalid event object", event);
+      return;
+    }
+
+    contextMenuNodeId = nodeId;
+
+    const k = kittyById.get(nodeId);
+    if (!k) return;
+
+    // Update disabled states
+    const expandItem = contextMenuEl.querySelector('[data-action="expand"]');
+    if (expandItem) {
+      if (expandedIds.has(nodeId)) {
+        expandItem.classList.add("disabled");
+      } else {
+        expandItem.classList.remove("disabled");
+      }
+    }
+
+    // Update highlight owner text and icon based on current state
+    const highlightItem = contextMenuEl.querySelector('[data-action="highlightOwner"]');
+    if (highlightItem) {
+      const isSameOwner = ownerHighlightLocked && doesKittyMatchOwner(k,
+        lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+        lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+      );
+
+      if (isSameOwner) {
+        highlightItem.classList.add("active");
+      } else {
+        highlightItem.classList.remove("active");
+      }
+
+      const textSpan = highlightItem.querySelector(".menu-text");
+      if (textSpan) {
+        textSpan.textContent = isSameOwner ? "Unhighlight owner" : "Highlight owner";
+      }
+
+      const iconSpan = highlightItem.querySelector(".menu-icon");
+      if (iconSpan) {
+        iconSpan.innerHTML = isSameOwner
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+              <path d="M12 1v1M17.5 3.5l-.7.7M21 9h-1M3 9h1M6.5 3.5l.7.7" stroke-width="1.5"/>
+            </svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+      }
+    }
+
+    // Position menu at click location
+    contextMenuEl.style.display = "block";
+    const menuRect = contextMenuEl.getBoundingClientRect();
+    let x = event.clientX || 0;
+    let y = event.clientY || 0;
+
+    // Keep menu within viewport bounds
+    if (x + menuRect.width > window.innerWidth) {
+      x = window.innerWidth - menuRect.width - 10;
+    }
+    if (y + menuRect.height > window.innerHeight) {
+      y = window.innerHeight - menuRect.height - 10;
+    }
+
+    contextMenuEl.style.left = `${x}px`;
+    contextMenuEl.style.top = `${y}px`;
+
+    log("showContextMenu:", nodeId, "at", x, y);
+  }
+
+  function hideContextMenu() {
+    if (contextMenuEl) {
+      contextMenuEl.style.display = "none";
+      contextMenuNodeId = null;
+    }
+  }
+
+  // Wire up context menu actions
+  if (contextMenuEl) {
+    contextMenuEl.addEventListener("click", (e) => {
+      const item = e.target.closest(".context-menu-item");
+      if (!item || item.classList.contains("disabled")) return;
+
+      const action = item.dataset.action;
+      const nodeId = contextMenuNodeId;
+      hideContextMenu();
+
+      if (!nodeId) return;
+
+      const k = kittyById.get(nodeId);
+      if (!k) return;
+
+      switch (action) {
+        case "center":
+          // Find the node in graph data and center camera on it while preserving viewing angle
+          const node = graphData.nodes.find(n => n.id === nodeId);
+          if (node && graph) {
+            const currentCamPos = graph.cameraPosition();
+            const distance = 200;
+
+            // Calculate direction from node to current camera
+            const dx = currentCamPos.x - (node.x || 0);
+            const dy = currentCamPos.y - (node.y || 0);
+            const dz = currentCamPos.z - (node.z || 0);
+            const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+            // Normalize direction and scale to desired distance
+            const scale = distance / currentDist;
+
+            // Set camera up vector to prevent upside-down orientation
+            const camera = graph.camera();
+            camera.up.set(0, 1, 0);
+
+            graph.cameraPosition(
+              { x: (node.x || 0) + dx * scale, y: (node.y || 0) + dy * scale, z: (node.z || 0) + dz * scale },
+              node,
+              1000
+            );
+          }
+          break;
+
+        case "expand":
+          CKGraph.expandFamily(nodeId);
+          break;
+
+        case "highlightOwner":
+          const ownerAddr = k.owner_address || normalizeOwner(k.owner) || null;
+          const ownerNick = k.owner_nickname || normalizeOwnerNickname(k) || null;
+
+          const isSameOwner = ownerHighlightLocked && doesKittyMatchOwner(k,
+            lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+            lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+          );
+
+          if (isSameOwner) {
+            // Unhighlight
+            ownerHighlightLocked = false;
+            lockedOwnerAddr = null;
+            lockedOwnerNick = null;
+            if (graph) graph.refresh();
+          } else {
+            // Highlight and lock
+            ownerHighlightLocked = true;
+            lockedOwnerAddr = ownerAddr;
+            lockedOwnerNick = ownerNick;
+            CKGraph.highlightOwnerKitties(ownerAddr, ownerNick);
+          }
+          break;
+
+        case "openOwner":
+          const addr = k.owner_address || normalizeOwner(k.owner);
+          if (addr) window.open(ownerUrl(addr), "_blank", "noopener");
+          break;
+
+        case "copyId":
+          navigator.clipboard.writeText(String(nodeId)).then(() => {
+            setStatus(`Copied kitty ID ${nodeId}`, false);
+          });
+          break;
+
+        case "openCK":
+          window.open(kittyUrl(nodeId), "_blank", "noopener");
+          break;
+      }
+    });
+
+    // Hide context menu when clicking outside
+    document.addEventListener("click", (e) => {
+      if (contextMenuEl && contextMenuEl.style.display === "block") {
+        if (!contextMenuEl.contains(e.target)) {
+          hideContextMenu();
+        }
+      }
+    });
+  }
+
+  // ===================== OWNER HIGHLIGHTING =====================
+  // highlightOwnerKitties is in base.js - it calls CKGraph.onRefresh
+
+  // ===================== EXPANSION =====================
+  // expandFamily is in base.js - wrap it to handle 3D-specific graph rebuild
+  async function expand3DFamily(id) {
+    await CKGraph.expandFamily(id); // base.js function - calls CKGraph.onDataLoaded
+    // 3D-specific: refresh selected panel if this was the selected node
+    if (CKGraph.selectedNodeId === id) {
+      showSelected(id);
+    }
+  }
+
   // ===================== SELECTION PANEL =====================
+  // lookupOwnerNickname and formatEth are in base.js
+
   function showSelected(id) {
     const k = kittyById.get(id);
     const section = $("selectedSection");
@@ -628,11 +807,13 @@
         // Set up handlers for regular panel
         setupTraitHighlightHandlers(box);
         setupGemHighlightHandlers(box);
+        setupOwnerHighlightHandlers(box, id);
       }
     }
 
     // Update floating panel (embed mode)
     if (floatingBox) {
+      const floatingPanel = $("floatingPanel");
       if (!k) {
         floatingBox.innerHTML = "Click a kitty to select";
       } else {
@@ -640,7 +821,65 @@
         // Set up handlers for floating panel
         setupTraitHighlightHandlers(floatingBox);
         setupGemHighlightHandlers(floatingBox);
+        setupOwnerHighlightHandlers(floatingBox, id);
+
+        // Re-open panel if it was closed
+        if (floatingPanel && floatingPanel.classList.contains("panel-hidden")) {
+          floatingPanel.classList.remove("panel-hidden");
+        }
       }
+    }
+  }
+
+  // Set up owner highlight handlers
+  function setupOwnerHighlightHandlers(container, id) {
+    const ownerLink = container.querySelector(".owner-link");
+    const highlightBtn = container.querySelector(".owner-highlight-btn");
+
+    if (ownerLink) {
+      ownerLink.addEventListener("mouseenter", () => {
+        if (ownerHighlightLocked) return;
+        const addr = ownerLink.dataset.owner || null;
+        const nick = ownerLink.dataset.ownerNick || null;
+        CKGraph.highlightOwnerKitties(addr, nick);
+      });
+      ownerLink.addEventListener("mouseleave", () => {
+        if (ownerHighlightLocked) return;
+        // Clear highlight - refresh to restore normal colors
+        if (graph) graph.refresh();
+      });
+    }
+
+    if (highlightBtn) {
+      highlightBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const addr = highlightBtn.dataset.owner || null;
+        const nick = highlightBtn.dataset.ownerNick || null;
+
+        const isSameOwner = ownerHighlightLocked &&
+          ((lockedOwnerAddr && addr && lockedOwnerAddr.toLowerCase() === addr.toLowerCase()) ||
+           (lockedOwnerNick && nick && lockedOwnerNick.toLowerCase() === nick.toLowerCase()));
+
+        if (isSameOwner) {
+          // Unlock
+          ownerHighlightLocked = false;
+          lockedOwnerAddr = null;
+          lockedOwnerNick = null;
+          if (graph) graph.refresh();
+          log("Owner highlight unlocked");
+        } else {
+          // Lock
+          ownerHighlightLocked = true;
+          lockedOwnerAddr = addr;
+          lockedOwnerNick = nick;
+          CKGraph.highlightOwnerKitties(addr, nick);
+          log("Owner highlight locked:", { addr, nick });
+        }
+
+        // Re-render to update button state
+        showSelected(id);
+      });
     }
   }
 
@@ -674,16 +913,158 @@
 
   function renderKittyDetails(k, id) {
     const colors = getKittyColors(k);
-    const ownerAddr = k.owner_address || normalizeOwner(k.owner) || null;
-    const ownerNick = k.owner_nickname || normalizeOwnerNickname(k) || null;
-    const ownerText = ownerNick || (ownerAddr ? shortAddr(ownerAddr) : "Unknown");
+    const raw = k.raw || k; // Fallback to k itself if raw not present
 
+    // === COLOR DISPLAY ===
+    const colorName = k.color || null;
+    const bgColorHtml = colors.isUnknown
+      ? `<span class="small auction-warning">Unknown</span>`
+      : `<span class="color-swatch" style="background:${colors.background}"></span>${colorName ? safeText(colorName) : colors.background}`;
+
+    // === OWNER INFO ===
+    let rawOwnerAddr = k.owner_address || normalizeOwner(k.owner) || null;
+    let displayOwnerAddr = null;
+    let displayOwnerNick = null;
+    let showAuctionStatus = false;
+    let auctionContractName = null;
+
+    // Check if on auction
+    const auction = k.auction || raw.auction || null;
+    const isOnAuction = auction && (auction.type === "sale" || auction.type === "sire");
+    const auctionType = auction?.type || null;
+
+    // If on auction, owner field might be the auction contract
+    if (isOnAuction && rawOwnerAddr) {
+      // Try to get real owner from seller field
+      const seller = k.seller || auction?.seller || null;
+      if (seller) {
+        const sellerAddr = normalizeOwner(seller);
+        const sellerNick = seller?.nickname || seller?.username || seller?.name || null;
+        if (sellerAddr || sellerNick) {
+          displayOwnerAddr = sellerAddr;
+          displayOwnerNick = sellerNick;
+        }
+      }
+
+      // If still no owner info, show auction status instead
+      if (!displayOwnerAddr && !displayOwnerNick) {
+        displayOwnerAddr = null;
+        displayOwnerNick = null;
+        showAuctionStatus = true;
+        auctionContractName = getContractName(rawOwnerAddr) || "Auction";
+      } else {
+        showAuctionStatus = false;
+      }
+    } else {
+      // Normal case - check if owner is an auction contract even without auction data
+      const ownerIsContract = isAuctionContract(rawOwnerAddr);
+      if (ownerIsContract) {
+        // Owner is a contract - try to get real owner from hatcher
+        const hatcher = raw.hatcher || k.hatcher || null;
+        if (hatcher && typeof hatcher === "object") {
+          const hatcherAddr = normalizeOwner(hatcher);
+          const hatcherNick = hatcher.nickname || hatcher.username || hatcher.name || null;
+          if (hatcherAddr && !isAuctionContract(hatcherAddr)) {
+            displayOwnerAddr = hatcherAddr;
+            displayOwnerNick = hatcherNick;
+          }
+        }
+        // If still no real owner, show auction status
+        if (!displayOwnerAddr && !displayOwnerNick) {
+          showAuctionStatus = true;
+          auctionContractName = getContractName(rawOwnerAddr);
+        }
+      } else {
+        displayOwnerAddr = rawOwnerAddr;
+        displayOwnerNick = k.owner_nickname || normalizeOwnerNickname(k) || null;
+        showAuctionStatus = false;
+      }
+    }
+
+    // Lookup nickname from other kitties if we have address but no nickname
+    if (displayOwnerAddr && !displayOwnerNick) {
+      displayOwnerNick = lookupOwnerNickname(displayOwnerAddr);
+    }
+
+    const ownerText = displayOwnerNick || (displayOwnerAddr ? shortAddr(displayOwnerAddr) : null);
+
+    // Build owner HTML with highlight button
+    let ownerHtml;
+    if (displayOwnerAddr || displayOwnerNick) {
+      const dataOwner = displayOwnerAddr ? `data-owner="${safeText(displayOwnerAddr)}"` : "";
+      const dataNick = displayOwnerNick ? `data-owner-nick="${safeText(displayOwnerNick)}"` : "";
+      const linkHref = displayOwnerAddr ? ownerUrl(displayOwnerAddr) : "#";
+      const isLocked = ownerHighlightLocked &&
+        ((lockedOwnerAddr && displayOwnerAddr && lockedOwnerAddr.toLowerCase() === displayOwnerAddr.toLowerCase()) ||
+         (lockedOwnerNick && displayOwnerNick && lockedOwnerNick.toLowerCase() === displayOwnerNick.toLowerCase()));
+      const btnTitle = isLocked ? "Unhighlight owner" : "Highlight owner";
+      const btnClass = isLocked ? "owner-highlight-btn active" : "owner-highlight-btn";
+      const highlightIcon = isLocked
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <path d="M12 1v1M17.5 3.5l-.7.7M21 9h-1M3 9h1M6.5 3.5l.7.7" stroke-width="1.5"/>
+          </svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>`;
+      ownerHtml = `<span class="owner-row">
+        <button class="${btnClass}" ${dataOwner} ${dataNick} title="${btnTitle}">${highlightIcon}</button>
+        <a href="${linkHref}" target="_blank" rel="noopener" class="owner-link" ${dataOwner} ${dataNick}>${safeText(ownerText)}</a>
+      </span>`;
+    } else if (showAuctionStatus) {
+      const auctionLabel = auctionContractName || "On Auction";
+      ownerHtml = `<span class="small auction-warning">${auctionLabel}</span>`;
+    } else {
+      ownerHtml = `<span class="small muted">Unknown</span>`;
+    }
+
+    // === STATUS (auction) ===
+    let statusHtml = "";
+    if (isOnAuction) {
+      const statusLabel = auctionType === "sire" ? "For Siring" : "For Sale";
+      const currentPrice = formatEth(auction.current_price);
+      const priceHtml = currentPrice ? ` · ${currentPrice}` : "";
+      statusHtml = `<div class="k">Status</div><div class="v"><a href="${kittyUrl(id)}" target="_blank" rel="noopener" class="tag auction-tag">${statusLabel}${priceHtml}</a></div>`;
+    }
+
+    // === BORN DATE ===
+    const birthDate = k.created_at || k.birthday || "";
+    const bornHtml = birthDate
+      ? `<span title="${safeText(formatDateTimeFull(birthDate))}">${formatDatePretty(birthDate)}</span>`
+      : "";
+
+    // === CHILDREN ===
+    const apiChildren = raw.children;
+    const totalChildren = Array.isArray(apiChildren) ? apiChildren.length : null;
+
+    let childrenInGraph = 0;
+    for (const [_, kitty] of kittyById.entries()) {
+      if (kitty.matron_id === id || kitty.sire_id === id) {
+        childrenInGraph++;
+      }
+    }
+
+    let childrenHtml;
+    if (totalChildren !== null) {
+      if (totalChildren === 0) {
+        childrenHtml = "0";
+      } else if (childrenInGraph < totalChildren) {
+        childrenHtml = `${totalChildren} <span class="small muted">(${childrenInGraph} shown)</span>`;
+      } else {
+        childrenHtml = `${totalChildren}`;
+      }
+    } else {
+      childrenHtml = `<span class="small muted">Unknown</span>`;
+    }
+
+    // === TRAITS ===
     const traits = k.traits || {};
     const traitKeys = Object.keys(traits).slice(0, 12);
     const gems = getMewtationGems(k);
     const gemsFull = gemsHtml(gems, false);
 
-    // Build traits HTML with mewtation highlighting
     const traitsHtml = traitKeys.map(t => {
       const gem = gems.find(g => g.type === t);
       if (gem) {
@@ -708,11 +1089,18 @@
         </div>
       </div>
       <div class="kv">
-        <div class="k">Born</div><div class="v">${formatDatePretty(k.created_at || k.birthday)}</div>
-        <div class="k">Owner</div><div class="v">${ownerAddr ? `<a href="${ownerUrl(ownerAddr)}" target="_blank" class="owner-link">${safeText(ownerText)}</a>` : ownerText}</div>
+        <div class="k">Color</div>
+        <div class="v">${bgColorHtml}</div>
+        <div class="k">Born</div>
+        <div class="v">${bornHtml}</div>
+        <div class="k">Owner</div>
+        <div class="v">${ownerHtml}</div>
+        ${statusHtml}
+        <div class="k">Children</div>
+        <div class="v">${childrenHtml}</div>
         ${gems.length ? `<div class="k">Mewtations</div><div class="v gems-list">${gemsFull}</div>` : ""}
         <div class="k">Traits</div>
-        <div class="v">${traitKeys.length ? traitsHtml : "<span style='color:var(--muted)'>None</span>"}</div>
+        <div class="v">${traitKeys.length ? traitsHtml : "<span class='small muted'>None</span>"}</div>
       </div>
     `;
   }
@@ -743,43 +1131,345 @@
       });
     }
 
+    // Collapse button
+    const collapseBtn = $("floatingPanelCollapse");
+    if (collapseBtn) {
+      collapseBtn.addEventListener("click", () => {
+        panel.classList.toggle("panel-collapsed");
+        // Rotate the chevron icon
+        const svg = collapseBtn.querySelector("svg");
+        if (svg) {
+          svg.style.transform = panel.classList.contains("panel-collapsed") ? "rotate(180deg)" : "";
+        }
+      });
+    }
+
+    // Accordion section toggles
+    const accordionHeaders = panel.querySelectorAll(".accordion-header");
+    accordionHeaders.forEach(header => {
+      header.addEventListener("click", () => {
+        const section = header.closest(".accordion-section");
+        if (section) {
+          section.classList.toggle("collapsed");
+        }
+      });
+    });
+
     // 2D view button - pass current query params with embed=true
     if (view2dBtn) {
       view2dBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        const url2d = generatePermalinkUrl(window.location.origin + "/index.html", false); // Don't include 3D camera params
-        window.location.href = url2d;
+        // Build URL relative to current location
+        const url2d = new URL("index.html", window.location.href);
+        // Add current state params including 3D viewport for round-trip
+        const currentParams = new URLSearchParams(location.search);
+        const newParams = new URLSearchParams();
+
+        // Copy relevant params - use CKGraph directly for source of truth
+        if (CKGraph.loadedFromDataUrl && CKGraph.expandedIds.size === 0) {
+          newParams.set("dataUrl", CKGraph.loadedFromDataUrl);
+        } else {
+          const allIds = Array.from(kittyById.keys()).sort((a, b) => a - b);
+          if (allIds.length > 0) {
+            newParams.set("kitties", allIds.join(","));
+            newParams.set("noExpand", "true");
+          }
+        }
+
+        // Copy filters
+        if (generationHighlightActive) {
+          if (generationRangeMin !== null) newParams.set("genMin", generationRangeMin);
+          if (generationRangeMax !== null) newParams.set("genMax", generationRangeMax);
+        }
+        if (mewtationHighlightActive) {
+          if (highlightedGemTypes.size === 0) {
+            newParams.set("mewtations", "all");
+          } else {
+            newParams.set("mewtations", Array.from(highlightedGemTypes).join(","));
+          }
+        }
+        if (selectedNodeId) newParams.set("selected", selectedNodeId);
+        if (shortestPathMode) newParams.set("shortestPath", "true");
+        if (lockedPathToId && selectedNodeId) {
+          newParams.set("pathFrom", selectedNodeId);
+          newParams.set("pathTo", lockedPathToId);
+        }
+
+        // Include 3D viewport for round-trip preservation
+        if (graph) {
+          const camPos = graph.cameraPosition();
+          const camera = graph.camera();
+          if (camPos && camera && camera.up) {
+            newParams.set("cam3d", [
+              camPos.x.toFixed(1), camPos.y.toFixed(1), camPos.z.toFixed(1),
+              camera.up.x.toFixed(2), camera.up.y.toFixed(2), camera.up.z.toFixed(2),
+              camera.zoom.toFixed(2)
+            ].join(","));
+          }
+        }
+
+        // Include foreign 2D viewport if we have one from previous round-trip
+        if (foreignCam2d) {
+          newParams.set("cam2d", foreignCam2d);
+        }
+
+        // Preserve embed mode
+        newParams.set("embed", "true");
+        if (currentParams.get("switcher") === "false") {
+          newParams.set("switcher", "false");
+        }
+
+        url2d.search = newParams.toString();
+        window.location.href = url2d.href;
       });
     }
 
     // Make panel draggable
     if (dragHandle) {
       let isDragging = false;
-      let currentX;
-      let currentY;
-      let initialX;
-      let initialY;
+      let dragOffsetX = 0;
+      let dragOffsetY = 0;
 
       dragHandle.addEventListener("mousedown", (e) => {
-        if (e.target === closeBtn || e.target === view2dBtn) return;
+        // Don't start dragging if clicking on buttons
+        if (e.target.closest(".panel-btn")) return;
         isDragging = true;
-        initialX = e.clientX - (parseInt(panel.style.left) || 0);
-        initialY = e.clientY - (parseInt(panel.style.top) || 0);
+        const rect = panel.getBoundingClientRect();
+        dragOffsetX = e.clientX - rect.left;
+        dragOffsetY = e.clientY - rect.top;
+        panel.style.transition = "none";
       });
 
       document.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         e.preventDefault();
-        currentX = e.clientX - initialX;
-        currentY = e.clientY - initialY;
-        panel.style.left = currentX + "px";
-        panel.style.top = currentY + "px";
+        const x = e.clientX - dragOffsetX;
+        const y = e.clientY - dragOffsetY;
+        // Allow partial out-of-view but keep at least 50px visible
+        const minVisible = 50;
+        const minX = minVisible - panel.offsetWidth;
+        const maxX = window.innerWidth - minVisible;
+        const minY = minVisible - panel.offsetHeight;
+        const maxY = window.innerHeight - minVisible;
+        panel.style.left = Math.max(minX, Math.min(x, maxX)) + "px";
+        panel.style.top = Math.max(minY, Math.min(y, maxY)) + "px";
         panel.style.right = "auto";
       });
 
       document.addEventListener("mouseup", () => {
-        isDragging = false;
+        if (isDragging) {
+          isDragging = false;
+          panel.style.transition = "";
+        }
       });
+
+      // Keep at least 50px of panel visible on window resize
+      window.addEventListener("resize", () => {
+        if (panel.style.right !== "auto") return; // Only adjust if manually positioned
+        const rect = panel.getBoundingClientRect();
+        const minVisible = 50;
+        const minX = minVisible - panel.offsetWidth;
+        const maxX = window.innerWidth - minVisible;
+        const minY = minVisible - panel.offsetHeight;
+        const maxY = window.innerHeight - minVisible;
+        let needsUpdate = false;
+        let newX = rect.left;
+        let newY = rect.top;
+
+        if (rect.left < minX) {
+          newX = minX;
+          needsUpdate = true;
+        } else if (rect.left > maxX) {
+          newX = maxX;
+          needsUpdate = true;
+        }
+        if (rect.top < minY) {
+          newY = minY;
+          needsUpdate = true;
+        } else if (rect.top > maxY) {
+          newY = maxY;
+          needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+          panel.style.left = newX + "px";
+          panel.style.top = newY + "px";
+        }
+      });
+    }
+
+    // Set up GitHub link
+    const floatingGithubLink = $("floatingGithubLink");
+    if (floatingGithubLink) {
+      const githubUrl = CK_GRAPH_DEFAULTS.githubUrl || "https://github.com/nivs/crypto-kitties-family-graph";
+      floatingGithubLink.href = githubUrl;
+    }
+
+    // Set up "Open in viewer" link
+    const floatingViewerLink = $("floatingViewerLink");
+    if (floatingViewerLink) {
+      floatingViewerLink.addEventListener("click", () => {
+        // Build URL relative to current location
+        const url = new URL("3d.html", window.location.href);
+        const params = {};
+
+        // Data params - use CKGraph directly for source of truth
+        if (CKGraph.loadedFromDataUrl && CKGraph.expandedIds.size === 0) {
+          params.dataUrl = CKGraph.loadedFromDataUrl;
+        } else if (kittyById.size > 0) {
+          params.kitties = Array.from(kittyById.keys()).sort((a, b) => a - b).join(",");
+          params.noExpand = "true";
+        }
+
+        // Filter params
+        if (generationRangeMin !== null) params.genMin = generationRangeMin;
+        if (generationRangeMax !== null) params.genMax = generationRangeMax;
+        if (mewtationHighlightActive) {
+          params.mewtations = highlightedGemTypes.size === 0 ? "all" : Array.from(highlightedGemTypes).join(",");
+        }
+
+        // Selection/path params
+        if (selectedNodeId) params.selected = selectedNodeId;
+        if (shortestPathMode) params.shortestPath = "true";
+        if (lockedPathToId && selectedNodeId) {
+          params.pathFrom = selectedNodeId;
+          params.pathTo = lockedPathToId;
+        }
+
+        // Camera state (compact format)
+        if (graph) {
+          const camPos = graph.cameraPosition();
+          const camera = graph.camera();
+          if (camPos && camera && camera.up) {
+            params.cam3d = [
+              camPos.x.toFixed(1),
+              camPos.y.toFixed(1),
+              camPos.z.toFixed(1),
+              camera.up.x.toFixed(2),
+              camera.up.y.toFixed(2),
+              camera.up.z.toFixed(2),
+              camera.zoom.toFixed(2)
+            ].join(",");
+          }
+        }
+
+        url.search = new URLSearchParams(params).toString();
+        window.open(url.href, "_blank");
+      });
+    }
+  }
+
+  // ===================== FLOATING FILTERS PANEL (EMBED MODE) =====================
+  function setupFloatingFiltersPanel() {
+    // Wire up floating filter controls to main filter controls
+    const floatingGenMin = $("floatingGenerationMin");
+    const floatingGenMax = $("floatingGenerationMax");
+    const mainGenMin = $("generationMin");
+    const mainGenMax = $("generationMax");
+
+    // Sync generation filters
+    if (floatingGenMin && mainGenMin) {
+      floatingGenMin.addEventListener("input", () => {
+        mainGenMin.value = floatingGenMin.value;
+        mainGenMin.dispatchEvent(new Event("input"));
+      });
+      mainGenMin.addEventListener("input", () => {
+        floatingGenMin.value = mainGenMin.value;
+      });
+    }
+
+    if (floatingGenMax && mainGenMax) {
+      floatingGenMax.addEventListener("input", () => {
+        mainGenMax.value = floatingGenMax.value;
+        mainGenMax.dispatchEvent(new Event("input"));
+      });
+      mainGenMax.addEventListener("input", () => {
+        floatingGenMax.value = mainGenMax.value;
+      });
+    }
+
+    // Sync mewtation filter buttons
+    ["All", "Diamond", "Gold", "Silver", "Bronze"].forEach(type => {
+      const floatingBtn = $(`floatingMewtationFilter${type}`);
+      const mainBtn = $(`mewtationFilter${type}`);
+      if (floatingBtn && mainBtn) {
+        floatingBtn.addEventListener("click", () => {
+          mainBtn.click();
+        });
+        // Observe main button class changes to sync visual state
+        const observer = new MutationObserver(() => {
+          if (mainBtn.classList.contains("active")) {
+            floatingBtn.classList.add("active");
+          } else {
+            floatingBtn.classList.remove("active");
+          }
+        });
+        observer.observe(mainBtn, { attributes: true, attributeFilter: ["class"] });
+      }
+    });
+
+    // Sync shortest path checkbox
+    const floatingPathMode = $("floatingShortestPathMode");
+    const mainPathMode = $("shortestPathMode");
+    if (floatingPathMode && mainPathMode) {
+      floatingPathMode.addEventListener("change", () => {
+        mainPathMode.checked = floatingPathMode.checked;
+        mainPathMode.dispatchEvent(new Event("change"));
+      });
+      mainPathMode.addEventListener("change", () => {
+        floatingPathMode.checked = mainPathMode.checked;
+      });
+    }
+
+    // Clear filters button
+    const floatingClearBtn = $("floatingClearFiltersBtn");
+    const mainClearBtn = $("clearFiltersBtn");
+    if (floatingClearBtn && mainClearBtn) {
+      floatingClearBtn.addEventListener("click", () => {
+        mainClearBtn.click();
+      });
+    }
+
+    // Sync Z-Axis selector
+    const floatingZAxisSelect = $("floatingZAxisSelect");
+    const mainZAxisSelect = $("zAxisSelect");
+    if (floatingZAxisSelect && mainZAxisSelect) {
+      floatingZAxisSelect.addEventListener("change", () => {
+        mainZAxisSelect.value = floatingZAxisSelect.value;
+        mainZAxisSelect.dispatchEvent(new Event("change"));
+      });
+      mainZAxisSelect.addEventListener("change", () => {
+        floatingZAxisSelect.value = mainZAxisSelect.value;
+      });
+      // Sync initial value
+      floatingZAxisSelect.value = mainZAxisSelect.value;
+    }
+
+    // Sync Settings checkboxes
+    const floatingPrefetch = $("floatingPrefetchChildren");
+    const mainPrefetch = $("prefetchChildren");
+    if (floatingPrefetch && mainPrefetch) {
+      floatingPrefetch.addEventListener("change", () => {
+        mainPrefetch.checked = floatingPrefetch.checked;
+        mainPrefetch.dispatchEvent(new Event("change"));
+      });
+      mainPrefetch.addEventListener("change", () => {
+        floatingPrefetch.checked = mainPrefetch.checked;
+      });
+      floatingPrefetch.checked = mainPrefetch.checked;
+    }
+
+    const floatingAutoConnect = $("floatingAutoConnect");
+    const mainAutoConnect = $("autoConnect");
+    if (floatingAutoConnect && mainAutoConnect) {
+      floatingAutoConnect.addEventListener("change", () => {
+        mainAutoConnect.checked = floatingAutoConnect.checked;
+        mainAutoConnect.dispatchEvent(new Event("change"));
+      });
+      mainAutoConnect.addEventListener("change", () => {
+        floatingAutoConnect.checked = mainAutoConnect.checked;
+      });
+      floatingAutoConnect.checked = mainAutoConnect.checked;
     }
   }
 
@@ -788,8 +1478,21 @@
     const container = $("graph-container");
     if (!container) return;
 
+    // Prevent browser context menu on container to allow right-click panning
+    container.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+
+    // Track mouse position for context menu
+    document.addEventListener("mousemove", (e) => {
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+
     graph = ForceGraph3D()(container)
-      .backgroundColor("#0b0d12")
+      .width(container.clientWidth)
+      .height(container.clientHeight)
+      .backgroundColor("#161b2b")
       .graphData(graphData)
       .nodeLabel(node => node.name)
       .nodeThreeObject(createNodeObject)
@@ -806,6 +1509,19 @@
           return;
         }
 
+        // Detect double-click for expansion
+        const now = Date.now();
+        const timeSinceLastClick = now - lastClickTime;
+        const isDoubleClick = (timeSinceLastClick < DOUBLE_CLICK_THRESHOLD) && (lastClickNodeId === node.id);
+        lastClickTime = now;
+        lastClickNodeId = node.id;
+
+        if (isDoubleClick) {
+          // Double-click: expand family
+          CKGraph.expandFamily(node.id);
+          return;
+        }
+
         if (shortestPathMode && selectedNodeId && node.id !== selectedNodeId) {
           lockedPathToId = node.id;
           highlightPath(selectedNodeId, node.id);
@@ -817,11 +1533,25 @@
         showSelected(node.id);
         graph.refresh();
 
-        // Focus camera on selected node
+        // Focus camera on selected node while preserving viewing angle
+        const currentCamPos = graph.cameraPosition();
         const distance = 200;
-        const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+
+        // Calculate direction from node to current camera
+        const dx = currentCamPos.x - node.x;
+        const dy = currentCamPos.y - node.y;
+        const dz = currentCamPos.z - node.z;
+        const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+        // Normalize direction and scale to desired distance
+        const scale = distance / currentDist;
+
+        // Set camera up vector to prevent upside-down orientation
+        const camera = graph.camera();
+        camera.up.set(0, 1, 0);
+
         graph.cameraPosition(
-          { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+          { x: node.x + dx * scale, y: node.y + dy * scale, z: node.z + dz * scale },
           node,
           1000
         );
@@ -848,10 +1578,38 @@
         hideSelected();
         clearPathHighlight();
         graph.refresh();
+      })
+      .onNodeRightClick((node) => {
+        if (node) {
+          // Use tracked mouse position since onNodeRightClick doesn't provide screen coordinates
+          showContextMenu(node.id, { clientX: lastMouseX, clientY: lastMouseY });
+        }
       });
 
-    // Set initial camera position
-    graph.cameraPosition({ x: 0, y: 0, z: 500 });
+    // Configure force simulation to increase node spacing
+    graph.d3Force('link').distance(80); // Increase link distance from default ~30 to 80
+    graph.d3Force('charge').strength(-120); // Increase repulsion from default -30 to -120
+
+    // Allow full camera rotation (prevent gimbal lock at poles)
+    const controls = graph.controls();
+    controls.minPolarAngle = 0;
+    controls.maxPolarAngle = Math.PI;
+
+    // Enable panning with right-click or Ctrl+left-click
+    controls.enablePan = true;
+    controls.screenSpacePanning = true; // Pan parallel to screen rather than ground plane
+    controls.panSpeed = 1.0;
+
+    // Set initial camera position and lookAt target
+    // Set up vector first to ensure correct orientation
+    const camera = graph.camera();
+    camera.up.set(0, 1, 0);
+
+    graph.cameraPosition(
+      { x: -25, y: 487, z: 76 },  // position
+      { x: 0, y: 0, z: 0 },       // lookAt target
+      0                           // no animation
+    );
 
     // Add lighting for shading
     const scene = graph.scene();
@@ -873,21 +1631,35 @@
     // Initialize viewport gizmo
     initViewportGizmo();
 
+    // Handle window resize - update graph dimensions
+    window.addEventListener("resize", () => {
+      if (graph && container) {
+        graph.width(container.clientWidth);
+        graph.height(container.clientHeight);
+      }
+    });
+
     log("Graph initialized");
+
+    // Expose for console debugging
+    window.graph3d = graph;
   }
 
   // ===================== VIEWPORT GIZMO =====================
   function initViewportGizmo() {
-    if (!graph || !window.ViewportGizmo) return;
+    if (!graph || !ViewportGizmo) return;
 
     try {
       const camera = graph.camera();
       const renderer = graph.renderer();
+      const controls = graph.controls(); // Get existing OrbitControls from graph
 
-      viewportGizmo = new window.ViewportGizmo(camera, renderer, {
-        placement: "bottom-left",
+      viewportGizmo = new ViewportGizmo(camera, renderer, {
+        placement: "bottom-right",
         size: 100,
         lineWidth: 3,
+        animated: true,
+        speed: 2,
         background: {
           color: 0x12161e,
           opacity: 0.75,
@@ -898,32 +1670,43 @@
         }
       });
 
-      // Start gizmo render loop
-      function renderGizmo() {
-        if (viewportGizmo && graph) {
+      // Attach to existing controls
+      viewportGizmo.attachControls(controls);
+
+      // Sync controls after gizmo animation completes
+      viewportGizmo.addEventListener("end", () => {
+        // Update the controls target to match gizmo's target
+        controls.target.copy(viewportGizmo.target);
+        // Force update to recalculate internal spherical coords from camera position
+        controls.update();
+      });
+
+      // Render gizmo on each frame using requestAnimationFrame
+      let rafId = null;
+      const animate = () => {
+        if (viewportGizmo) {
           viewportGizmo.render();
         }
-        requestAnimationFrame(renderGizmo);
-      }
-      renderGizmo();
-
-      // Update gizmo on window resize
-      const originalResize = window.onresize;
-      window.onresize = () => {
-        if (originalResize) originalResize();
-        if (viewportGizmo) viewportGizmo.update();
+        rafId = requestAnimationFrame(animate);
       };
+      animate();
+
+      // Update gizmo on window resize (use addEventListener to not interfere with graph resize)
+      window.addEventListener("resize", () => {
+        if (viewportGizmo) viewportGizmo.update();
+      });
 
       log("Viewport gizmo initialized");
+
+      // Return cleanup function (optional, for future use)
+      return () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        if (viewportGizmo && viewportGizmo.dispose) viewportGizmo.dispose();
+      };
     } catch (e) {
       console.error("Failed to initialize viewport gizmo:", e);
     }
   }
-
-  // ===================== PATH HIGHLIGHTING =====================
-  let highlightedPath = new Set();
-  let highlightedPathLinks = new Set();
-  let highlightedTraitGemNodes = new Set(); // For trait/gem hover highlighting
 
   // ===================== TRAIT/GEM HIGHLIGHTING =====================
   function highlightByTrait(traitValue) {
@@ -1006,7 +1789,7 @@
   // ===================== PATH HIGHLIGHTING =====================
 
   function highlightPath(fromId, toId) {
-    const path = findShortestPath(fromId, toId);
+    const path = CKGraph.findShortestPath(fromId, toId);
     highlightedPath = new Set(path);
 
     // Find links in path
@@ -1043,199 +1826,8 @@
   }
 
   // ===================== DATA LOADING =====================
-  function loadJsonObject(obj) {
-    kittyById.clear();
-    expandedIds.clear();
-
-    const roots = Array.isArray(obj.root_ids) ? obj.root_ids.map(Number) : [];
-    myKittyIds = new Set(roots);
-
-    const kitties = Array.isArray(obj.kitties) ? obj.kitties : [];
-    log("loadJsonObject:", { roots: roots.length, kitties: kitties.length });
-
-    for (const k of kitties) {
-      const kk = (k && typeof k.id !== "undefined") ? k : normalizeFromApi(k);
-      if (!kk || !kk.id) continue;
-      kittyById.set(Number(kk.id), kk);
-    }
-
-    graphData = buildGraphData();
-
-    // Clear container and reinitialize graph
-    const container = $("graph-container");
-    if (container && graph) {
-      container.innerHTML = "";
-      graph = null;
-    }
-    initGraph();
-
-    setStats();
-    setStatus(`Loaded ${kitties.length} kitties`, false);
-  }
-
-  async function loadJsonFromUrl(url) {
-    log("loadJsonFromUrl:", url);
-    loadedFromDataUrl = url;
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-    const data = await res.json();
-    loadJsonObject(data);
-  }
-
-  async function loadKittiesById(ids, noExpand = false) {
-    if (!ids || ids.length === 0) return;
-    log("loadKittiesById:", ids);
-    setStatus(`Loading ${ids.length} kitty(s)...`, false);
-
-    const kittiesToAdd = [];
-    const requestedIds = new Set(ids.map(Number));
-    const fetchedIds = new Set();
-    const embeddedData = new Map();
-
-    try {
-      for (const id of ids) {
-        const numId = Number(id);
-        if (fetchedIds.has(numId)) continue;
-        fetchedIds.add(numId);
-
-        const kitty = await fetchJson(apiUrl(`/kitties/${numId}`));
-        const kObj = unwrapKitty(kitty);
-        const normalized = normalizeFromApi(kObj);
-        kittiesToAdd.push(normalized);
-
-        if (!noExpand) {
-          if (kObj.matron && kObj.matron.id) {
-            const matronId = Number(kObj.matron.id);
-            if (!requestedIds.has(matronId) && !embeddedData.has(matronId)) {
-              embeddedData.set(matronId, normalizeFromApi(kObj.matron));
-            }
-          }
-          if (kObj.sire && kObj.sire.id) {
-            const sireId = Number(kObj.sire.id);
-            if (!requestedIds.has(sireId) && !embeddedData.has(sireId)) {
-              embeddedData.set(sireId, normalizeFromApi(kObj.sire));
-            }
-          }
-          if (Array.isArray(kObj.children)) {
-            for (const child of kObj.children) {
-              if (child && child.id) {
-                const childId = Number(child.id);
-                if (!requestedIds.has(childId) && !embeddedData.has(childId)) {
-                  const childNorm = normalizeFromApi(child);
-                  if (!childNorm.matron_id) childNorm.matron_id = numId;
-                  else if (!childNorm.sire_id) childNorm.sire_id = numId;
-                  embeddedData.set(childId, childNorm);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      for (const [embId, embKitty] of embeddedData) {
-        if (!fetchedIds.has(embId)) {
-          kittiesToAdd.push(embKitty);
-        }
-      }
-
-      loadJsonObject({ root_ids: Array.from(requestedIds), kitties: kittiesToAdd });
-      setStatus(`Loaded ${ids.length} kitty(s)`, false);
-    } catch (e) {
-      console.error(e);
-      setStatus(`Failed to load kitties: ${e.message}`, true);
-    }
-  }
-
-  async function addKittiesById(ids, noExpand = false) {
-    if (!ids || ids.length === 0) return;
-    log("addKittiesById:", ids);
-    setStatus(`Adding ${ids.length} kitty(s)...`, false);
-
-    const kittiesToAdd = [];
-    const requestedIds = new Set(ids.map(Number));
-    const fetchedIds = new Set();
-    const embeddedData = new Map();
-
-    try {
-      // Fetch requested kitties
-      for (const id of ids) {
-        const numId = Number(id);
-
-        // Skip if already in graph
-        if (kittyById.has(numId)) {
-          log("addKittiesById: skipping already loaded", numId);
-          continue;
-        }
-
-        if (fetchedIds.has(numId)) continue;
-        fetchedIds.add(numId);
-
-        const kitty = await fetchJson(apiUrl(`/kitties/${numId}`));
-        const kObj = unwrapKitty(kitty);
-        const normalized = normalizeFromApi(kObj);
-        kittiesToAdd.push(normalized);
-
-        // Collect embedded parents/children (skip if noExpand)
-        if (!noExpand) {
-          if (kObj.matron && kObj.matron.id) {
-            const matronId = Number(kObj.matron.id);
-            if (!kittyById.has(matronId) && !requestedIds.has(matronId) && !embeddedData.has(matronId)) {
-              embeddedData.set(matronId, normalizeFromApi(kObj.matron));
-            }
-          }
-          if (kObj.sire && kObj.sire.id) {
-            const sireId = Number(kObj.sire.id);
-            if (!kittyById.has(sireId) && !requestedIds.has(sireId) && !embeddedData.has(sireId)) {
-              embeddedData.set(sireId, normalizeFromApi(kObj.sire));
-            }
-          }
-          if (Array.isArray(kObj.children)) {
-            for (const child of kObj.children) {
-              if (child && child.id) {
-                const childId = Number(child.id);
-                if (!kittyById.has(childId) && !requestedIds.has(childId) && !embeddedData.has(childId)) {
-                  const childNorm = normalizeFromApi(child);
-                  if (!childNorm.matron_id) childNorm.matron_id = numId;
-                  else if (!childNorm.sire_id) childNorm.sire_id = numId;
-                  embeddedData.set(childId, childNorm);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Add embedded data
-      for (const [embId, embKitty] of embeddedData) {
-        if (!kittyById.has(embId) && !fetchedIds.has(embId)) {
-          kittiesToAdd.push(embKitty);
-        }
-      }
-
-      if (kittiesToAdd.length === 0) {
-        setStatus("All kitties already in graph", false);
-        return;
-      }
-
-      log("addKittiesById: adding", kittiesToAdd.length, "kitties to existing graph");
-
-      // Add new kitties to kittyById and rebuild
-      myKittyIds = new Set([...myKittyIds, ...requestedIds]);
-      for (const k of kittiesToAdd) {
-        kittyById.set(Number(k.id), k);
-      }
-
-      graphData = buildGraphData();
-      if (graph) {
-        graph.graphData(graphData);
-      }
-      setStats();
-      setStatus(`Added ${kittiesToAdd.length} kitty(s) to graph`, false);
-    } catch (e) {
-      console.error(e);
-      setStatus(`Failed to add kitties: ${e.message}`, true);
-    }
-  }
+  // Data loading functions are in base.js (CKGraph.loadKittiesById, etc.)
+  // The CKGraph.onDataLoaded callback handles 3D-specific graph rebuilding
 
   function setStats() {
     if (statsPill) statsPill.textContent = `${graphData.nodes.length} nodes, ${graphData.links.length} edges`;
@@ -1260,14 +1852,15 @@
   }
 
   // ===================== PERMALINK GENERATION =====================
-  let loadedFromDataUrl = null;
+  // loadedFromDataUrl and foreignCam2d are declared at the top of the file
 
   function generatePermalinkUrl(basePath = "", includeViewport = true) {
-    const base = basePath || window.location.origin;
+    const base = basePath || (window.location.origin + window.location.pathname);
     let url;
 
-    if (loadedFromDataUrl && expandedIds.size === 0) {
-      url = `${base}?dataUrl=${encodeURIComponent(loadedFromDataUrl)}`;
+    // Use CKGraph directly for source of truth
+    if (CKGraph.loadedFromDataUrl && CKGraph.expandedIds.size === 0) {
+      url = `${base}?dataUrl=${encodeURIComponent(CKGraph.loadedFromDataUrl)}`;
     } else {
       const allIds = Array.from(kittyById.keys()).sort((a, b) => a - b);
       if (allIds.length === 0) return base;
@@ -1293,14 +1886,28 @@
       url += `&pathFrom=${selectedNodeId}&pathTo=${lockedPathToId}`;
     }
 
-    // Add camera position parameters - only for same viewer type
+    // Add camera state as single compact parameter - only for same viewer type
+    // Format: cam3d=posX,posY,posZ,upX,upY,upZ,zoom
     if (includeViewport && graph) {
       const camPos = graph.cameraPosition();
-      if (camPos) {
-        url += `&cameraX=${camPos.x.toFixed(1)}`;
-        url += `&cameraY=${camPos.y.toFixed(1)}`;
-        url += `&cameraZ=${camPos.z.toFixed(1)}`;
+      const camera = graph.camera();
+      if (camPos && camera && camera.up) {
+        const camState = [
+          camPos.x.toFixed(1),
+          camPos.y.toFixed(1),
+          camPos.z.toFixed(1),
+          camera.up.x.toFixed(2),
+          camera.up.y.toFixed(2),
+          camera.up.z.toFixed(2),
+          camera.zoom.toFixed(2)
+        ].join(",");
+        url += `&cam3d=${camState}`;
       }
+    }
+
+    // Include foreign 2D viewport for round-trip preservation
+    if (foreignCam2d) {
+      url += `&cam2d=${foreignCam2d}`;
     }
 
     return url;
@@ -1316,13 +1923,13 @@
       const doLoadKitties = async () => {
         const ids = kittyIdInput.value.split(/[,\s]+/).map(s => parseInt(s.trim(), 10)).filter(n => n && !isNaN(n));
         if (!ids.length) { setStatus("Enter valid kitty ID(s)", true); return; }
-        await loadKittiesById(ids);
+        await CKGraph.loadKittiesById(ids);
       };
 
       const doAddKitties = async () => {
         const ids = kittyIdInput.value.split(/[,\s]+/).map(s => parseInt(s.trim(), 10)).filter(n => n && !isNaN(n));
         if (!ids.length) { setStatus("Enter valid kitty ID(s)", true); return; }
-        await addKittiesById(ids);
+        await CKGraph.addKittiesById(ids);
       };
 
       if (loadKittyBtn) {
@@ -1348,7 +1955,7 @@
         const url = jsonInput.value.trim();
         if (url) {
           // Load from URL
-          try { await loadJsonFromUrl(url); }
+          try { await CKGraph.loadJsonFromUrl(url); }
           catch (e) { console.error(e); setStatus("Failed to load JSON URL", true); }
         } else {
           // Open file picker
@@ -1362,10 +1969,10 @@
         if (!file) return;
         try {
           log("load from file:", file.name, file.size);
-          loadedFromDataUrl = null;
+          CKGraph.loadedFromDataUrl = null;
           const text = await file.text();
           const data = JSON.parse(text);
-          loadJsonObject(data);
+          CKGraph.loadJsonObject(data);
           jsonFilePicker.value = ""; // Reset for re-selection
         } catch (err) {
           console.error(err);
@@ -1400,10 +2007,10 @@
 
         try {
           log("load from dropped file:", file.name, file.size);
-          loadedFromDataUrl = null;
+          CKGraph.loadedFromDataUrl = null;
           const text = await file.text();
           const data = JSON.parse(text);
-          loadJsonObject(data);
+          CKGraph.loadJsonObject(data);
         } catch (err) {
           console.error(err);
           setStatus("Failed to load dropped JSON file", true);
@@ -1590,7 +2197,7 @@
     if (view2dBtn) {
       view2dBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        const url2d = generatePermalinkUrl(window.location.origin + "/index.html", false); // Don't include 3D camera params
+        const url2d = generatePermalinkUrl(window.location.origin + "/index.html", true); // Include 3D viewport for round-trip
         window.location.href = url2d;
       });
     }
@@ -1689,9 +2296,7 @@
 
       // Remove viewport parameters if not preserving
       if (!preserveViewport) {
-        url.searchParams.delete("cameraX");
-        url.searchParams.delete("cameraY");
-        url.searchParams.delete("cameraZ");
+        url.searchParams.delete("cam3d");
       }
 
       // Note: For 2D viewport from 3D viewer, we can't preserve since we don't have 2D camera data
@@ -1710,10 +2315,57 @@
       }
     }
 
-    // ESC key handler
+    // ===================== KEYBOARD CONTROLS =====================
+    // Track orientation interaction for hint system
+    let orientationStartTime = null;
+    let hintShown = false;
+    const HINT_DELAY = 8000; // Show hint after 8 seconds of continuous interaction
+
+    const showKeyboardHint = () => {
+      // Allow re-showing with H key (hintShown only blocks auto-hint)
+      setStatus(
+        "Keys: WASD=pan, R/F=up/down, Q/E=roll, Arrows=pitch/yaw, +/-=zoom, Space=reset, C=center, V=flip",
+        false
+      );
+      hintShown = true;
+    };
+
+    // Track mouse interaction for hint
+    let lastInteractionTime = 0;
+    document.addEventListener("mousedown", () => {
+      if (!orientationStartTime) orientationStartTime = Date.now();
+      lastInteractionTime = Date.now();
+    });
+    document.addEventListener("mouseup", () => {
+      if (orientationStartTime && !hintShown) {
+        const elapsed = Date.now() - orientationStartTime;
+        if (elapsed > HINT_DELAY) {
+          showKeyboardHint();
+        }
+      }
+      orientationStartTime = null;
+    });
+    document.addEventListener("mousemove", (e) => {
+      if (e.buttons > 0 && orientationStartTime && !hintShown) {
+        const elapsed = Date.now() - orientationStartTime;
+        if (elapsed > HINT_DELAY) {
+          showKeyboardHint();
+        }
+      }
+    });
+
+    // Keyboard event handler
     document.addEventListener("keydown", (e) => {
+      // Ignore if typing in an input field
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+      // ESC - close modals, disable modes
       if (e.key === "Escape") {
-        // Disable shortest path mode
+        const embedModal = $("embedModal");
+        if (embedModal && embedModal.classList.contains("show")) {
+          embedModal.classList.remove("show");
+          return;
+        }
         if (shortestPathMode) {
           shortestPathMode = false;
           lockedPathToId = null;
@@ -1722,8 +2374,241 @@
           clearPathHighlight();
           if (graph) graph.refresh();
         }
-        // Remove focus to prevent blue outline on buttons
         if (document.activeElement) document.activeElement.blur();
+        return;
+      }
+
+      if (!graph) return;
+
+      const camera = graph.camera();
+      const controls = graph.controls();
+      const panAmount = 20;
+      const rotateAmount = 0.05;
+      const zoomAmount = 0.1;
+
+      // H - show help
+      if (e.key === "h" || e.key === "H") {
+        showKeyboardHint();
+        return;
+      }
+
+      // === STANDARD KEYBOARD NAV SCHEME ===
+      // WASD: pan, R/F: up/down, Q/E: roll, Arrows: pitch/yaw
+      //
+      // Previous implementation (orbit-centric):
+      // - WASD: orbit around target (W/S vertical, A/D horizontal)
+      // - Arrows: pan camera and target together
+      // - R/F: zoom in/out (move toward/away from target)
+
+      // WASD - Pan camera (move camera and target together)
+      if (e.key === "w" || e.key === "W") {
+        // Pan forward in camera view direction (projected onto XZ plane)
+        const viewDir = new THREE.Vector3();
+        camera.getWorldDirection(viewDir);
+        viewDir.y = 0; // Project onto horizontal plane
+        viewDir.normalize();
+        if (viewDir.length() > 0.01) {
+          camera.position.addScaledVector(viewDir, panAmount);
+          controls.target.addScaledVector(viewDir, panAmount);
+        }
+        controls.update();
+        return;
+      }
+      if (e.key === "s" || e.key === "S") {
+        // Pan backward
+        const viewDir = new THREE.Vector3();
+        camera.getWorldDirection(viewDir);
+        viewDir.y = 0;
+        viewDir.normalize();
+        if (viewDir.length() > 0.01) {
+          camera.position.addScaledVector(viewDir, -panAmount);
+          controls.target.addScaledVector(viewDir, -panAmount);
+        }
+        controls.update();
+        return;
+      }
+      if (e.key === "a" || e.key === "A") {
+        // Strafe left
+        const right = new THREE.Vector3();
+        camera.getWorldDirection(right);
+        right.cross(camera.up).normalize();
+        camera.position.addScaledVector(right, -panAmount);
+        controls.target.addScaledVector(right, -panAmount);
+        controls.update();
+        return;
+      }
+      if (e.key === "d" || e.key === "D") {
+        // Strafe right
+        const right = new THREE.Vector3();
+        camera.getWorldDirection(right);
+        right.cross(camera.up).normalize();
+        camera.position.addScaledVector(right, panAmount);
+        controls.target.addScaledVector(right, panAmount);
+        controls.update();
+        return;
+      }
+
+      // R/F - Move up/down (vertical pan)
+      if (e.key === "r" || e.key === "R") {
+        camera.position.y += panAmount;
+        controls.target.y += panAmount;
+        controls.update();
+        return;
+      }
+      if (e.key === "f" || e.key === "F") {
+        camera.position.y -= panAmount;
+        controls.target.y -= panAmount;
+        controls.update();
+        return;
+      }
+
+      // Q/E - roll camera (rotate around view axis)
+      if (e.key === "q" || e.key === "Q" || e.key === "e" || e.key === "E") {
+        const rollAmount = 0.05;
+        const direction = (e.key === "q" || e.key === "Q") ? 1 : -1;
+        const viewDir = new THREE.Vector3();
+        camera.getWorldDirection(viewDir);
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromAxisAngle(viewDir, rollAmount * direction);
+        camera.up.applyQuaternion(quaternion);
+        camera.up.normalize();
+        controls.update();
+        return;
+      }
+
+      // Arrow keys - Pitch and Yaw (orbit around target)
+      if (e.key === "ArrowUp") {
+        // Pitch up (orbit to look from above)
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        spherical.phi = Math.max(0.1, spherical.phi - rotateAmount);
+        offset.setFromSpherical(spherical);
+        camera.position.copy(controls.target).add(offset);
+        camera.lookAt(controls.target);
+        controls.update();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        // Pitch down (orbit to look from below)
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        spherical.phi = Math.min(Math.PI - 0.1, spherical.phi + rotateAmount);
+        offset.setFromSpherical(spherical);
+        camera.position.copy(controls.target).add(offset);
+        camera.lookAt(controls.target);
+        controls.update();
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        // Yaw left (orbit to look from the left)
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        spherical.theta -= rotateAmount;
+        offset.setFromSpherical(spherical);
+        camera.position.copy(controls.target).add(offset);
+        camera.lookAt(controls.target);
+        controls.update();
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        // Yaw right (orbit to look from the right)
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+        spherical.theta += rotateAmount;
+        offset.setFromSpherical(spherical);
+        camera.position.copy(controls.target).add(offset);
+        camera.lookAt(controls.target);
+        controls.update();
+        return;
+      }
+
+      // +/- or =/- - Zoom in/out (move toward/away from target)
+      if (e.key === "+" || e.key === "=") {
+        const viewDir = new THREE.Vector3();
+        camera.getWorldDirection(viewDir);
+        camera.position.addScaledVector(viewDir, panAmount);
+        controls.update();
+        return;
+      }
+      if (e.key === "-" || e.key === "_") {
+        const viewDir = new THREE.Vector3();
+        camera.getWorldDirection(viewDir);
+        camera.position.addScaledVector(viewDir, -panAmount);
+        controls.update();
+        return;
+      }
+
+      // Z/X - rotate around world Z axis (spin the view)
+      if (e.key === "z" || e.key === "Z" || e.key === "x" || e.key === "X") {
+        const direction = (e.key === "z" || e.key === "Z") ? 1 : -1;
+        const zAxis = new THREE.Vector3(0, 0, 1);
+
+        // Rotate camera position around Z axis
+        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+        offset.applyAxisAngle(zAxis, rotateAmount * direction);
+        camera.position.copy(controls.target).add(offset);
+
+        // Also rotate the up vector to maintain orientation
+        camera.up.applyAxisAngle(zAxis, rotateAmount * direction);
+        camera.up.normalize();
+
+        camera.lookAt(controls.target);
+        controls.update();
+        return;
+      }
+
+      // Space - reset camera to default position
+      if (e.key === " ") {
+        e.preventDefault();
+        camera.up.set(0, 1, 0);
+        camera.position.set(-25, 487, 76);
+        controls.target.set(0, 0, 0);
+        camera.lookAt(controls.target);
+        controls.update();
+        setStatus("Camera reset to default", false);
+        return;
+      }
+
+      // C - center on selected node
+      if (e.key === "c" || e.key === "C") {
+        if (!selectedNodeId) {
+          setStatus("No kitty selected - click a node first", false);
+          return;
+        }
+        const node = graphData.nodes.find(n => n.id === selectedNodeId);
+        if (node && node.x !== undefined) {
+          const currentCamPos = graph.cameraPosition();
+          const distance = 200;
+          const dx = currentCamPos.x - node.x;
+          const dy = currentCamPos.y - node.y;
+          const dz = currentCamPos.z - node.z;
+          const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+          // Avoid division by zero if camera is already at node
+          if (currentDist < 1) {
+            graph.cameraPosition(
+              { x: node.x, y: node.y + distance, z: node.z },
+              node,
+              1000
+            );
+          } else {
+            const scale = distance / currentDist;
+            camera.up.set(0, 1, 0);
+            graph.cameraPosition(
+              { x: node.x + dx * scale, y: node.y + dy * scale, z: node.z + dz * scale },
+              node,
+              1000
+            );
+          }
+        }
+        return;
+      }
+
+      // V - flip view (invert up vector)
+      if (e.key === "v" || e.key === "V") {
+        camera.up.negate();
+        controls.update();
+        return;
       }
     });
   }
@@ -1754,17 +2639,42 @@
     if (pathFromParam) pendingPathFrom = Number(pathFromParam);
     if (pathToParam) pendingPathTo = Number(pathToParam);
 
-    // Camera position params
-    const cameraXParam = params.get("cameraX");
-    const cameraYParam = params.get("cameraY");
-    const cameraZParam = params.get("cameraZ");
+    // Camera state param (compact format: cam3d=posX,posY,posZ,upX,upY,upZ,zoom)
+    // Validate to prevent malicious or malformed input
+    const cam3dParam = params.get("cam3d");
     pendingCameraPos = null;
-    if (cameraXParam && cameraYParam && cameraZParam) {
-      pendingCameraPos = {
-        x: parseFloat(cameraXParam),
-        y: parseFloat(cameraYParam),
-        z: parseFloat(cameraZParam)
-      };
+    if (cam3dParam && cam3dParam.length < 200) { // Sanity check on length
+      const parts = cam3dParam.split(",").map(s => {
+        const n = parseFloat(s);
+        // Check for NaN, Infinity, and clamp to reasonable bounds
+        if (!Number.isFinite(n)) return null;
+        return Math.max(-100000, Math.min(100000, n));
+      });
+
+      // Validate we have valid numbers
+      if (parts.length >= 3 && parts.slice(0, 3).every(n => n !== null)) {
+        pendingCameraPos = {
+          x: parts[0],
+          y: parts[1],
+          z: parts[2]
+        };
+        // Up vector (should be unit vector, but clamp to [-1, 1])
+        if (parts.length >= 6 && parts.slice(3, 6).every(n => n !== null)) {
+          pendingCameraPos.upX = Math.max(-1, Math.min(1, parts[3]));
+          pendingCameraPos.upY = Math.max(-1, Math.min(1, parts[4]));
+          pendingCameraPos.upZ = Math.max(-1, Math.min(1, parts[5]));
+        }
+        // Zoom (should be positive, reasonable range)
+        if (parts.length >= 7 && parts[6] !== null) {
+          pendingCameraPos.zoom = Math.max(0.01, Math.min(100, parts[6]));
+        }
+      }
+    }
+
+    // Store foreign 2D viewport param for round-trip preservation when switching back
+    const cam2dParam = params.get("cam2d");
+    if (cam2dParam && cam2dParam.length < 100) {
+      foreignCam2d = cam2dParam;
     }
 
     // Generation filter
@@ -1823,7 +2733,7 @@
       const ids = kittyParam.split(/[,\s]+/).map(s => parseInt(s.trim(), 10)).filter(n => n && !isNaN(n));
       if (ids.length > 0) {
         const noExpand = params.get("noExpand") === "true";
-        loadKittiesById(ids, noExpand).then(applyPendingSelections);
+        CKGraph.loadKittiesById(ids, noExpand).then(applyPendingSelections);
         dataLoaded = true;
       }
     }
@@ -1831,7 +2741,7 @@
     // Check for dataUrl
     const dataUrl = params.get("dataUrl");
     if (!dataLoaded && dataUrl) {
-      loadJsonFromUrl(dataUrl).then(applyPendingSelections).catch(e => {
+      CKGraph.loadJsonFromUrl(dataUrl).then(applyPendingSelections).catch(e => {
         console.error(e);
         setStatus("Failed to load JSON from URL", true);
       });
@@ -1852,10 +2762,24 @@
         setTimeout(() => {
           const node = graphData.nodes.find(n => n.id === pendingSelectedId);
           if (node && graph) {
+            const currentCamPos = graph.cameraPosition();
             const distance = 200;
-            const distRatio = 1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
+
+            // Calculate direction from node to current camera
+            const dx = currentCamPos.x - (node.x || 0);
+            const dy = currentCamPos.y - (node.y || 0);
+            const dz = currentCamPos.z - (node.z || 0);
+            const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+            // Normalize direction and scale to desired distance
+            const scale = distance / currentDist;
+
+            // Set camera up vector to prevent upside-down orientation
+            const camera = graph.camera();
+            camera.up.set(0, 1, 0);
+
             graph.cameraPosition(
-              { x: (node.x || 0) * distRatio, y: (node.y || 0) * distRatio, z: (node.z || 0) * distRatio },
+              { x: (node.x || 0) + dx * scale, y: (node.y || 0) + dy * scale, z: (node.z || 0) + dz * scale },
               node,
               1000
             );
@@ -1880,8 +2804,45 @@
     // Apply pending camera position if set (after selection/path to allow animation)
     if (pendingCameraPos && graph) {
       setTimeout(() => {
-        graph.cameraPosition(pendingCameraPos, { x: 0, y: 0, z: 0 }, 1000);
+        const camera = graph.camera();
+        const controls = graph.controls();
+
+        // Temporarily disable controls to prevent interference
+        const wasEnabled = controls.enabled;
+        controls.enabled = false;
+
+        // Store the desired up vector
+        const upX = pendingCameraPos.upX !== undefined ? pendingCameraPos.upX : 0;
+        const upY = pendingCameraPos.upY !== undefined ? pendingCameraPos.upY : 1;
+        const upZ = pendingCameraPos.upZ !== undefined ? pendingCameraPos.upZ : 0;
+
+        // Apply zoom if provided
+        if (pendingCameraPos.zoom !== undefined) {
+          camera.zoom = pendingCameraPos.zoom;
+          camera.updateProjectionMatrix();
+          log("Camera zoom from query params:", pendingCameraPos.zoom);
+        }
+
+        // Set camera position
+        camera.position.set(pendingCameraPos.x, pendingCameraPos.y, pendingCameraPos.z);
+
+        // Set the up vector BEFORE lookAt to influence orientation
+        camera.up.set(upX, upY, upZ);
+
+        // Look at target
+        camera.lookAt(controls.target);
+
+        // Re-apply up vector AFTER lookAt since lookAt can modify it
+        camera.up.set(upX, upY, upZ);
+
         log("Camera position from query params:", pendingCameraPos);
+        log("Camera up vector from query params:", upX, upY, upZ);
+
+        // Re-enable controls after a frame to let camera state settle
+        requestAnimationFrame(() => {
+          controls.enabled = wasEnabled;
+          controls.update();
+        });
       }, 700);
     }
 
@@ -1901,7 +2862,42 @@
 
       // Setup floating panel controls
       setupFloatingPanel(showSwitcher);
+      setupFloatingFiltersPanel();
     }
+
+    // Set up CKGraph callbacks for state synchronization
+    CKGraph.onDataLoaded = () => {
+      log("CKGraph.onDataLoaded: rebuilding graph");
+      // Sync local state from CKGraph
+      loadedFromDataUrl = CKGraph.loadedFromDataUrl;
+      myKittyIds = CKGraph.myKittyIds;
+
+      // Clear texture cache since resolution may change with new graph size
+      textureCache.clear();
+
+      // Rebuild graph data
+      graphData = buildGraphData();
+
+      if (graph) {
+        // Update existing graph
+        graph.graphData(graphData);
+      } else {
+        // Initialize new graph
+        initGraph();
+      }
+      setStats();
+
+      // Refresh selected panel if a kitty is selected (e.g., after expand)
+      if (selectedNodeId && kittyById.has(selectedNodeId)) {
+        showSelected(selectedNodeId);
+      }
+    };
+
+    CKGraph.onRefresh = () => {
+      // Sync highlight state from CKGraph
+      highlightedTraitGemNodes = CKGraph.highlightedTraitGemNodes;
+      if (graph) graph.refresh();
+    };
 
     wireControls();
 

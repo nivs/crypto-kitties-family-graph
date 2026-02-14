@@ -191,5 +191,9 @@ See **[docs/NOTABLE_KITTIES.md](docs/NOTABLE_KITTIES.md)** for the complete cata
 ## Credits
 
 - [CryptoKitties](https://www.cryptokitties.co/) for the awesome game and API
-- [vis-network](https://visjs.github.io/vis-network/docs/network/) for the graph library
+- [vis-network](https://visjs.github.io/vis-network/docs/network/) for the 2D graph library
+- [3d-force-graph](https://github.com/vasturiano/3d-force-graph) by Vasco Asturiano for the 3D graph library
+- [Three.js](https://threejs.org/) for WebGL 3D rendering
+- [three-viewport-gizmo](https://github.com/Fennec-hub/three-viewport-gizmo) by Fennec Hub for the camera navigation widget
+- [Claude Code](https://claude.ai/code) by Anthropic for AI-assisted development
 

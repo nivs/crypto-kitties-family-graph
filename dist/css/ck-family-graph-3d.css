@@ -16,10 +16,6 @@ header {
   margin-left: 8px;
 }
 
-.input-narrow {
-  width: 140px;
-}
-
 .select {
   border: 1px solid var(--border);
   background: var(--panel);
@@ -41,13 +37,18 @@ header {
 #banner {
   position: fixed;
   left: 80px;
-  right: 80px;
+  right: 128px;
   z-index: 50;
 }
 
 .tooltip {
   position: fixed;
   z-index: 200;
+}
+
+/* Hide navInfo */
+.scene-nav-info {
+  display: none;
 }
 
 /* Controls panel */
@@ -127,6 +128,11 @@ header {
 
 .controls-panel .kv {
   grid-template-columns: 70px 1fr;
+  align-items: center;
+}
+
+.controls-panel .kv .k {
+  padding-top: 0;
 }
 
 /* 3D specific: smaller font size and compact icon-only buttons */
@@ -176,14 +182,44 @@ header {
 }
 
 /* Embed mode */
-body.embed-mode header,
-body.embed-mode .controls-panel {
+body.embed-mode header {
   display: none;
 }
 
 body.embed-mode #graph-container {
   height: 100vh;
   padding-top: 0;
+}
+
+/* Hide controls-panel entirely in 3D - use floating panel instead */
+.controls-panel {
+  display: none;
+}
+
+/* Show floating panel in both modes for 3D viewer */
+.floating-panel {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 76px; /* Account for 60px header + 16px margin */
+  max-height: calc(100vh - 92px); /* Viewport - header - margins */
+}
+
+/* In embed mode, reset to top since no header */
+body.embed-mode .floating-panel {
+  top: 16px;
+  max-height: calc(100vh - 32px);
+}
+
+/* Hide Settings and Examples in embed mode */
+body.embed-mode .accordion-section-settings,
+body.embed-mode .accordion-section-examples {
+  display: none;
+}
+
+/* Layout becomes last visible accordion in embed mode - remove its border */
+body.embed-mode .floating-panel-body > .accordion-section:nth-child(3) {
+  border-bottom: none;
 }
 
 /* Responsive */

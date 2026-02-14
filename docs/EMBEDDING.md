@@ -5,11 +5,14 @@ The graph can be embedded in other pages using an iframe with embed mode enabled
 ## Embed Mode Features
 
 - **Full Viewport**: Graph fills the entire iframe (no header or sidebar)
-- **Floating Panel**: Selected kitty details in a draggable, collapsible panel
+- **Floating Panel**: Draggable panel with accordion-style collapsible sections
+  - **Selected Kitty**: Details when a kitty is clicked (expanded by default)
+  - **Filters**: Generation range, mewtation gems, shortest path mode (collapsed by default)
+  - **Footer**: GitHub link and "Open in viewer" button
+- **Panel Controls**: Collapse (chevron) and close (×) buttons in header
 - **2D ↔ 3D Switcher**: Toggle between viewers (can be hidden)
 - **Responsive Design**: Panel and navigation buttons adapt to small viewports
-- **Viewer Links**: "Open in viewer" link to open current graph in standalone viewer
-- **GitHub Link**: Link to repository
+- **Viewport Preservation**: Camera position/zoom maintained on load
 
 ## Using the Embed Code Generator
 
@@ -39,7 +42,7 @@ The generator creates an iframe code snippet with all current state preserved (f
 ### 2D Viewer
 ```html
 <iframe
-  src="https://ck.innerlogics.com/?embed=true&kitties=896775&zoom=1.500&viewX=150.5&viewY=-200.3"
+  src="https://ck.innerlogics.com/?embed=true&kitties=896775&cam2d=1.500,150.5,-200.3"
   width="800"
   height="600"
   frameborder="0"
@@ -47,16 +50,20 @@ The generator creates an iframe code snippet with all current state preserved (f
 </iframe>
 ```
 
+The `cam2d` parameter format is `zoom,x,y` (comma-separated).
+
 ### 3D Viewer
 ```html
 <iframe
-  src="https://ck.innerlogics.com/3d.html?embed=true&kitties=896775&cameraX=250.0&cameraY=300.0&cameraZ=400.0"
+  src="https://ck.innerlogics.com/3d.html?embed=true&kitties=896775&cam3d=-25,487,76,0,1,0,1"
   width="800"
   height="600"
   frameborder="0"
   allowfullscreen>
 </iframe>
 ```
+
+The `cam3d` parameter format is `x,y,z,upX,upY,upZ,zoom` (7 comma-separated values).
 
 ## Embed with Filters
 
@@ -134,7 +141,7 @@ For best results:
 ```html
 <!-- Embed with all features: 3D view, filters, preserved camera -->
 <iframe
-  src="https://ck.innerlogics.com/3d.html?embed=true&dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&mewtations=diamond&cameraX=250.0&cameraY=300.0&cameraZ=400.0"
+  src="https://ck.innerlogics.com/3d.html?embed=true&dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&mewtations=diamond&cam3d=-25,487,76,0,1,0,1"
   width="100%"
   height="800"
   frameborder="0"
@@ -162,9 +169,10 @@ For best results:
 - Use `&svgFromApi=true` to load from CryptoKitties API
 
 ### Viewport Not Preserving
-- Verify viewport parameters are in URL (`zoom`, `viewX`, `viewY` for 2D; `cameraX`, `cameraY`, `cameraZ` for 3D)
+- Verify viewport parameters are in URL (`cam2d` for 2D; `cam3d` for 3D)
+- Check format: `cam2d=zoom,x,y` and `cam3d=x,y,z,upX,upY,upZ,zoom`
 - Ensure parameters match the viewer type (2D params won't work in 3D viewer)
-- Check that values are numeric (decimals allowed)
+- Check that values are numeric and comma-separated
 
 ### Switcher Not Hiding
 - Add `&switcher=false` to URL

@@ -67,6 +67,31 @@ Materials use `MeshPhysicalMaterial` with:
 
 ### Controls
 
+**Mouse Controls:**
+- **Left-click drag**: Orbit camera around target
+- **Right-click drag** / **Ctrl+left drag**: Pan camera
+- **Scroll wheel**: Zoom in/out
+- **Left-click node**: Select kitty
+- **Double-click node**: Expand family (load parents/children)
+- **Right-click node**: Context menu
+
+**Keyboard Controls:**
+
+| Key | Action |
+|-----|--------|
+| **Arrow keys** | Pan camera (up/down/left/right) |
+| **W/A/S/D** | Orbit camera (W=up, S=down, A=left, D=right) |
+| **Q/E** | Roll camera (rotate around view axis) |
+| **Z/X** | Spin view (rotate around Z axis) |
+| **R/F** | Zoom in (R) / out (F) |
+| **Space** | Reset camera to default position |
+| **C** | Center on selected kitty |
+| **V** | Flip view 180° (fix upside-down orientation) |
+| **H** | Show keyboard hint |
+| **Escape** | Close modals, cancel path mode |
+
+**Hint:** After 8 seconds of continuous mouse interaction, a keyboard hint automatically appears to remind users of available shortcuts.
+
 **Collapsible Panels:**
 - Selected Kitty (auto-expands on selection)
 - Z-Axis mode selector
@@ -84,21 +109,27 @@ Add `?embed=true` to URL for fullscreen embed mode:
 
 **Features:**
 - Hides header and side panels
-- Shows floating draggable panel for selected kitty
+- Shows floating draggable panel with accordion-style sections
 - 2D/3D switcher in panel header
+- Collapse (chevron) and close (×) buttons
 - Optional viewport preservation (camera position)
+
+**Floating Panel:**
+- **Selected Kitty**: Shows details when a kitty is clicked (expanded by default)
+- **Filters**: Collapsible section with generation range, mewtation filters, shortest path mode
+- **Footer**: Links to GitHub and "Open in viewer" button
 
 **Switcher Control:**
 - `?switcher=false` or `?switcher=0`: Hides the 2D/3D button
 
 **Viewport Preservation:**
-- Use the "Preserve viewport" checkbox in the embed modal to include current camera position
-- Camera parameters (`cameraX`, `cameraY`, `cameraZ`) will be added to the embed URL
+- Use the "Preserve viewport" checkbox in the embed modal to include current camera state
+- The `cam3d` parameter encodes position, orientation, and zoom
 - Useful for showcasing specific views or details in the graph
 
 **Example:**
 ```
-https://yoursite.com/3d.html?dataUrl=./examples/dragon.json&embed=true&switcher=true&cameraX=250.0&cameraY=300.0&cameraZ=400.0
+https://yoursite.com/3d.html?dataUrl=./examples/dragon.json&embed=true&switcher=true&cam3d=-25,487,76,0,1,0,1
 ```
 
 See **[EMBEDDING.md](EMBEDDING.md)** for complete embedding guide with examples and best practices.
@@ -111,9 +142,7 @@ See **[EMBEDDING.md](EMBEDDING.md)** for complete embedding guide with examples 
 | `kitties` or `kitty` | IDs | Comma-separated kitty IDs to load from API |
 | `selected` | ID | Pre-select kitty by ID |
 | `zAxis` | generation\|birthday\|rarity\|flat | Z-axis mode |
-| `cameraX` | number | Camera X position (3D space) |
-| `cameraY` | number | Camera Y position (3D space) |
-| `cameraZ` | number | Camera Z position (3D space) |
+| `cam3d` | x,y,z,upX,upY,upZ,zoom | Camera state (position, orientation, zoom) |
 | `genMin` | number | Minimum generation filter |
 | `genMax` | number | Maximum generation filter |
 | `mewtations` | all\|diamond,gold,silver,bronze | Mewtation filter (comma-separated) |
@@ -126,13 +155,13 @@ See **[EMBEDDING.md](EMBEDDING.md)** for complete embedding guide with examples 
 | `examples` | open | Auto-open examples panel |
 
 **Viewport Preservation:**
-- Camera position (`cameraX`, `cameraY`, `cameraZ`) is automatically included in all permalinks
-- When generating embed code, use the "Preserve viewport" checkbox to include camera position
-- On page load, camera position parameters override auto-centering on selected nodes
+- The `cam3d` parameter is automatically included in all permalinks
+- When generating embed code, use the "Preserve viewport" checkbox to include camera state
+- On page load, `cam3d` parameter overrides auto-centering on selected nodes
 
 **Example with filters and viewport:**
 ```
-3d.html?dataUrl=./examples/tier_iiii.json&mewtations=diamond&zAxis=rarity&cameraX=250.0&cameraY=300.0&cameraZ=400.0
+3d.html?dataUrl=./examples/tier_iiii.json&mewtations=diamond&zAxis=rarity&cam3d=-25,487,76,0,1,0,1
 ```
 
 For complete parameter documentation including 2D viewer parameters, see **[QUERY_PARAMETERS.md](QUERY_PARAMETERS.md)**.

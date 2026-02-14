@@ -130,81 +130,8 @@
     }
   }
 
-  function formatDateTimeFull(dateStr) {
-    if (!dateStr) return "";
-    try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      // Show in local time with timezone abbreviation
-      return d.toLocaleString("en-US", { timeZoneName: "short" });
-    } catch {
-      return dateStr;
-    }
-  }
-
-  // Known CryptoKitties contract addresses
-  const CK_CONTRACTS = {
-    "0xb1690c08e213a35ed9bab7b318de14420fb57d8c": "Sale Auction",
-    "0xc7af99fe5513eb6710e6d5f44f9989da40f27f26": "Siring Auction",
-    "0x06012c8cf97bead5deae237070f9587f8e7a266d": "Core Contract"
-  };
-
-  function isAuctionContract(addr) {
-    if (!addr) return false;
-    return !!CK_CONTRACTS[addr.toLowerCase()];
-  }
-
-  function getContractName(addr) {
-    if (!addr) return null;
-    return CK_CONTRACTS[addr.toLowerCase()] || null;
-  }
-
-  function formatEth(weiString) {
-    if (!weiString) return null;
-    try {
-      const wei = BigInt(weiString);
-      const eth = Number(wei) / 1e18;
-      if (eth < 0.001) return eth.toExponential(2) + " ETH";
-      if (eth < 1) return eth.toFixed(4).replace(/\.?0+$/, "") + " ETH";
-      if (eth < 100) return eth.toFixed(3).replace(/\.?0+$/, "") + " ETH";
-      return eth.toFixed(2).replace(/\.?0+$/, "") + " ETH";
-    } catch {
-      return null;
-    }
-  }
-
-  // Extended version of normalizeOwnerNickname with owner_profile support
-  function normalizeOwnerNickname(k) {
-    if (!k || typeof k !== "object") return null;
-    const owner = k.owner;
-    if (owner && typeof owner === "object") {
-      if (typeof owner.nickname === "string" && owner.nickname.trim()) return owner.nickname.trim();
-      if (typeof owner.username === "string" && owner.username.trim()) return owner.username.trim();
-      if (typeof owner.name === "string" && owner.name.trim()) return owner.name.trim();
-    }
-    const op = k.owner_profile || k.ownerProfile;
-    if (op && typeof op === "object") {
-      if (typeof op.nickname === "string" && op.nickname.trim()) return op.nickname.trim();
-      if (typeof op.username === "string" && op.username.trim()) return op.username.trim();
-      if (typeof op.name === "string" && op.name.trim()) return op.name.trim();
-    }
-    return null;
-  }
-
-  // Look up owner nickname from other kitties in the graph that have the same address
-  function lookupOwnerNickname(addr) {
-    if (!addr) return null;
-    const addrLower = addr.toLowerCase();
-
-    for (const k of kittyById.values()) {
-      const kAddr = k.owner_address || normalizeOwner(k.owner);
-      if (kAddr && kAddr.toLowerCase() === addrLower) {
-        const nick = k.owner_nickname || normalizeOwnerNickname(k);
-        if (nick) return nick;
-      }
-    }
-    return null;
-  }
+  // formatDateTimeFull, formatEth, normalizeOwnerNickname, lookupOwnerNickname are in base.js
+  // CK_CONTRACTS, isAuctionContract, getContractName are in base.js
 
   function siteBase() {
     const el = $("siteBaseUrl");
@@ -303,6 +230,7 @@
 
   let physicsOn = true;
   let network = null;
+  let networkResizeHandlerAdded = false;
 
   // Owner highlight lock state
   let ownerHighlightLocked = false;
@@ -318,6 +246,9 @@
 
   // Track original dataUrl for permalink (null if loaded via kitty IDs)
   let loadedFromDataUrl = null;
+
+  // Store foreign viewport param for round-trip preservation when switching viewers
+  let foreignCam3d = null;
 
   const resolvedImgUrl = new Map();
   const nodeBaseStyle = new Map();
@@ -1391,6 +1322,11 @@
       if (physBtn) physBtn.textContent = "Physics: on";
 
       setStatus(`Expanded ${id}`, false);
+
+      // Refresh selected kitty details if this is the selected node (to update children count)
+      if (selectedNodeId === id) {
+        showSelected(id);
+      }
     } catch (e) {
       console.error(e);
       expandedIds.delete(id);
@@ -2291,37 +2227,7 @@
 
   const tooltipEl = $("tooltip");
 
-  // Format gem name for display
-  function gemDisplayName(gemType) {
-    const names = { diamond: "Diamond", gold: "Gilded", silver: "Amethyst", bronze: "Lapis" };
-    return names[gemType] || gemType;
-  }
-
-  // Generate HTML for mewtation gems
-  function gemsHtml(gems, compact = false) {
-    if (!gems || gems.length === 0) return "";
-
-    const gemPriority = { diamond: 4, gold: 3, silver: 2, bronze: 1 };
-    const sortedGems = [...gems].sort((a, b) => (gemPriority[b.gem] || 0) - (gemPriority[a.gem] || 0));
-
-    if (compact) {
-      // Compact version for tooltip - just show icons and count
-      return sortedGems.map(g =>
-        `<span class="gem-badge gem-${g.gem}" data-gem="${g.gem}" title="${safeText(g.description)} #${g.position}">
-          <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-md" />
-        </span>`
-      ).join("");
-    }
-
-    // Full version for right pane
-    return sortedGems.map(g =>
-      `<div class="gem-item" data-gem="${g.gem}">
-        <img src="${GEM_IMAGES[g.gem]}" alt="${g.gem}" class="gem-icon gem-icon-lg" />
-        <span class="gem-label">${gemDisplayName(g.gem)}</span>
-        <span class="gem-detail">${safeText(g.type)}: <a href="${cattributeUrl(g.description)}" target="_blank" rel="noopener" class="trait-link">${safeText(g.description)}</a> (#${g.position})</span>
-      </div>`
-    ).join("");
-  }
+  // gemDisplayName and gemsHtml are in base.js
 
   function showTooltip(id, event, pathInfo = null) {
     if (!tooltipEl) return;
@@ -3074,6 +2980,15 @@
     network = new vis.Network(container, { nodes, edges }, options);
     physicsOn = isPhysics;
 
+    // Add resize handler once to redraw network when window resizes
+    // (autoResize is disabled to prevent jitter on large graphs)
+    if (!networkResizeHandlerAdded) {
+      window.addEventListener("resize", () => {
+        if (network) network.redraw();
+      });
+      networkResizeHandlerAdded = true;
+    }
+
     // Apply circle layout positioning after network creation
     if (layoutType === "circle") {
       arrangeNodesInCircle();
@@ -3781,13 +3696,18 @@
       url += `&layout=${encodeURIComponent(currentLayout)}`;
     }
 
-    // Add viewport parameters (zoom and position) - only for same viewer type
+    // Add viewport state as single compact parameter - only for same viewer type
+    // Format: cam2d=zoom,x,y
     if (includeViewport && network) {
       const zoom = network.getScale();
       const pos = network.getViewPosition();
-      url += `&zoom=${zoom.toFixed(3)}`;
-      url += `&viewX=${pos.x.toFixed(1)}`;
-      url += `&viewY=${pos.y.toFixed(1)}`;
+      const camState = [zoom.toFixed(3), pos.x.toFixed(1), pos.y.toFixed(1)].join(",");
+      url += `&cam2d=${camState}`;
+    }
+
+    // Include foreign 3D viewport for round-trip preservation
+    if (foreignCam3d) {
+      url += `&cam3d=${foreignCam3d}`;
     }
 
     return url;
@@ -3980,9 +3900,7 @@
 
       // Remove viewport parameters if not preserving
       if (!preserveViewport) {
-        url.searchParams.delete("zoom");
-        url.searchParams.delete("viewX");
-        url.searchParams.delete("viewY");
+        url.searchParams.delete("cam2d");
       }
 
       // Note: For 3D viewport from 2D viewer, we can't preserve since we don't have camera data
@@ -4006,7 +3924,7 @@
     if (view3dBtn) {
       view3dBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        const permalinkUrl = generatePermalinkUrl(false); // Don't include 2D viewport params
+        const permalinkUrl = generatePermalinkUrl(true); // Include 2D viewport for round-trip
         // Replace origin with 3d.html path
         const url3d = permalinkUrl.replace(window.location.origin, window.location.origin + "/3d.html");
         window.location.href = url3d;
@@ -4250,6 +4168,106 @@
     }
   }
 
+  // ===================== FLOATING FILTERS PANEL (EMBED MODE) =====================
+  function setupFloatingFiltersPanel() {
+    // Wire up floating filter controls to main filter controls
+    const floatingGenMin = $("floatingGenerationMin");
+    const floatingGenMax = $("floatingGenerationMax");
+    const mainGenMin = $("generationMin");
+    const mainGenMax = $("generationMax");
+
+    // Sync generation filters
+    if (floatingGenMin && mainGenMin) {
+      floatingGenMin.addEventListener("input", () => {
+        mainGenMin.value = floatingGenMin.value;
+        mainGenMin.dispatchEvent(new Event("input"));
+      });
+      mainGenMin.addEventListener("input", () => {
+        floatingGenMin.value = mainGenMin.value;
+      });
+    }
+
+    if (floatingGenMax && mainGenMax) {
+      floatingGenMax.addEventListener("input", () => {
+        mainGenMax.value = floatingGenMax.value;
+        mainGenMax.dispatchEvent(new Event("input"));
+      });
+      mainGenMax.addEventListener("input", () => {
+        floatingGenMax.value = mainGenMax.value;
+      });
+    }
+
+    // Sync mewtation filter buttons
+    ["All", "Diamond", "Gold", "Silver", "Bronze"].forEach(type => {
+      const floatingBtn = $(`floatingMewtationFilter${type}`);
+      const mainBtn = $(`mewtationFilter${type}`);
+      if (floatingBtn && mainBtn) {
+        floatingBtn.addEventListener("click", () => {
+          mainBtn.click();
+        });
+        // Observe main button class changes to sync visual state
+        const observer = new MutationObserver(() => {
+          if (mainBtn.classList.contains("active")) {
+            floatingBtn.classList.add("active");
+          } else {
+            floatingBtn.classList.remove("active");
+          }
+        });
+        observer.observe(mainBtn, { attributes: true, attributeFilter: ["class"] });
+      }
+    });
+
+    // Sync filter edge highlight checkbox
+    const floatingEdgeHighlight = $("floatingFilterEdgeHighlight");
+    const mainEdgeHighlight = $("filterEdgeHighlight");
+    if (floatingEdgeHighlight && mainEdgeHighlight) {
+      floatingEdgeHighlight.addEventListener("change", () => {
+        mainEdgeHighlight.checked = floatingEdgeHighlight.checked;
+        mainEdgeHighlight.dispatchEvent(new Event("change"));
+      });
+      mainEdgeHighlight.addEventListener("change", () => {
+        floatingEdgeHighlight.checked = mainEdgeHighlight.checked;
+      });
+    }
+
+    // Sync shortest path checkbox
+    const floatingPathMode = $("floatingShortestPathMode");
+    const mainPathMode = $("shortestPathMode");
+    if (floatingPathMode && mainPathMode) {
+      floatingPathMode.addEventListener("change", () => {
+        mainPathMode.checked = floatingPathMode.checked;
+        mainPathMode.dispatchEvent(new Event("change"));
+      });
+      mainPathMode.addEventListener("change", () => {
+        floatingPathMode.checked = mainPathMode.checked;
+      });
+    }
+
+    // Clear filters button
+    const floatingClearBtn = $("floatingClearFiltersBtn");
+    const mainClearBtn = $("clearFiltersBtn");
+    if (floatingClearBtn && mainClearBtn) {
+      floatingClearBtn.addEventListener("click", () => {
+        mainClearBtn.click();
+      });
+    }
+
+    // Sync layout selector
+    const floatingLayoutSelect = $("floatingLayoutSelect");
+    const mainLayoutSelect = $("layoutSelect");
+    if (floatingLayoutSelect && mainLayoutSelect) {
+      floatingLayoutSelect.addEventListener("change", () => {
+        mainLayoutSelect.value = floatingLayoutSelect.value;
+        mainLayoutSelect.dispatchEvent(new Event("change"));
+      });
+      mainLayoutSelect.addEventListener("change", () => {
+        floatingLayoutSelect.value = mainLayoutSelect.value;
+      });
+      // Sync initial value
+      floatingLayoutSelect.value = mainLayoutSelect.value;
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     assertVisLoaded();
     applyDefaultsToUI();
@@ -4257,8 +4275,27 @@
     preloadGemImages(); // Load mewtation gem images
 
     // Keyboard shortcuts
+    const panAmount = 100;
+    const zoomFactor = 1.2;
+
+    const showKeyboardHint = () => {
+      setStatus("Keys: Arrows/WASD=pan, +/-=zoom, Space/F=fit, C=center on selection, H=help", false);
+    };
+
     document.addEventListener("keydown", (e) => {
+      // Ignore if typing in an input field
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+      // ESC - close modals, disable modes
       if (e.key === "Escape") {
+        // Close embed modal if open
+        const embedModal = $("embedModal");
+        if (embedModal && embedModal.classList.contains("show")) {
+          embedModal.classList.remove("show");
+          if (document.activeElement) document.activeElement.blur();
+          return;
+        }
+
         // Disable shortest path mode
         if (shortestPathMode) {
           shortestPathMode = false;
@@ -4275,6 +4312,65 @@
         }
         // Remove focus to prevent blue outline on buttons
         if (document.activeElement) document.activeElement.blur();
+        return;
+      }
+
+      // H - show help
+      if (e.key === "h" || e.key === "H") {
+        showKeyboardHint();
+        return;
+      }
+
+      if (!network) return;
+
+      // Arrow keys / WASD - pan
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
+        const pos = network.getViewPosition();
+        network.moveTo({ position: { x: pos.x, y: pos.y - panAmount }, animation: { duration: 150 } });
+        return;
+      }
+      if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+        const pos = network.getViewPosition();
+        network.moveTo({ position: { x: pos.x, y: pos.y + panAmount }, animation: { duration: 150 } });
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        const pos = network.getViewPosition();
+        network.moveTo({ position: { x: pos.x - panAmount, y: pos.y }, animation: { duration: 150 } });
+        return;
+      }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        const pos = network.getViewPosition();
+        network.moveTo({ position: { x: pos.x + panAmount, y: pos.y }, animation: { duration: 150 } });
+        return;
+      }
+
+      // +/- - zoom
+      if (e.key === "+" || e.key === "=") {
+        const scale = network.getScale();
+        network.moveTo({ scale: scale * zoomFactor, animation: { duration: 150 } });
+        return;
+      }
+      if (e.key === "-" || e.key === "_") {
+        const scale = network.getScale();
+        network.moveTo({ scale: scale / zoomFactor, animation: { duration: 150 } });
+        return;
+      }
+
+      // Space or F - fit all
+      if (e.key === " " || e.key === "f" || e.key === "F") {
+        e.preventDefault(); // Prevent space from scrolling
+        fitMainCluster();
+        return;
+      }
+
+      // C - center on selected node
+      if ((e.key === "c" || e.key === "C") && selectedNodeId) {
+        network.focus(selectedNodeId, {
+          scale: network.getScale(),
+          animation: { duration: 300 }
+        });
+        return;
       }
     });
 
@@ -4285,6 +4381,16 @@
       filtersToggle.addEventListener("click", () => {
         filtersToggle.classList.toggle("collapsed");
         filtersBody.classList.toggle("collapsed");
+      });
+    }
+
+    // Layout panel collapse toggle
+    const layoutToggle = $("layoutToggle");
+    const layoutBody = $("layoutBody");
+    if (layoutToggle && layoutBody) {
+      layoutToggle.addEventListener("click", () => {
+        layoutToggle.classList.toggle("collapsed");
+        layoutBody.classList.toggle("collapsed");
       });
     }
 
@@ -4318,6 +4424,9 @@
     if (isEmbedMode) {
       document.body.classList.add("embed-mode");
       log("Embed mode enabled");
+
+      // Setup floating filters panel
+      setupFloatingFiltersPanel();
     }
 
     // Floating panel controls (for embed mode)
@@ -4343,12 +4452,25 @@
     if (floatingPanelCollapse && floatingPanel) {
       floatingPanelCollapse.addEventListener("click", (e) => {
         e.stopPropagation();
-        floatingPanel.classList.toggle("collapsed");
+        floatingPanel.classList.toggle("panel-collapsed");
         // Rotate the chevron icon
         const svg = floatingPanelCollapse.querySelector("svg");
         if (svg) {
-          svg.style.transform = floatingPanel.classList.contains("collapsed") ? "rotate(180deg)" : "";
+          svg.style.transform = floatingPanel.classList.contains("panel-collapsed") ? "rotate(180deg)" : "";
         }
+      });
+    }
+
+    // Accordion section toggles
+    if (floatingPanel) {
+      const accordionHeaders = floatingPanel.querySelectorAll(".accordion-header");
+      accordionHeaders.forEach(header => {
+        header.addEventListener("click", () => {
+          const section = header.closest(".accordion-section");
+          if (section) {
+            section.classList.toggle("collapsed");
+          }
+        });
       });
     }
 
@@ -4379,11 +4501,14 @@
         if (!isDragging) return;
         const x = e.clientX - dragOffsetX;
         const y = e.clientY - dragOffsetY;
-        // Keep within viewport
-        const maxX = window.innerWidth - floatingPanel.offsetWidth;
-        const maxY = window.innerHeight - floatingPanel.offsetHeight;
-        floatingPanel.style.left = Math.max(0, Math.min(x, maxX)) + "px";
-        floatingPanel.style.top = Math.max(0, Math.min(y, maxY)) + "px";
+        // Allow partial out-of-view but keep at least 50px visible
+        const minVisible = 50;
+        const minX = minVisible - floatingPanel.offsetWidth;
+        const maxX = window.innerWidth - minVisible;
+        const minY = minVisible - floatingPanel.offsetHeight;
+        const maxY = window.innerHeight - minVisible;
+        floatingPanel.style.left = Math.max(minX, Math.min(x, maxX)) + "px";
+        floatingPanel.style.top = Math.max(minY, Math.min(y, maxY)) + "px";
         floatingPanel.style.right = "auto";
       });
 
@@ -4394,30 +4519,31 @@
         }
       });
 
-      // Keep panel within viewport on window resize
+      // Keep at least 50px of panel visible on window resize
       window.addEventListener("resize", () => {
         if (floatingPanel.style.right !== "auto") return; // Only adjust if manually positioned
         const rect = floatingPanel.getBoundingClientRect();
-        const maxX = window.innerWidth - floatingPanel.offsetWidth;
-        const maxY = window.innerHeight - floatingPanel.offsetHeight;
+        const minVisible = 50;
+        const minX = minVisible - floatingPanel.offsetWidth;
+        const maxX = window.innerWidth - minVisible;
+        const minY = minVisible - floatingPanel.offsetHeight;
+        const maxY = window.innerHeight - minVisible;
         let needsUpdate = false;
         let newX = rect.left;
         let newY = rect.top;
 
-        if (rect.left > maxX) {
-          newX = Math.max(0, maxX);
+        if (rect.left < minX) {
+          newX = minX;
+          needsUpdate = true;
+        } else if (rect.left > maxX) {
+          newX = maxX;
           needsUpdate = true;
         }
-        if (rect.top > maxY) {
-          newY = Math.max(0, maxY);
+        if (rect.top < minY) {
+          newY = minY;
           needsUpdate = true;
-        }
-        if (rect.right > window.innerWidth) {
-          newX = Math.max(0, window.innerWidth - floatingPanel.offsetWidth);
-          needsUpdate = true;
-        }
-        if (rect.bottom > window.innerHeight) {
-          newY = Math.max(0, window.innerHeight - floatingPanel.offsetHeight);
+        } else if (rect.top > maxY) {
+          newY = maxY;
           needsUpdate = true;
         }
 
@@ -4440,8 +4566,62 @@
     if (floatingView3dBtn) {
       floatingView3dBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        const url3d = generatePermalinkUrl(window.location.origin + "/3d.html", false); // Don't include 2D viewport params
-        window.location.href = url3d;
+        // Build URL relative to current location
+        const url3d = new URL("3d.html", window.location.href);
+        // Add current state params but don't include 2D viewport params
+        const currentParams = new URLSearchParams(location.search);
+        const newParams = new URLSearchParams();
+
+        // Copy relevant params
+        if (loadedFromDataUrl) {
+          newParams.set("dataUrl", loadedFromDataUrl);
+        } else {
+          const allIds = Array.from(kittyById.keys()).sort((a, b) => a - b);
+          if (allIds.length > 0) {
+            newParams.set("kitties", allIds.join(","));
+            newParams.set("noExpand", "true");
+          }
+        }
+
+        // Copy filters
+        if (generationHighlightActive) {
+          if (generationRangeMin !== null) newParams.set("genMin", generationRangeMin);
+          if (generationRangeMax !== null) newParams.set("genMax", generationRangeMax);
+        }
+        if (mewtationHighlightActive) {
+          if (highlightedGemTypes.size === 0) {
+            newParams.set("mewtations", "all");
+          } else {
+            newParams.set("mewtations", Array.from(highlightedGemTypes).join(","));
+          }
+        }
+        if (selectedNodeId) newParams.set("selected", selectedNodeId);
+        if (shortestPathMode) newParams.set("shortestPath", "true");
+        if (lockedPathToId && selectedNodeId) {
+          newParams.set("pathFrom", selectedNodeId);
+          newParams.set("pathTo", lockedPathToId);
+        }
+
+        // Include 2D viewport for round-trip preservation
+        if (network) {
+          const zoom = network.getScale();
+          const pos = network.getViewPosition();
+          newParams.set("cam2d", [zoom.toFixed(3), pos.x.toFixed(1), pos.y.toFixed(1)].join(","));
+        }
+
+        // Include foreign 3D viewport if we have one from previous round-trip
+        if (foreignCam3d) {
+          newParams.set("cam3d", foreignCam3d);
+        }
+
+        // Preserve embed mode
+        newParams.set("embed", "true");
+        if (currentParams.get("switcher") === "false") {
+          newParams.set("switcher", "false");
+        }
+
+        url3d.search = newParams.toString();
+        window.location.href = url3d.href;
       });
     }
 
@@ -4513,10 +4693,30 @@
     // Check for shortest path mode param
     const shortestPathParam = params.get("shortestPath") === "true" || params.get("shortestPath") === "1";
 
-    // Check for viewport params
-    const zoomParam = params.get("zoom");
-    const viewXParam = params.get("viewX");
-    const viewYParam = params.get("viewY");
+    // Check for viewport state param (compact format: cam2d=zoom,x,y)
+    // Validate to prevent malicious or malformed input
+    const cam2dParam = params.get("cam2d");
+    let pendingViewport = null;
+    if (cam2dParam && cam2dParam.length < 100) {
+      const parts = cam2dParam.split(",").map(s => {
+        const n = parseFloat(s);
+        if (!Number.isFinite(n)) return null;
+        return n;
+      });
+      if (parts.length >= 3 && parts.every(n => n !== null)) {
+        pendingViewport = {
+          zoom: Math.max(0.01, Math.min(10, parts[0])),
+          x: Math.max(-100000, Math.min(100000, parts[1])),
+          y: Math.max(-100000, Math.min(100000, parts[2]))
+        };
+      }
+    }
+
+    // Store foreign 3D viewport param for round-trip preservation when switching back
+    const cam3dParam = params.get("cam3d");
+    if (cam3dParam && cam3dParam.length < 200) {
+      foreignCam3d = cam3dParam;
+    }
 
     // Expand filters panel if any filter/path params are present
     const hasFilterParams = genMinParam || genMaxParam || mewtationsParam || filterEdgeHighlightParam ||
@@ -4665,19 +4865,15 @@
       }
 
       // Apply viewport parameters if present
-      if (zoomParam || (viewXParam && viewYParam)) {
+      if (pendingViewport) {
         setTimeout(() => {
           if (network) {
-            const targetZoom = zoomParam ? parseFloat(zoomParam) : network.getScale();
-            const targetX = viewXParam ? parseFloat(viewXParam) : 0;
-            const targetY = viewYParam ? parseFloat(viewYParam) : 0;
-
             network.moveTo({
-              scale: targetZoom,
-              position: { x: targetX, y: targetY },
+              scale: pendingViewport.zoom,
+              position: { x: pendingViewport.x, y: pendingViewport.y },
               animation: { duration: 600, easingFunction: "easeInOutQuad" }
             });
-            log("Viewport from query params:", { zoom: targetZoom, x: targetX, y: targetY });
+            log("Viewport from query params:", pendingViewport);
           }
         }, 800); // After selection (700ms)
       }

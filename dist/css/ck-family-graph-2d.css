@@ -136,76 +136,7 @@ aside {
   margin-top: auto;
 }
 
-/* Context menu */
-.context-menu {
-  position: absolute;
-  min-width: 180px;
-  background: rgba(18,22,34,0.98);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 12px;
-  padding: 6px 0;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-  backdrop-filter: blur(12px);
-  z-index: 30;
-  display: none;
-}
-
-.context-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  color: var(--text);
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.1s;
-}
-
-.context-menu-item:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-.context-menu-item.disabled {
-  opacity: 0.4;
-  cursor: default;
-  pointer-events: none;
-}
-
-.context-menu-item.active .menu-icon svg {
-  color: var(--accent);
-}
-
-.context-menu-item svg {
-  width: 16px;
-  height: 16px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-
-.context-menu-item .menu-icon {
-  display: flex;
-  align-items: center;
-}
-
-.context-menu-item .menu-icon svg {
-  width: 16px;
-  height: 16px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-
-.context-menu-separator {
-  height: 1px;
-  background: var(--border);
-  margin: 6px 0;
-}
-
 /* Settings */
-.input-narrow {
-  width: 140px;
-  margin-left: 8px;
-}
-
 .input-full {
   width: 100%;
 }
@@ -235,28 +166,11 @@ aside {
   color: #ffb3b3;
 }
 
-/* Filter controls */
-.filter-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.filter-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.filter-label {
-  font-size: 11px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+/* Filter controls - 2D specific overrides */
+/* Base styles are in ck-family-graph-base.css */
 
 .filter-select {
-  background: var(--card);
+  background: var(--panel2);
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 6px 10px;
@@ -275,26 +189,15 @@ aside {
   box-shadow: 0 0 0 2px rgba(122,162,255,0.2);
 }
 
-/* 2D specific: use --card background for filter buttons */
+/* 2D specific: use --panel2 background for filter buttons */
 .filter-btn {
-  background: var(--card);
-}
-
-.filter-range {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  background: var(--panel2);
 }
 
 .filter-input {
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 8px;
-  color: var(--text);
-  font-size: 12px;
   width: 80px;
-  text-align: center;
+  text-align: left;
 }
 
 .filter-input:focus {
@@ -307,45 +210,16 @@ aside {
   opacity: 0.6;
 }
 
-.filter-range-sep {
-  color: var(--muted);
-  font-size: 12px;
-}
-
 .filter-row-inline {
   margin-top: 4px;
-}
-
-.filter-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.filter-checkbox-label input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.filter-checkbox-label:hover {
-  color: var(--text);
-}
-
-.github-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 12px;
+  justify-content: flex-start;
 }
 
 /* Embed mode */
+body.embed-mode {
+  overflow: hidden;
+}
+
 body.embed-mode header,
 body.embed-mode aside {
   display: none;

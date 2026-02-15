@@ -1110,8 +1110,8 @@ window.ViewportGizmo = ViewportGizmo;
     if (section) section.style.display = "none";
   }
 
-  // ===================== FLOATING PANEL (EMBED MODE) =====================
-  function setupFloatingPanel(showSwitcher) {
+  // ===================== FLOATING PANEL =====================
+  function setupFloatingPanel(showSwitcher, isEmbedMode) {
     const panel = $("floatingPanel");
     const closeBtn = $("floatingPanelClose");
     const dragHandle = $("floatingPanelDragHandle");
@@ -1214,10 +1214,12 @@ window.ViewportGizmo = ViewportGizmo;
           newParams.set("cam2d", foreignCam2d);
         }
 
-        // Preserve embed mode
-        newParams.set("embed", "true");
-        if (currentParams.get("switcher") === "false") {
-          newParams.set("switcher", "false");
+        // Preserve embed mode only if currently in embed mode
+        if (isEmbedMode) {
+          newParams.set("embed", "true");
+          if (currentParams.get("switcher") === "false") {
+            newParams.set("switcher", "false");
+          }
         }
 
         url2d.search = newParams.toString();
@@ -2686,6 +2688,11 @@ window.ViewportGizmo = ViewportGizmo;
         examplesToggle.classList.remove("collapsed");
         examplesBody.style.display = "block";
       }
+      // Also open floating panel examples accordion
+      const floatingExamplesSection = $("floatingExamplesToggle")?.closest(".accordion-section");
+      if (floatingExamplesSection) {
+        floatingExamplesSection.classList.remove("collapsed");
+      }
     }
 
     // Z-axis mode
@@ -2842,7 +2849,7 @@ window.ViewportGizmo = ViewportGizmo;
     }
 
     // Setup floating panel controls (used in both modes for 3D viewer)
-    setupFloatingPanel(showSwitcher);
+    setupFloatingPanel(showSwitcher, isEmbedMode);
     setupFloatingFiltersPanel();
 
     // Set up CKGraph callbacks for state synchronization

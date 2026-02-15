@@ -1199,12 +1199,13 @@ window.ViewportGizmo = ViewportGizmo;
         if (graph) {
           const camPos = graph.cameraPosition();
           const camera = graph.camera();
-          if (camPos && camera && camera.up) {
+          if (camPos && camera && camera.quaternion) {
+            const q = camera.quaternion;
             newParams.set("cam3d", [
               camPos.x.toFixed(1), camPos.y.toFixed(1), camPos.z.toFixed(1),
-              camera.up.x.toFixed(2), camera.up.y.toFixed(2), camera.up.z.toFixed(2),
+              q.x.toFixed(4), q.y.toFixed(4), q.z.toFixed(4), q.w.toFixed(4),
               camera.zoom.toFixed(2)
-            ].join(","));
+            ].join("_"));
           }
         }
 
@@ -1340,16 +1341,18 @@ window.ViewportGizmo = ViewportGizmo;
         if (graph) {
           const camPos = graph.cameraPosition();
           const camera = graph.camera();
-          if (camPos && camera && camera.up) {
+          if (camPos && camera && camera.quaternion) {
+            const q = camera.quaternion;
             params.cam3d = [
               camPos.x.toFixed(1),
               camPos.y.toFixed(1),
               camPos.z.toFixed(1),
-              camera.up.x.toFixed(2),
-              camera.up.y.toFixed(2),
-              camera.up.z.toFixed(2),
+              q.x.toFixed(4),
+              q.y.toFixed(4),
+              q.z.toFixed(4),
+              q.w.toFixed(4),
               camera.zoom.toFixed(2)
-            ].join(",");
+            ].join("_");
           }
         }
 
@@ -1533,25 +1536,14 @@ window.ViewportGizmo = ViewportGizmo;
         showSelected(node.id);
         graph.refresh();
 
-        // Focus camera on selected node while preserving viewing angle
-        const currentCamPos = graph.cameraPosition();
+        // Focus camera on selected node with proper kitty orientation (feet down, face front)
         const distance = 200;
-
-        // Calculate direction from node to current camera
-        const dx = currentCamPos.x - node.x;
-        const dy = currentCamPos.y - node.y;
-        const dz = currentCamPos.z - node.z;
-        const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-
-        // Normalize direction and scale to desired distance
-        const scale = distance / currentDist;
-
-        // Set camera up vector to prevent upside-down orientation
         const camera = graph.camera();
-        camera.up.set(0, 1, 0);
 
+        // Camera above node looking down, up=+Z for proper kitty orientation
+        camera.up.set(0, 0, 1);
         graph.cameraPosition(
-          { x: node.x + dx * scale, y: node.y + dy * scale, z: node.z + dz * scale },
+          { x: node.x, y: node.y + distance, z: node.z || 0 },
           node,
           1000
         );
@@ -1887,20 +1879,22 @@ window.ViewportGizmo = ViewportGizmo;
     }
 
     // Add camera state as single compact parameter - only for same viewer type
-    // Format: cam3d=posX,posY,posZ,upX,upY,upZ,zoom
+    // Format: cam3d=posX_posY_posZ_quatX_quatY_quatZ_quatW_zoom
     if (includeViewport && graph) {
       const camPos = graph.cameraPosition();
       const camera = graph.camera();
-      if (camPos && camera && camera.up) {
+      if (camPos && camera && camera.quaternion) {
+        const q = camera.quaternion;
         const camState = [
           camPos.x.toFixed(1),
           camPos.y.toFixed(1),
           camPos.z.toFixed(1),
-          camera.up.x.toFixed(2),
-          camera.up.y.toFixed(2),
-          camera.up.z.toFixed(2),
+          q.x.toFixed(4),
+          q.y.toFixed(4),
+          q.z.toFixed(4),
+          q.w.toFixed(4),
           camera.zoom.toFixed(2)
-        ].join(",");
+        ].join("_");
         url += `&cam3d=${camState}`;
       }
     }
@@ -2324,7 +2318,7 @@ window.ViewportGizmo = ViewportGizmo;
     const showKeyboardHint = () => {
       // Allow re-showing with H key (hintShown only blocks auto-hint)
       setStatus(
-        "Keys: WASD=pan, R/F=up/down, Q/E=roll, Arrows=pitch/yaw, +/-=zoom, Space=reset, C=center, V=flip",
+        "Keys: WASD=pan, R/F=up/down, Q/E=roll, Z/X=spin, Arrows=orbit, +/-=zoom, Space=reset, C=center, V=flip",
         false
       );
       hintShown = true;
@@ -2476,47 +2470,34 @@ window.ViewportGizmo = ViewportGizmo;
         return;
       }
 
-      // Arrow keys - Pitch and Yaw (orbit around target)
-      if (e.key === "ArrowUp") {
-        // Pitch up (orbit to look from above)
+      // Arrow keys - Orbit around target
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        // Pitch - rotate around camera's right axis (like Z/X but horizontal)
         const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
-        const spherical = new THREE.Spherical().setFromVector3(offset);
-        spherical.phi = Math.max(0.1, spherical.phi - rotateAmount);
-        offset.setFromSpherical(spherical);
+
+        // Use camera's current up to find right axis (stable through full rotation)
+        const right = new THREE.Vector3().crossVectors(camera.up, offset).normalize();
+
+        const direction = e.key === "ArrowUp" ? 1 : -1;
+        offset.applyAxisAngle(right, rotateAmount * direction);
         camera.position.copy(controls.target).add(offset);
+
+        // Also rotate the up vector to maintain orientation
+        camera.up.applyAxisAngle(right, rotateAmount * direction);
+        camera.up.normalize();
+
         camera.lookAt(controls.target);
         controls.update();
         return;
       }
-      if (e.key === "ArrowDown") {
-        // Pitch down (orbit to look from below)
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        // Yaw - rotate around camera's up axis
         const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
-        const spherical = new THREE.Spherical().setFromVector3(offset);
-        spherical.phi = Math.min(Math.PI - 0.1, spherical.phi + rotateAmount);
-        offset.setFromSpherical(spherical);
+
+        const direction = e.key === "ArrowLeft" ? 1 : -1;
+        offset.applyAxisAngle(camera.up, rotateAmount * direction);
         camera.position.copy(controls.target).add(offset);
-        camera.lookAt(controls.target);
-        controls.update();
-        return;
-      }
-      if (e.key === "ArrowLeft") {
-        // Yaw left (orbit to look from the left)
-        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
-        const spherical = new THREE.Spherical().setFromVector3(offset);
-        spherical.theta -= rotateAmount;
-        offset.setFromSpherical(spherical);
-        camera.position.copy(controls.target).add(offset);
-        camera.lookAt(controls.target);
-        controls.update();
-        return;
-      }
-      if (e.key === "ArrowRight") {
-        // Yaw right (orbit to look from the right)
-        const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
-        const spherical = new THREE.Spherical().setFromVector3(offset);
-        spherical.theta += rotateAmount;
-        offset.setFromSpherical(spherical);
-        camera.position.copy(controls.target).add(offset);
+
         camera.lookAt(controls.target);
         controls.update();
         return;
@@ -2569,7 +2550,7 @@ window.ViewportGizmo = ViewportGizmo;
         return;
       }
 
-      // C - center on selected node
+      // C - center on selected node with proper kitty orientation
       if (e.key === "c" || e.key === "C") {
         if (!selectedNodeId) {
           setStatus("No kitty selected - click a node first", false);
@@ -2577,29 +2558,16 @@ window.ViewportGizmo = ViewportGizmo;
         }
         const node = graphData.nodes.find(n => n.id === selectedNodeId);
         if (node && node.x !== undefined) {
-          const currentCamPos = graph.cameraPosition();
           const distance = 200;
-          const dx = currentCamPos.x - node.x;
-          const dy = currentCamPos.y - node.y;
-          const dz = currentCamPos.z - node.z;
-          const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
 
-          // Avoid division by zero if camera is already at node
-          if (currentDist < 1) {
-            graph.cameraPosition(
-              { x: node.x, y: node.y + distance, z: node.z },
-              node,
-              1000
-            );
-          } else {
-            const scale = distance / currentDist;
-            camera.up.set(0, 1, 0);
-            graph.cameraPosition(
-              { x: node.x + dx * scale, y: node.y + dy * scale, z: node.z + dz * scale },
-              node,
-              1000
-            );
-          }
+          // Camera above node looking down, up=+Z for proper kitty orientation
+          camera.up.set(0, 0, 1);
+          graph.cameraPosition(
+            { x: node.x, y: node.y + distance, z: node.z || 0 },
+            node,
+            1000
+          );
+          setStatus("Centered on kitty", false);
         }
         return;
       }
@@ -2639,12 +2607,12 @@ window.ViewportGizmo = ViewportGizmo;
     if (pathFromParam) pendingPathFrom = Number(pathFromParam);
     if (pathToParam) pendingPathTo = Number(pathToParam);
 
-    // Camera state param (compact format: cam3d=posX,posY,posZ,upX,upY,upZ,zoom)
+    // Camera state param (compact format: cam3d=posX_posY_posZ_quatX_quatY_quatZ_quatW_zoom)
     // Validate to prevent malicious or malformed input
     const cam3dParam = params.get("cam3d");
     pendingCameraPos = null;
     if (cam3dParam && cam3dParam.length < 200) { // Sanity check on length
-      const parts = cam3dParam.split(",").map(s => {
+      const parts = cam3dParam.split("_").map(s => {
         const n = parseFloat(s);
         // Check for NaN, Infinity, and clamp to reasonable bounds
         if (!Number.isFinite(n)) return null;
@@ -2658,15 +2626,16 @@ window.ViewportGizmo = ViewportGizmo;
           y: parts[1],
           z: parts[2]
         };
-        // Up vector (should be unit vector, but clamp to [-1, 1])
-        if (parts.length >= 6 && parts.slice(3, 6).every(n => n !== null)) {
-          pendingCameraPos.upX = Math.max(-1, Math.min(1, parts[3]));
-          pendingCameraPos.upY = Math.max(-1, Math.min(1, parts[4]));
-          pendingCameraPos.upZ = Math.max(-1, Math.min(1, parts[5]));
+        // Quaternion (should be unit quaternion, clamp components to [-1, 1])
+        if (parts.length >= 7 && parts.slice(3, 7).every(n => n !== null)) {
+          pendingCameraPos.quatX = Math.max(-1, Math.min(1, parts[3]));
+          pendingCameraPos.quatY = Math.max(-1, Math.min(1, parts[4]));
+          pendingCameraPos.quatZ = Math.max(-1, Math.min(1, parts[5]));
+          pendingCameraPos.quatW = Math.max(-1, Math.min(1, parts[6]));
         }
         // Zoom (should be positive, reasonable range)
-        if (parts.length >= 7 && parts[6] !== null) {
-          pendingCameraPos.zoom = Math.max(0.01, Math.min(100, parts[6]));
+        if (parts.length >= 8 && parts[7] !== null) {
+          pendingCameraPos.zoom = Math.max(0.01, Math.min(100, parts[7]));
         }
       }
     }
@@ -2807,41 +2776,46 @@ window.ViewportGizmo = ViewportGizmo;
         const camera = graph.camera();
         const controls = graph.controls();
 
-        // Temporarily disable controls to prevent interference
-        const wasEnabled = controls.enabled;
-        controls.enabled = false;
-
-        // Store the desired up vector
-        const upX = pendingCameraPos.upX !== undefined ? pendingCameraPos.upX : 0;
-        const upY = pendingCameraPos.upY !== undefined ? pendingCameraPos.upY : 1;
-        const upZ = pendingCameraPos.upZ !== undefined ? pendingCameraPos.upZ : 0;
-
         // Apply zoom if provided
         if (pendingCameraPos.zoom !== undefined) {
           camera.zoom = pendingCameraPos.zoom;
           camera.updateProjectionMatrix();
-          log("Camera zoom from query params:", pendingCameraPos.zoom);
         }
 
         // Set camera position
         camera.position.set(pendingCameraPos.x, pendingCameraPos.y, pendingCameraPos.z);
 
-        // Set the up vector BEFORE lookAt to influence orientation
-        camera.up.set(upX, upY, upZ);
+        // Apply quaternion if provided (this fully defines orientation including roll)
+        if (pendingCameraPos.quatW !== undefined) {
+          camera.quaternion.set(
+            pendingCameraPos.quatX,
+            pendingCameraPos.quatY,
+            pendingCameraPos.quatZ,
+            pendingCameraPos.quatW
+          );
+        }
 
-        // Look at target
-        camera.lookAt(controls.target);
-
-        // Re-apply up vector AFTER lookAt since lookAt can modify it
-        camera.up.set(upX, upY, upZ);
+        // Set controls target to selected node if we have one
+        if (pendingSelectedId) {
+          const node = graphData.nodes.find(n => n.id === pendingSelectedId);
+          if (node && node.x !== undefined) {
+            controls.target.set(node.x, node.y, node.z);
+          }
+        }
 
         log("Camera position from query params:", pendingCameraPos);
-        log("Camera up vector from query params:", upX, upY, upZ);
 
-        // Re-enable controls after a frame to let camera state settle
+        // Update controls without letting it override our quaternion
         requestAnimationFrame(() => {
-          controls.enabled = wasEnabled;
-          controls.update();
+          // Re-apply quaternion after any controls interference
+          if (pendingCameraPos.quatW !== undefined) {
+            camera.quaternion.set(
+              pendingCameraPos.quatX,
+              pendingCameraPos.quatY,
+              pendingCameraPos.quatZ,
+              pendingCameraPos.quatW
+            );
+          }
         });
       }, 700);
     }

@@ -1,6 +1,4 @@
-# 3D Viewer (Proof of Concept)
-
-**Status:** Proof of Concept - Experimental 3D visualization layer
+# 3D Viewer
 
 The 3D viewer provides an alternative way to explore CryptoKitties family graphs in three-dimensional space using WebGL.
 
@@ -124,12 +122,12 @@ Add `?embed=true` to URL for fullscreen embed mode:
 
 **Viewport Preservation:**
 - Use the "Preserve viewport" checkbox in the embed modal to include current camera state
-- The `cam3d` parameter encodes position, orientation, and zoom
+- The `cam3d` parameter encodes position, orientation (as quaternion), and zoom
 - Useful for showcasing specific views or details in the graph
 
 **Example:**
 ```
-https://yoursite.com/3d.html?dataUrl=./examples/dragon.json&embed=true&switcher=true&cam3d=-25,487,76,0,1,0,1
+https://yoursite.com/3d.html?dataUrl=./examples/dragon.json&embed=true&switcher=true&cam3d=-25_487_76_0_0.707_0_0.707_1
 ```
 
 See **[EMBEDDING.md](EMBEDDING.md)** for complete embedding guide with examples and best practices.
@@ -142,7 +140,7 @@ See **[EMBEDDING.md](EMBEDDING.md)** for complete embedding guide with examples 
 | `kitties` or `kitty` | IDs | Comma-separated kitty IDs to load from API |
 | `selected` | ID | Pre-select kitty by ID |
 | `zAxis` | generation\|birthday\|rarity\|flat | Z-axis mode |
-| `cam3d` | x,y,z,upX,upY,upZ,zoom | Camera state (position, orientation, zoom) |
+| `cam3d` | x_y_z_quatX_quatY_quatZ_quatW_zoom | Camera state (position, quaternion, zoom) |
 | `genMin` | number | Minimum generation filter |
 | `genMax` | number | Maximum generation filter |
 | `mewtations` | all\|diamond,gold,silver,bronze | Mewtation filter (comma-separated) |
@@ -161,7 +159,7 @@ See **[EMBEDDING.md](EMBEDDING.md)** for complete embedding guide with examples 
 
 **Example with filters and viewport:**
 ```
-3d.html?dataUrl=./examples/tier_iiii.json&mewtations=diamond&zAxis=rarity&cam3d=-25,487,76,0,1,0,1
+3d.html?dataUrl=./examples/tier_iiii.json&mewtations=diamond&zAxis=rarity&cam3d=-25_487_76_0_0.707_0_0.707_1
 ```
 
 For complete parameter documentation including 2D viewer parameters, see **[QUERY_PARAMETERS.md](QUERY_PARAMETERS.md)**.

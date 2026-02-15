@@ -2787,12 +2787,17 @@ window.ViewportGizmo = ViewportGizmo;
 
         // Apply quaternion if provided (this fully defines orientation including roll)
         if (pendingCameraPos.quatW !== undefined) {
-          camera.quaternion.set(
+          const quat = new THREE.Quaternion(
             pendingCameraPos.quatX,
             pendingCameraPos.quatY,
             pendingCameraPos.quatZ,
             pendingCameraPos.quatW
           );
+          camera.quaternion.copy(quat);
+
+          // Derive up vector from quaternion (transform local Y by quaternion)
+          const up = new THREE.Vector3(0, 1, 0).applyQuaternion(quat);
+          camera.up.copy(up);
         }
 
         // Set controls target to selected node if we have one
@@ -2805,16 +2810,17 @@ window.ViewportGizmo = ViewportGizmo;
 
         log("Camera position from query params:", pendingCameraPos);
 
-        // Update controls without letting it override our quaternion
+        // Update controls without letting it override our orientation
         requestAnimationFrame(() => {
-          // Re-apply quaternion after any controls interference
           if (pendingCameraPos.quatW !== undefined) {
-            camera.quaternion.set(
+            const quat = new THREE.Quaternion(
               pendingCameraPos.quatX,
               pendingCameraPos.quatY,
               pendingCameraPos.quatZ,
               pendingCameraPos.quatW
             );
+            camera.quaternion.copy(quat);
+            camera.up.set(0, 1, 0).applyQuaternion(quat);
           }
         });
       }, 700);
@@ -2833,11 +2839,11 @@ window.ViewportGizmo = ViewportGizmo;
     if (isEmbedMode) {
       document.body.classList.add("embed-mode");
       log("Embed mode enabled");
-
-      // Setup floating panel controls
-      setupFloatingPanel(showSwitcher);
-      setupFloatingFiltersPanel();
     }
+
+    // Setup floating panel controls (used in both modes for 3D viewer)
+    setupFloatingPanel(showSwitcher);
+    setupFloatingFiltersPanel();
 
     // Set up CKGraph callbacks for state synchronization
     CKGraph.onDataLoaded = () => {

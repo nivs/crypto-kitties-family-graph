@@ -176,6 +176,28 @@ def calculate_z(kitty: dict, all_kitties: list, mode: str, max_z_spread: float) 
     return 0
 
 
+def calculate_quaternion_looking_down():
+    """
+    Calculate quaternion for camera looking down from +Y with up=+Z.
+
+    This orients the kitty properly (feet down, face forward).
+    Standard camera: looking -Z, up +Y
+    We want: looking -Y, up +Z
+
+    Rotation: 90 degrees around X axis.
+    Quaternion for 90° rotation around X: (sin(45°), 0, 0, cos(45°)) = (0.7071, 0, 0, 0.7071)
+    """
+    import math
+    angle = math.pi / 2  # 90 degrees
+    half_angle = angle / 2
+    return {
+        "x": math.sin(half_angle),  # 0.7071
+        "y": 0,
+        "z": 0,
+        "w": math.cos(half_angle),  # 0.7071
+    }
+
+
 def calculate_viewports(example: dict) -> dict | None:
     """Calculate optimal 2D and 3D viewports for an example dataset."""
     data = load_dataset(example["file"])
@@ -243,17 +265,17 @@ def calculate_viewports(example: dict) -> dict | None:
         dist = math.sqrt(dx * dx + dy * dy + dz * dz)
         max_dist = max(max_dist, dist)
 
-    # Calculate optimal 3D camera position
+    # Calculate optimal 3D camera position (from above, looking down at centroid)
     fov = 75 * math.pi / 180  # Default FOV
-    camera_distance = (max_dist * 1.5) / math.tan(fov / 2) if max_dist > 0 else 500
+    camera_distance = (max_dist * 2.0) / math.tan(fov / 2) if max_dist > 0 else 500
 
-    # Position camera looking at centroid from an angle
-    cam_angle_h = -0.1  # Slight tilt
-    cam_angle_v = 1.0   # Looking from above
+    # Position camera directly above centroid (on +Y axis) looking down
+    cam_x = centroid_3d_x
+    cam_y = centroid_3d_y + camera_distance
+    cam_z = centroid_3d_z
 
-    cam_x = centroid_3d_x + math.sin(cam_angle_h) * camera_distance * 0.3
-    cam_y = centroid_3d_y + camera_distance * cam_angle_v
-    cam_z = centroid_3d_z + math.cos(cam_angle_h) * camera_distance * 0.5
+    # Get quaternion for looking down from +Y with up=+Z (proper kitty orientation)
+    quat = calculate_quaternion_looking_down()
 
     z_values = [p["z"] for p in positions_3d]
 
@@ -269,9 +291,10 @@ def calculate_viewports(example: dict) -> dict | None:
             "x": round(cam_x, 1),
             "y": round(cam_y, 1),
             "z": round(cam_z, 1),
-            "upX": 0,
-            "upY": 1,
-            "upZ": 0,
+            "quatX": round(quat["x"], 4),
+            "quatY": round(quat["y"], 4),
+            "quatZ": round(quat["z"], 4),
+            "quatW": round(quat["w"], 4),
             "zoom": 1,
         },
         "stats": {
@@ -284,13 +307,13 @@ def calculate_viewports(example: dict) -> dict | None:
 
 
 def format_cam2d(cam: dict) -> str:
-    """Format cam2d as URL parameter value."""
-    return f"{cam['zoom']:.3f},{cam['x']:.1f},{cam['y']:.1f}"
+    """Format cam2d as URL parameter value (underscore-separated)."""
+    return f"{cam['zoom']:.3f}_{cam['x']:.1f}_{cam['y']:.1f}"
 
 
 def format_cam3d(cam: dict) -> str:
-    """Format cam3d as URL parameter value."""
-    return f"{cam['x']:.1f},{cam['y']:.1f},{cam['z']:.1f},{cam['upX']:.2f},{cam['upY']:.2f},{cam['upZ']:.2f},{cam['zoom']:.2f}"
+    """Format cam3d as URL parameter value (underscore-separated, quaternion format)."""
+    return f"{cam['x']:.1f}_{cam['y']:.1f}_{cam['z']:.1f}_{cam['quatX']:.4f}_{cam['quatY']:.4f}_{cam['quatZ']:.4f}_{cam['quatW']:.4f}_{cam['zoom']:.2f}"
 
 
 def main():

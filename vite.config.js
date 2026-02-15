@@ -15,7 +15,14 @@ export default defineConfig({
     },
     outDir: '.',
     emptyOutDir: false,
-    minify: 'esbuild',
+    minify: 'terser',
+    terserOptions: {
+      compress: true,
+      mangle: true,
+      format: {
+        comments: false
+      }
+    },
     sourcemap: false
   },
   server: {

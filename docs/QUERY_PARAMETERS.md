@@ -14,7 +14,7 @@ Complete reference for URL parameters supported by both 2D and 3D viewers.
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `cam2d` | Camera state: `zoom,x,y` (compact) | `?cam2d=1.500,150.5,-200.3` |
+| `cam2d` | Camera state: `zoom_x_y` (compact) | `?cam2d=1.500_150.5_-200.3` |
 
 The `cam2d` parameter encodes the 2D viewport state:
 - `zoom` - Zoom level (scale factor)
@@ -27,11 +27,11 @@ The `cam2d` parameter encodes the 2D viewport state:
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `cam3d` | Camera state: `posX,posY,posZ,upX,upY,upZ,zoom` (compact) | `?cam3d=-25,487,76,0,1,0,1` |
+| `cam3d` | Camera state: `posX_posY_posZ_quatX_quatY_quatZ_quatW_zoom` (compact) | `?cam3d=-25_487_76_0_0.707_0_0.707_1` |
 
 The `cam3d` parameter encodes the full 3D camera state:
-- `posX,posY,posZ` - Camera position in 3D space
-- `upX,upY,upZ` - Camera up vector (orientation, values -1 to 1)
+- `posX_posY_posZ` - Camera position in 3D space
+- `quatX_quatY_quatZ_quatW` - Camera orientation as quaternion
 - `zoom` - Camera zoom level (0.01 to 100)
 
 **Automatically included in permalinks.** When generating embed code, use "Preserve viewport" checkbox to include.
@@ -87,10 +87,10 @@ The `cam3d` parameter encodes the full 3D camera state:
 ### With Viewport
 ```
 # 2D with custom zoom and position
-?kitties=896775&cam2d=1.500,150.5,-200.3
+?kitties=896775&cam2d=1.500_150.5_-200.3
 
 # 3D with custom camera state (position + orientation + zoom)
-?kitties=896775&cam3d=-25,487,76,0,1,0,1
+?kitties=896775&cam3d=-25_487_76_0_0.707_0_0.707_1
 ```
 
 ### Embed Mode
@@ -102,10 +102,10 @@ The `cam3d` parameter encodes the full 3D camera state:
 ?embed=true&kitties=124653,129868&switcher=false
 
 # Embed with preserved viewport (2D)
-?embed=true&kitties=124653&cam2d=1.5,100,-50
+?embed=true&kitties=124653&cam2d=1.5_100_-50
 
 # Embed with preserved viewport (3D)
-?embed=true&kitties=124653&cam3d=-25,487,76,0,1,0,1
+?embed=true&kitties=124653&cam3d=-25_487_76_0_0.707_0_0.707_1
 ```
 
 ### With Filters
@@ -138,7 +138,7 @@ The `cam3d` parameter encodes the full 3D camera state:
 ?kitties=896775&zAxis=rarity
 
 # Full 3D setup with filters and camera state
-?kitties=896775&zAxis=rarity&mewtations=diamond&cam3d=-25,487,76,0,1,0,1
+?kitties=896775&zAxis=rarity&mewtations=diamond&cam3d=-25_487_76_0_0.707_0_0.707_1
 ```
 
 ## Parameter Interaction

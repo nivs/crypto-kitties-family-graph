@@ -42,7 +42,7 @@ The generator creates an iframe code snippet with all current state preserved (f
 ### 2D Viewer
 ```html
 <iframe
-  src="https://ck.innerlogics.com/?embed=true&kitties=896775&cam2d=1.500,150.5,-200.3"
+  src="https://ck.innerlogics.com/?embed=true&kitties=896775&cam2d=1.500_150.5_-200.3"
   width="800"
   height="600"
   frameborder="0"
@@ -50,12 +50,12 @@ The generator creates an iframe code snippet with all current state preserved (f
 </iframe>
 ```
 
-The `cam2d` parameter format is `zoom,x,y` (comma-separated).
+The `cam2d` parameter format is `zoom_x_y` (underscore-separated).
 
 ### 3D Viewer
 ```html
 <iframe
-  src="https://ck.innerlogics.com/3d.html?embed=true&kitties=896775&cam3d=-25,487,76,0,1,0,1"
+  src="https://ck.innerlogics.com/3d.html?embed=true&kitties=896775&cam3d=-25_487_76_0.7071_0_0_0.7071_1"
   width="800"
   height="600"
   frameborder="0"
@@ -63,7 +63,7 @@ The `cam2d` parameter format is `zoom,x,y` (comma-separated).
 </iframe>
 ```
 
-The `cam3d` parameter format is `x,y,z,upX,upY,upZ,zoom` (7 comma-separated values).
+The `cam3d` parameter format is `posX_posY_posZ_quatX_quatY_quatZ_quatW_zoom` (8 underscore-separated values, quaternion orientation).
 
 ## Embed with Filters
 
@@ -129,7 +129,7 @@ For best results:
 ### Performance
 - Keep graphs under 1000 nodes for smooth interaction
 - Use 2D viewer for large graphs (better performance)
-- Use 3D viewer for exploration (proof of concept)
+- Use 3D viewer for exploration and presentations
 
 ### Accessibility
 - Always include `frameborder="0"` for clean appearance
@@ -141,7 +141,7 @@ For best results:
 ```html
 <!-- Embed with all features: 3D view, filters, preserved camera -->
 <iframe
-  src="https://ck.innerlogics.com/3d.html?embed=true&dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&mewtations=diamond&cam3d=-25,487,76,0,1,0,1"
+  src="https://ck.innerlogics.com/3d.html?embed=true&dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&mewtations=diamond&cam3d=4.0_1949.5_748.2_0.7071_0_0_0.7071_1"
   width="100%"
   height="800"
   frameborder="0"
@@ -170,9 +170,9 @@ For best results:
 
 ### Viewport Not Preserving
 - Verify viewport parameters are in URL (`cam2d` for 2D; `cam3d` for 3D)
-- Check format: `cam2d=zoom,x,y` and `cam3d=x,y,z,upX,upY,upZ,zoom`
+- Check format: `cam2d=zoom_x_y` and `cam3d=posX_posY_posZ_quatX_quatY_quatZ_quatW_zoom`
 - Ensure parameters match the viewer type (2D params won't work in 3D viewer)
-- Check that values are numeric and comma-separated
+- Check that values are numeric and underscore-separated
 
 ### Switcher Not Hiding
 - Add `&switcher=false` to URL

@@ -3697,11 +3697,11 @@
     }
 
     // Add viewport state as single compact parameter - only for same viewer type
-    // Format: cam2d=zoom,x,y
+    // Format: cam2d=zoom_x_y
     if (includeViewport && network) {
       const zoom = network.getScale();
       const pos = network.getViewPosition();
-      const camState = [zoom.toFixed(3), pos.x.toFixed(1), pos.y.toFixed(1)].join(",");
+      const camState = [zoom.toFixed(3), pos.x.toFixed(1), pos.y.toFixed(1)].join("_");
       url += `&cam2d=${camState}`;
     }
 
@@ -4606,7 +4606,7 @@
         if (network) {
           const zoom = network.getScale();
           const pos = network.getViewPosition();
-          newParams.set("cam2d", [zoom.toFixed(3), pos.x.toFixed(1), pos.y.toFixed(1)].join(","));
+          newParams.set("cam2d", [zoom.toFixed(3), pos.x.toFixed(1), pos.y.toFixed(1)].join("_"));
         }
 
         // Include foreign 3D viewport if we have one from previous round-trip
@@ -4693,12 +4693,12 @@
     // Check for shortest path mode param
     const shortestPathParam = params.get("shortestPath") === "true" || params.get("shortestPath") === "1";
 
-    // Check for viewport state param (compact format: cam2d=zoom,x,y)
+    // Check for viewport state param (compact format: cam2d=zoom_x_y)
     // Validate to prevent malicious or malformed input
     const cam2dParam = params.get("cam2d");
     let pendingViewport = null;
     if (cam2dParam && cam2dParam.length < 100) {
-      const parts = cam2dParam.split(",").map(s => {
+      const parts = cam2dParam.split("_").map(s => {
         const n = parseFloat(s);
         if (!Number.isFinite(n)) return null;
         return n;

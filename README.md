@@ -24,11 +24,11 @@ An interactive family graph visualizer for [CryptoKitties](https://www.cryptokit
 - **Live API**: Fetch kitty data directly from CryptoKitties API
 - **Embed Mode**: Embeddable graph with responsive floating panel and "Open in viewer" link
 
-### 3D Viewer (Proof of Concept)
+### 3D Viewer
 
 **[→ Full 3D Documentation](docs/3D_VIEWER.md)**
 
-Experimental 3D visualization layer using WebGL and Three.js:
+3D visualization layer using WebGL and Three.js:
 
 - **3D Force-Directed Graph**: Nodes in 3D space with physics simulation
 - **Z-Axis Modes**: Generation, birthday, rarity (mewtation position), or flat
@@ -38,7 +38,7 @@ Experimental 3D visualization layer using WebGL and Three.js:
 - **Embed Support**: Fullscreen mode with floating panel and 2D/3D switcher
 - **Smart Defaults**: Auto-recommends Z-axis mode based on dataset analysis
 
-**Status**: Proof of concept - use 2D viewer for primary analysis, 3D for exploration.
+**Recommendation**: Use 2D viewer for large graphs, 3D for exploration and presentations.
 
 ## Quick Start
 
@@ -63,7 +63,7 @@ Experimental 3D visualization layer using WebGL and Three.js:
 
 **[→ Embedding Guide](docs/EMBEDDING.md)** - How to embed the graph in other pages with iframe examples and best practices
 
-**[→ 3D Viewer](docs/3D_VIEWER.md)** - Full documentation for the experimental 3D visualization layer
+**[→ 3D Viewer](docs/3D_VIEWER.md)** - Full documentation for the 3D visualization layer
 
 **[→ Notable Kitties](docs/NOTABLE_KITTIES.md)** - Catalog of historically significant and expensive CryptoKitties
 

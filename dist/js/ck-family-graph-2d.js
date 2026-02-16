@@ -3628,9 +3628,9 @@
       log("Permalink:", allIds.length, "IDs with noExpand");
     }
 
-    // Add owner highlight if pinned
+    // Add owner highlight if pinned (prefer nickname for readability)
     if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
-      const ownerParam = lockedOwnerAddr || lockedOwnerNick;
+      const ownerParam = lockedOwnerNick || lockedOwnerAddr;
       url += `&owner=${encodeURIComponent(ownerParam)}`;
     }
 

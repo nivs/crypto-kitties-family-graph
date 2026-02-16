@@ -508,13 +508,39 @@ window.ViewportGizmo = ViewportGizmo;
   }
 
   function getLinkColor(link) {
-    // Priority: path highlighting > filter edge highlighting > default
+    // Priority: path highlighting > owner highlighting > filter edge highlighting > default
 
     // Path highlighting takes priority
     if (highlightedPathLinks.size > 0) {
       if (highlightedPathLinks.has(link)) {
         return link.type === "matron" ? "#ff40a0" : "#40a0ff";
       }
+      return darkenColor(link.color, 0.6);
+    }
+
+    // Owner highlighting (same style as shortest path mode)
+    const ownerModeActive = ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick);
+    if (ownerModeActive) {
+      const srcId = Number(typeof link.source === "object" ? link.source.id : link.source);
+      const tgtId = Number(typeof link.target === "object" ? link.target.id : link.target);
+      const sourceNode = graphData.nodes.find(n => n.id === srcId);
+      const targetNode = graphData.nodes.find(n => n.id === tgtId);
+
+      if (sourceNode && targetNode) {
+        const sourceMatch = doesKittyMatchOwner(sourceNode.kitty,
+          lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+          lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+        );
+        const targetMatch = doesKittyMatchOwner(targetNode.kitty,
+          lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+          lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+        );
+        if (sourceMatch && targetMatch) {
+          // Brighten matching edges like shortest path mode
+          return link.type === "matron" ? "#ff40a0" : "#40a0ff";
+        }
+      }
+      // Dim non-matching edges like shortest path mode
       return darkenColor(link.color, 0.6);
     }
 
@@ -755,7 +781,11 @@ window.ViewportGizmo = ViewportGizmo;
             ownerHighlightLocked = false;
             lockedOwnerAddr = null;
             lockedOwnerNick = null;
-            if (graph) graph.refresh();
+            if (graph) {
+              graph.linkColor(getLinkColor);
+              graph.linkWidth(2);
+              graph.refresh();
+            }
           } else {
             // Highlight and lock
             ownerHighlightLocked = true;
@@ -892,7 +922,11 @@ window.ViewportGizmo = ViewportGizmo;
           ownerHighlightLocked = false;
           lockedOwnerAddr = null;
           lockedOwnerNick = null;
-          if (graph) graph.refresh();
+          if (graph) {
+            graph.linkColor(getLinkColor);
+            graph.linkWidth(2);
+            graph.refresh();
+          }
           log("Owner highlight unlocked");
         } else {
           // Lock
@@ -1973,6 +2007,12 @@ window.ViewportGizmo = ViewportGizmo;
 
     if (filterEdgeHighlight) url += `&filterEdgeHighlight=true`;
 
+    // Add owner highlight if locked (prefer nickname for readability)
+    if (ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick)) {
+      const ownerParam = lockedOwnerNick || lockedOwnerAddr;
+      url += `&owner=${encodeURIComponent(ownerParam)}`;
+    }
+
     if (selectedNodeId) url += `&selected=${selectedNodeId}`;
     if (shortestPathMode) url += `&shortestPath=true`;
     if (lockedPathToId && selectedNodeId) {
@@ -2651,6 +2691,7 @@ window.ViewportGizmo = ViewportGizmo;
   let pendingPathTo = null;
   let pendingCameraPos = null;
   let pendingCenterOnSelected = false; // Set true to center camera when simulation finishes
+  let pendingOwnerParam = null;
 
   function parseQueryParams() {
     const params = new URLSearchParams(location.search);
@@ -2750,6 +2791,12 @@ window.ViewportGizmo = ViewportGizmo;
       if (checkbox) checkbox.checked = true;
     }
 
+    // Owner highlight (will be applied in applyPendingSelections after data loads)
+    const ownerParam = params.get("owner");
+    if (ownerParam) {
+      pendingOwnerParam = ownerParam;
+    }
+
     // If filters are active from query params, sync to CKGraph and expand filter pane
     if (generationHighlightActive || mewtationHighlightActive) {
       syncFiltersToCKGraph();
@@ -2830,6 +2877,17 @@ window.ViewportGizmo = ViewportGizmo;
 
     // Apply filters after data is loaded
     applyFilters();
+
+    // Apply pending owner highlight
+    if (pendingOwnerParam) {
+      // Detect if it's an Ethereum address (0x + 40 hex chars = 42 total)
+      const isAddress = /^0x[0-9a-fA-F]{40}$/.test(pendingOwnerParam);
+      ownerHighlightLocked = true;
+      lockedOwnerAddr = isAddress ? pendingOwnerParam : null;
+      lockedOwnerNick = isAddress ? null : pendingOwnerParam;
+      CKGraph.highlightOwnerKitties(lockedOwnerAddr, lockedOwnerNick);
+      log("Owner highlight from query param:", { owner: pendingOwnerParam, isAddress });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -2880,7 +2938,39 @@ window.ViewportGizmo = ViewportGizmo;
     CKGraph.onRefresh = () => {
       // Sync highlight state from CKGraph
       highlightedTraitGemNodes = CKGraph.highlightedTraitGemNodes;
-      if (graph) graph.refresh();
+      if (graph) {
+        graph.linkColor(getLinkColor);
+        // Update linkWidth based on current highlighting mode
+        const ownerModeActive = ownerHighlightLocked && (lockedOwnerAddr || lockedOwnerNick);
+        if (ownerModeActive) {
+          graph.linkWidth(link => {
+            const srcId = Number(typeof link.source === "object" ? link.source.id : link.source);
+            const tgtId = Number(typeof link.target === "object" ? link.target.id : link.target);
+            const sourceNode = graphData.nodes.find(n => n.id === srcId);
+            const targetNode = graphData.nodes.find(n => n.id === tgtId);
+            if (sourceNode && targetNode) {
+              const sourceMatch = doesKittyMatchOwner(sourceNode.kitty,
+                lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+                lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+              );
+              const targetMatch = doesKittyMatchOwner(targetNode.kitty,
+                lockedOwnerAddr ? lockedOwnerAddr.toLowerCase() : null,
+                lockedOwnerNick ? lockedOwnerNick.toLowerCase() : null
+              );
+              if (sourceMatch && targetMatch) return 4;
+            }
+            return 2;
+          });
+        } else {
+          // Reset to default width when owner mode inactive
+          // (filter mode handles its own linkWidth in applyFilters)
+          const filterActive = generationHighlightActive || mewtationHighlightActive;
+          if (!filterActive || !filterEdgeHighlight) {
+            graph.linkWidth(2);
+          }
+        }
+        graph.refresh();
+      }
     };
 
     wireControls();

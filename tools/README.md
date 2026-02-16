@@ -19,6 +19,7 @@ pip install requests matplotlib numpy
 | `download_svgs.py` | Download kitty SVG/PNG images |
 | `gene_analysis.py` | Analyze genetic inheritance and mewtations |
 | `analyze_datasets.py` | Analyze datasets and recommend optimal 3D viewer settings |
+| `calculate_viewports.py` | Calculate cam2d/cam3d viewport params for examples |
 | `genome_visualizer.py` | Create visual genome charts |
 | `prune_to_ancestors.py` | Prune JSON to direct ancestors only |
 | `fancy_detector.py` | Detect fancy cats and potential matches |

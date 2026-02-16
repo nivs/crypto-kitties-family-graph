@@ -8,61 +8,61 @@ Example datasets are in `dist/examples/` for testing and demonstrating the analy
 
 ### Rare Mewtations (Tier II-IIII)
 
-| Dataset | Kitties | View | Filters |
-|---------|---------|------|---------|
-| **Tier IIII** (liger, moonrise) | 158 | [View](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json) | [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond) |
-| **Tier III** (lykoi, avatar) | 139 | [View](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json) | [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold) |
-| **Diamonds** (first discoverers) | 150 | [View](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json) | [All gems](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true) |
-| **Gen-0 Diamonds** | 40 | [View](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json) | [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true) |
-| **Liger** (single IIII trait) | 92 | [View](https://ck.innerlogics.com/?dataUrl=./examples/liger/liger.json) | |
+| Dataset | Kitties | View | 3D View | Filters |
+|---------|---------|------|---------|---------|
+| **Tier IIII** (liger, moonrise) | 158 | [View](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&zAxis=rarity&cam2d=0.250_-1.6_-4.2&cam3d=-1.6_1104.2_60.7_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/tier_iiii/tier_iiii.json&zAxis=rarity&cam2d=0.250_-1.6_-4.2&cam3d=-1.6_1104.2_60.7_-0.0975_0.6487_0.7490_-0.0930_1.00) | [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.250_-1.6_-4.2&cam3d=-1.6_1104.2_60.7_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| **Tier III** (lykoi, avatar) | 139 | [View](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&zAxis=rarity&cam2d=0.314_-6.8_-1.5&cam3d=-6.8_612.5_52.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/tier_iii/tier_iii.json&zAxis=rarity&cam2d=0.314_-6.8_-1.5&cam3d=-6.8_612.5_52.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.314_-6.8_-1.5&cam3d=-6.8_612.5_52.1_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| **Diamonds** (first discoverers) | 150 | [View](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&zAxis=rarity&cam2d=0.100_-7.8_-5.9&cam3d=-7.8_5385.6_58.7_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/diamonds/diamonds.json&zAxis=rarity&cam2d=0.100_-7.8_-5.9&cam3d=-7.8_5385.6_58.7_-0.0975_0.6487_0.7490_-0.0930_1.00) | [All gems](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.100_-7.8_-5.9&cam3d=-7.8_5385.6_58.7_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| **Gen-0 Diamonds** | 40 | [View](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&zAxis=rarity&cam2d=0.518_14.3_-73.5&cam3d=14.3_297.2_48.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&zAxis=rarity&cam2d=0.518_14.3_-73.5&cam3d=14.3_297.2_48.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.518_14.3_-73.5&cam3d=14.3_297.2_48.1_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| **Liger** (single IIII trait) | 92 | [View](https://ck.innerlogics.com/?dataUrl=./examples/liger/liger.json&zAxis=rarity) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/liger/liger.json&zAxis=rarity) | |
 
 ### Historical Collections
 
-| Dataset | Kitties | View (cached) | View (API) |
-|---------|---------|---------------|------------|
-| **Dragon** (600 ETH kitty) | 3 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775) | [API](https://ck.innerlogics.com/?kitties=896775&selected=896775) |
-| **Dragon Extended** | 76 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) | |
-| **Founders** (#1, #4, #18) | 10 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json) | [API](https://ck.innerlogics.com/?kitties=1,4,18) |
-| **Founders Extended** | 26 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_extended.json) | |
-| **Founders Connected** | 6 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json) | Filtered to connected nodes |
-| **Holidays** (Mistletoe, Santa) | 13 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/holidays/holidays.json) | [API](https://ck.innerlogics.com/?kitties=174756,275808) |
-| **Milestones** (#100k, #500k) | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json) | [API](https://ck.innerlogics.com/?kitties=100000,500000) |
-| **Milestones 1M** | 43 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones1M.json) | |
+| Dataset | Kitties | View (cached) | 3D View | View (API) |
+|---------|---------|---------------|---------|------------|
+| **Dragon** (600 ETH kitty) | 3 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity) | [API](https://ck.innerlogics.com/?kitties=896775&selected=896775) |
+| **Dragon Extended** | 76 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity) | |
+| **Founders** (#1, #4, #18) | 10 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation) | [API](https://ck.innerlogics.com/?kitties=1,4,18) |
+| **Founders Extended** | 26 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_extended.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_extended.json&zAxis=generation) | |
+| **Founders Connected** | 6 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_connected.json&zAxis=generation) | Filtered to connected nodes |
+| **Holidays** (Mistletoe, Santa) | 13 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/holidays/holidays.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/holidays/holidays.json&zAxis=rarity) | [API](https://ck.innerlogics.com/?kitties=174756,275808) |
+| **Milestones** (#100k, #500k) | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/milestones/milestones.json&zAxis=rarity) | [API](https://ck.innerlogics.com/?kitties=100000,500000) |
+| **Milestones 1M** | 43 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones1M.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/milestones/milestones1M.json&zAxis=generation) | |
 
 ### Celebrity/Exclusive Collections
 
-| Dataset | Kitties | View | Description |
-|---------|---------|------|-------------|
-| **Exclusives** | 317 | [View](https://ck.innerlogics.com/?dataUrl=./examples/exclusives/exclusives.json) | Celebrity cats (Genesis, Vulcat, CZ, etc.) |
+| Dataset | Kitties | View | 3D View | Description |
+|---------|---------|------|---------|-------------|
+| **Exclusives** | 317 | [View](https://ck.innerlogics.com/?dataUrl=./examples/exclusives/exclusives.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/exclusives/exclusives.json&zAxis=generation) | Celebrity cats (Genesis, Vulcat, CZ, etc.) |
 
 ### Special Cat Types
 
-| Dataset | Kitties | View | Description |
-|---------|---------|------|-------------|
-| **Fancies** | 42 | [View](https://ck.innerlogics.com/?dataUrl=./examples/fancies/fancies.json) | Bred from specific trait recipes |
-| **Purrstiges** | 59 | [View](https://ck.innerlogics.com/?dataUrl=./examples/purrstiges/purrstiges.json) | Time-limited breeding events |
+| Dataset | Kitties | View | 3D View | Description |
+|---------|---------|------|---------|-------------|
+| **Fancies** | 42 | [View](https://ck.innerlogics.com/?dataUrl=./examples/fancies/fancies.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/fancies/fancies.json&zAxis=generation) | Bred from specific trait recipes |
+| **Purrstiges** | 59 | [View](https://ck.innerlogics.com/?dataUrl=./examples/purrstiges/purrstiges.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/purrstiges/purrstiges.json&zAxis=generation) | Time-limited breeding events |
 
 ### Personal Collection (nivs)
 
-| Dataset | Kitties | View |
-|---------|---------|------|
-| **Root Kitties** | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs) |
-| **Full Parents** | 878 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs) ・ [Gen 0-5](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&genMin=0&genMax=5) |
-| **Full + Children** | 894 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs) |
-| **Matron Line** | 70 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs) |
-| **Sire Line** | 51 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs) |
-| **Shortest Path** | 55 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs) |
+| Dataset | Kitties | View | 3D View |
+|---------|---------|------|---------|
+| **Root Kitties** | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation) |
+| **Full Parents** | 878 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs) ・ [Gen 0-5](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&genMin=0&genMax=5) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation) |
+| **Full + Children** | 894 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation) |
+| **Matron Line** | 70 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs&zAxis=generation) |
+| **Sire Line** | 51 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs&zAxis=generation) |
+| **Shortest Path** | 55 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&zAxis=generation) |
 
 ### Shortest Path Examples
 
 See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 
-| Dataset | Description | View |
-|---------|-------------|------|
-| **Holiday Fancies** | Mistletoe → Santa Claws path | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808) |
-| **Nivs + Dragon** | Personal cats connecting to Dragon | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775) |
-| **Dragon Ancestry** | Hover to see paths from Dragon (31 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true) |
-| **Nivs Ancestry** | Hover to see paths between nivs cats (55 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&selected=149343&shortestPath=true) |
+| Dataset | Description | View | 3D View |
+|---------|-------------|------|---------|
+| **Holiday Fancies** | Mistletoe → Santa Claws path | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&zAxis=rarity&cam2d=0.100_1.5_-4.6&cam3d=1.5_6845.3_63.2_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&zAxis=rarity&cam2d=0.100_1.5_-4.6&cam3d=1.5_6845.3_63.2_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| **Nivs + Dragon** | Personal cats connecting to Dragon | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775&zAxis=rarity) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775&zAxis=rarity) |
+| **Dragon Ancestry** | Hover to see paths from Dragon (31 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true&zAxis=rarity&cam3d=6.6_311.1_45.0_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true&zAxis=rarity&cam3d=6.6_311.1_45.0_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| **Nivs Ancestry** | Hover to see paths between nivs cats (55 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&selected=149343&shortestPath=true&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&selected=149343&shortestPath=true&zAxis=generation) |
 
 ---
 
@@ -86,7 +86,7 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 
 ## Tier IIII Kitties (`tier_iiii/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json)** ・ [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&zAxis=rarity&cam2d=0.250_-1.6_-4.2&cam3d=-1.6_1104.2_60.7_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/tier_iiii/tier_iiii.json&zAxis=rarity&cam2d=0.250_-1.6_-4.2&cam3d=-1.6_1104.2_60.7_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [Diamond gems only](https://ck.innerlogics.com/?dataUrl=./examples/tier_iiii/tier_iiii.json&mewtations=diamond&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.250_-1.6_-4.2&cam3d=-1.6_1104.2_60.7_-0.0975_0.6487_0.7490_-0.0930_1.00)
 
 The rarest mewtation tier. Only ~0.1% of all CryptoKitties have Tier IIII dominant traits.
 
@@ -114,7 +114,7 @@ The rarest mewtation tier. Only ~0.1% of all CryptoKitties have Tier IIII domina
 
 ## Tier III Kitties (`tier_iii/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json)** ・ [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&zAxis=rarity&cam2d=0.314_-6.8_-1.5&cam3d=-6.8_612.5_52.1_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/tier_iii/tier_iii.json&zAxis=rarity&cam2d=0.314_-6.8_-1.5&cam3d=-6.8_612.5_52.1_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [Gold+ gems](https://ck.innerlogics.com/?dataUrl=./examples/tier_iii/tier_iii.json&mewtations=diamond,gold&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.314_-6.8_-1.5&cam3d=-6.8_612.5_52.1_-0.0975_0.6487_0.7490_-0.0930_1.00)
 
 Very rare mewtations, one tier below the rarest.
 
@@ -127,7 +127,7 @@ Very rare mewtations, one tier below the rarest.
 
 ## Diamond Gem Kitties (`diamonds/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json)** ・ [All gems highlighted](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&zAxis=rarity&cam2d=0.100_-7.8_-5.9&cam3d=-7.8_5385.6_58.7_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/diamonds/diamonds.json&zAxis=rarity&cam2d=0.100_-7.8_-5.9&cam3d=-7.8_5385.6_58.7_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [All gems highlighted](https://ck.innerlogics.com/?dataUrl=./examples/diamonds/diamonds.json&mewtations=all&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.100_-7.8_-5.9&cam3d=-7.8_5385.6_58.7_-0.0975_0.6487_0.7490_-0.0930_1.00)
 
 Kitties that were the **first to discover** a mewtation trait. These receive a diamond gem badge on CryptoKitties.
 
@@ -145,7 +145,7 @@ Kitties that were the **first to discover** a mewtation trait. These receive a d
 
 ## Liger Kitties (`liger/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/liger/liger.json)**
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/liger/liger.json&zAxis=rarity&cam2d=0.290_-5.5_-29.9&cam3d=-5.5_3213.3_736.5_0.7071_0.0000_0.0000_0.7071_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/liger/liger.json&zAxis=rarity&cam2d=0.290_-5.5_-29.9&cam3d=-5.5_3213.3_736.5_0.7071_0.0000_0.0000_0.7071_1.00)**
 
 Focused collection of kitties with the `liger` body trait (Tier IIII).
 
@@ -160,14 +160,14 @@ Focused collection of kitties with the `liger` body trait (Tier IIII).
 
 ## Dragon Kitty (`dragon/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775)** ・ [API](https://ck.innerlogics.com/?kitties=896775&selected=896775)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [API](https://ck.innerlogics.com/?kitties=896775&selected=896775)
 
 Kitty #896775 - Sold for 600 ETH (~$170k at the time), the most expensive CryptoKitty ever.
 
-| File | Description | View |
-|------|-------------|------|
-| dragon.json | Original 3 kitties | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775) |
-| dragon_extended.json | Extended with 5 levels of ancestry | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) |
+| File | Description | View | 3D View |
+|------|-------------|------|---------|
+| dragon.json | Original 3 kitties | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity) |
+| dragon_extended.json | Extended with 5 levels of ancestry | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00) |
 
 **Notable traits:** dragonwings (wild), secretgarden (environment)
 
@@ -175,15 +175,15 @@ Kitty #896775 - Sold for 600 ETH (~$170k at the time), the most expensive Crypto
 
 ## Founders (`founders/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json)** ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json&zAxis=generation)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation)** ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
 
 The original CryptoKitties founders.
 
-| File | Description | View |
-|------|-------------|------|
-| founders.json | Genesis (#1), Fluffy (#4), #18 with children | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json) |
-| founders_extended.json | Extended with more founder cats (26) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_extended.json) |
-| founders_connected.json | Filtered to connected nodes only (6) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json) |
+| File | Description | View | 3D View |
+|------|-------------|------|---------|
+| founders.json | Genesis (#1), Fluffy (#4), #18 with children | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation) |
+| founders_extended.json | Extended with more founder cats (26) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_extended.json&zAxis=generation&cam2d=0.518_17.9_-128.9&cam3d=17.9_1495.7_438.3_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_extended.json&zAxis=generation&cam2d=0.518_17.9_-128.9&cam3d=17.9_1495.7_438.3_0.7071_0.0000_0.0000_0.7071_1.00) |
+| founders_connected.json | Filtered to connected nodes only (6) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_connected.json&zAxis=generation) |
 
 **Root Kitties:**
 - #1 Genesis - The first CryptoKitty ever ([View](https://ck.innerlogics.com/?kitties=1))
@@ -194,7 +194,7 @@ The original CryptoKitties founders.
 
 ## Holidays (`holidays/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/holidays/holidays.json)** ・ [API](https://ck.innerlogics.com/?kitties=174756,275808)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/holidays/holidays.json&zAxis=rarity&cam2d=1.887_37.9_-186.4&cam3d=37.9_208.9_33.3_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/holidays/holidays.json&zAxis=rarity&cam2d=1.887_37.9_-186.4&cam3d=37.9_208.9_33.3_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [API](https://ck.innerlogics.com/?kitties=174756,275808)
 
 Christmas and seasonal themed kitties.
 
@@ -206,14 +206,14 @@ Christmas and seasonal themed kitties.
 
 ## Milestones (`milestones/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json)** ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json&zAxis=rarity&cam2d=1.195_28.9_-181.5&cam3d=28.9_285.2_44.9_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/milestones/milestones.json&zAxis=rarity&cam2d=1.195_28.9_-181.5&cam3d=28.9_285.2_44.9_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [API](https://ck.innerlogics.com/?kitties=100000,500000)
 
 Kitties at significant ID milestones.
 
-| File | Description | View |
-|------|-------------|------|
-| milestones.json | #100000, #200000 with parents/children | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json) |
-| milestones1M.json | Extended to #1000000 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones1M.json) |
+| File | Description | View | 3D View |
+|------|-------------|------|---------|
+| milestones.json | #100000, #200000 with parents/children | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones.json&zAxis=rarity&cam2d=1.195_28.9_-181.5&cam3d=28.9_285.2_44.9_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/milestones/milestones.json&zAxis=rarity&cam2d=1.195_28.9_-181.5&cam3d=28.9_285.2_44.9_-0.0975_0.6487_0.7490_-0.0930_1.00) |
+| milestones1M.json | Extended to #1000000 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/milestones/milestones1M.json&zAxis=generation&cam2d=0.900_14.3_-71.1&cam3d=14.3_1241.4_494.6_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/milestones/milestones1M.json&zAxis=generation&cam2d=0.900_14.3_-71.1&cam3d=14.3_1241.4_494.6_0.7071_0.0000_0.0000_0.7071_1.00) |
 
 **Root Kitties:**
 - Rudiger (#100000) ([View](https://ck.innerlogics.com/?kitties=100000))
@@ -223,18 +223,18 @@ Kitties at significant ID milestones.
 
 ## Nivs Collection (`nivs/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs)**
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation&cam2d=1.683_28.9_-181.5&cam3d=28.9_895.0_232.9_0.7071_0.0000_0.0000_0.7071_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation&cam2d=1.683_28.9_-181.5&cam3d=28.9_895.0_232.9_0.7071_0.0000_0.0000_0.7071_1.00)**
 
 Personal collection with complete ancestry traced to Gen 0.
 
-| File | Kitties | View |
-|------|---------|------|
-| nivs.json | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs) |
-| nivs_full_parents.json | 878 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs) |
-| nivs_full_parents_plus_one_child.json | 894 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs) |
-| nivs_matron_line.json | 70 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs) |
-| nivs_sire_line.json | 51 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs) |
-| nivs_shortest_path.json | 55 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs) |
+| File | Kitties | View | 3D View |
+|------|---------|------|---------|
+| nivs.json | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation) |
+| nivs_full_parents.json | 878 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation) |
+| nivs_full_parents_plus_one_child.json | 894 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation) |
+| nivs_matron_line.json | 70 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs&zAxis=generation&cam2d=0.454_5.8_-32.2&cam3d=5.8_1967.5_497.7_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs&zAxis=generation&cam2d=0.454_5.8_-32.2&cam3d=5.8_1967.5_497.7_0.7071_0.0000_0.0000_0.7071_1.00) |
+| nivs_sire_line.json | 51 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs&zAxis=generation&cam2d=0.821_12.7_-58.0&cam3d=12.7_1328.2_514.1_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs&zAxis=generation&cam2d=0.821_12.7_-58.0&cam3d=12.7_1328.2_514.1_0.7071_0.0000_0.0000_0.7071_1.00) |
+| nivs_shortest_path.json | 55 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&zAxis=generation&cam2d=1.056_3.0_-43.5&cam3d=3.0_1363.2_504.5_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&zAxis=generation&cam2d=1.056_3.0_-43.5&cam3d=3.0_1363.2_504.5_0.7071_0.0000_0.0000_0.7071_1.00) |
 
 **Filtering examples:**
 - [Gen 0-5 only](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&genMin=0&genMax=5)
@@ -244,7 +244,7 @@ Personal collection with complete ancestry traced to Gen 0.
 
 ## Gen-0 Diamonds (`gen0_diamonds/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json)** ・ [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&zAxis=rarity&cam2d=0.518_14.3_-73.5&cam3d=14.3_297.2_48.1_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&zAxis=rarity&cam2d=0.518_14.3_-73.5&cam3d=14.3_297.2_48.1_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [Diamond filter](https://ck.innerlogics.com/?dataUrl=./examples/gen0_diamonds/gen0_diamonds.json&mewtations=diamond&filterEdgeHighlight=true&zAxis=rarity&cam2d=0.518_14.3_-73.5&cam3d=14.3_297.2_48.1_-0.0975_0.6487_0.7490_-0.0930_1.00)
 
 Gen 0 kitties that were the **first to discover** mewtation traits (diamond gem discoverers). These are some of the most valuable CryptoKitties as they combine Gen 0 status with trait discovery.
 
@@ -256,7 +256,7 @@ Gen 0 kitties that were the **first to discover** mewtation traits (diamond gem 
 
 ## Exclusive/Celebrity Kitties (`exclusives/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/exclusives/exclusives.json)**
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/exclusives/exclusives.json&zAxis=generation&cam2d=0.100_0.6_-1.8&cam3d=0.6_213301.2_57.2_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/exclusives/exclusives.json&zAxis=generation&cam2d=0.100_0.6_-1.8&cam3d=0.6_213301.2_57.2_-0.0975_0.6487_0.7490_-0.0930_1.00)**
 
 Celebrity and exclusive cats from the KittyVerse - special cats created for promotions, partnerships, or given to notable individuals.
 
@@ -276,7 +276,7 @@ Celebrity and exclusive cats from the KittyVerse - special cats created for prom
 
 ## Fancy Cats (`fancies/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/fancies/fancies.json)**
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/fancies/fancies.json&zAxis=generation&cam2d=0.657_17.1_-66.1&cam3d=17.1_305.4_23.8_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/fancies/fancies.json&zAxis=generation&cam2d=0.657_17.1_-66.1&cam3d=17.1_305.4_23.8_-0.0975_0.6487_0.7490_-0.0930_1.00)**
 
 Fancy cats are special cats bred from specific trait combinations (recipes). Unlike exclusives, they don't have pre-assigned IDs - they're discovered by breeding the right traits together.
 
@@ -290,7 +290,7 @@ See `tools/data/kittyverse/fancies.json` for fancy recipes.
 
 ## Purrstige Cats (`purrstiges/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/purrstiges/purrstiges.json)**
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/purrstiges/purrstiges.json&zAxis=generation&cam2d=0.864_12.7_-41.4&cam3d=12.7_259.1_34.5_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/purrstiges/purrstiges.json&zAxis=generation&cam2d=0.864_12.7_-41.4&cam3d=12.7_259.1_34.5_-0.0975_0.6487_0.7490_-0.0930_1.00)**
 
 Purrstige cats are time-limited special cats that could only be bred during specific windows. They require both the right trait combinations AND breeding during the event period.
 

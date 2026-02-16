@@ -5,6 +5,20 @@ Calculate optimal 2D and 3D viewport parameters for example datasets.
 Usage: python3 tools/calculate_viewports.py
 
 Analyzes each linked example and outputs recommended cam2d and cam3d parameters.
+
+WORKFLOW:
+1. Run this script to get initial viewport estimates
+2. Load the example in the viewer (2D or 3D)
+3. Navigate to a better viewing angle if needed
+4. Click the "Permalink" button - this captures cam2d/cam3d params automatically
+5. Copy those params to the HTML examples and documentation
+
+Note: The calculated values are estimates based on simulated force-directed layouts.
+The actual viewer uses non-deterministic layouts, so manual tuning via Permalink
+usually produces better results. The script is useful for:
+- Getting initial starting points for new examples
+- Batch-checking all examples have reasonable viewports
+- Understanding the relative sizes and characteristics of datasets
 """
 
 import json
@@ -14,21 +28,42 @@ from pathlib import Path
 
 EXAMPLES_DIR = Path(__file__).parent.parent / "dist" / "examples"
 
-# Example datasets linked from the examples pane
+# Example datasets linked from the examples pane and NOTABLE_KITTIES.md
 EXAMPLES = [
+    # Historical Collections
     {"name": "Dragon", "file": "dragon/dragon_extended.json", "selected": 896775, "zAxis": "rarity"},
+    {"name": "Dragon (small)", "file": "dragon/dragon.json", "selected": 896775, "zAxis": "rarity"},
+    {"name": "Dragon Path", "file": "dragon/dragon_connected.json", "selected": 896775, "shortestPath": True, "zAxis": "rarity"},
     {"name": "Founders", "file": "founders/founders_children.json", "genMax": 0, "zAxis": "rarity"},
+    {"name": "Founders Extended", "file": "founders/founders_extended.json", "zAxis": "generation"},
+    {"name": "Founders Connected", "file": "founders/founders_connected.json", "zAxis": "generation"},
     {"name": "Milestones", "file": "milestones/milestones.json", "zAxis": "rarity"},
+    {"name": "Milestones 1M", "file": "milestones/milestones1M.json", "zAxis": "generation"},
     {"name": "Holidays", "file": "holidays/holidays.json", "zAxis": "rarity"},
+
+    # Special Cat Types
     {"name": "Fancies", "file": "fancies/fancies.json", "zAxis": "generation"},
     {"name": "Purrstiges", "file": "purrstiges/purrstiges.json", "zAxis": "generation"},
     {"name": "Exclusives", "file": "exclusives/exclusives.json", "zAxis": "generation"},
+
+    # Rare Mewtations
     {"name": "Tier III", "file": "tier_iii/tier_iii.json", "mewtations": "diamond,gold", "zAxis": "rarity"},
     {"name": "Tier IIII", "file": "tier_iiii/tier_iiii.json", "mewtations": "diamond", "zAxis": "rarity"},
     {"name": "Diamonds", "file": "diamonds/diamonds.json", "mewtations": "all", "zAxis": "rarity"},
     {"name": "Gen-0 Diamonds", "file": "gen0_diamonds/gen0_diamonds.json", "mewtations": "diamond", "zAxis": "rarity"},
+    {"name": "Liger", "file": "liger/liger.json", "zAxis": "rarity"},
+
+    # Shortest Path Examples
     {"name": "Holiday Fancies Path", "file": "shortest_path/holiday_fancies.json", "pathFrom": 174756, "pathTo": 275808, "zAxis": "rarity"},
-    {"name": "Dragon Path", "file": "dragon/dragon_connected.json", "selected": 896775, "shortestPath": True, "zAxis": "rarity"},
+    {"name": "Nivs + Dragon", "file": "shortest_path/nivs_plus_dragon.json", "pathFrom": 149343, "pathTo": 896775, "zAxis": "rarity"},
+
+    # Nivs Collection
+    {"name": "Nivs", "file": "nivs/nivs.json", "owner": "nivs", "zAxis": "generation"},
+    {"name": "Nivs Full Parents", "file": "nivs/nivs_full_parents.json", "owner": "nivs", "zAxis": "generation"},
+    {"name": "Nivs + Children", "file": "nivs/nivs_full_parents_plus_one_child.json", "owner": "nivs", "zAxis": "generation"},
+    {"name": "Nivs Matron Line", "file": "nivs/nivs_matron_line.json", "owner": "nivs", "zAxis": "generation"},
+    {"name": "Nivs Sire Line", "file": "nivs/nivs_sire_line.json", "owner": "nivs", "zAxis": "generation"},
+    {"name": "Nivs Shortest Path", "file": "nivs/nivs_shortest_path.json", "owner": "nivs", "selected": 149343, "shortestPath": True, "zAxis": "generation"},
 ]
 
 

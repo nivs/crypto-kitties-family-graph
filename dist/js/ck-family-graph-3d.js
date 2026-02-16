@@ -1364,120 +1364,6 @@ window.ViewportGizmo = ViewportGizmo;
     }
   }
 
-  // ===================== FLOATING FILTERS PANEL (EMBED MODE) =====================
-  function setupFloatingFiltersPanel() {
-    // Wire up floating filter controls to main filter controls
-    const floatingGenMin = $("floatingGenerationMin");
-    const floatingGenMax = $("floatingGenerationMax");
-    const mainGenMin = $("generationMin");
-    const mainGenMax = $("generationMax");
-
-    // Sync generation filters
-    if (floatingGenMin && mainGenMin) {
-      floatingGenMin.addEventListener("input", () => {
-        mainGenMin.value = floatingGenMin.value;
-        mainGenMin.dispatchEvent(new Event("input"));
-      });
-      mainGenMin.addEventListener("input", () => {
-        floatingGenMin.value = mainGenMin.value;
-      });
-    }
-
-    if (floatingGenMax && mainGenMax) {
-      floatingGenMax.addEventListener("input", () => {
-        mainGenMax.value = floatingGenMax.value;
-        mainGenMax.dispatchEvent(new Event("input"));
-      });
-      mainGenMax.addEventListener("input", () => {
-        floatingGenMax.value = mainGenMax.value;
-      });
-    }
-
-    // Sync mewtation filter buttons
-    ["All", "Diamond", "Gold", "Silver", "Bronze"].forEach(type => {
-      const floatingBtn = $(`floatingMewtationFilter${type}`);
-      const mainBtn = $(`mewtationFilter${type}`);
-      if (floatingBtn && mainBtn) {
-        floatingBtn.addEventListener("click", () => {
-          mainBtn.click();
-        });
-        // Observe main button class changes to sync visual state
-        const observer = new MutationObserver(() => {
-          if (mainBtn.classList.contains("active")) {
-            floatingBtn.classList.add("active");
-          } else {
-            floatingBtn.classList.remove("active");
-          }
-        });
-        observer.observe(mainBtn, { attributes: true, attributeFilter: ["class"] });
-      }
-    });
-
-    // Sync shortest path checkbox
-    const floatingPathMode = $("floatingShortestPathMode");
-    const mainPathMode = $("shortestPathMode");
-    if (floatingPathMode && mainPathMode) {
-      floatingPathMode.addEventListener("change", () => {
-        mainPathMode.checked = floatingPathMode.checked;
-        mainPathMode.dispatchEvent(new Event("change"));
-      });
-      mainPathMode.addEventListener("change", () => {
-        floatingPathMode.checked = mainPathMode.checked;
-      });
-    }
-
-    // Clear filters button
-    const floatingClearBtn = $("floatingClearFiltersBtn");
-    const mainClearBtn = $("clearFiltersBtn");
-    if (floatingClearBtn && mainClearBtn) {
-      floatingClearBtn.addEventListener("click", () => {
-        mainClearBtn.click();
-      });
-    }
-
-    // Sync Z-Axis selector
-    const floatingZAxisSelect = $("floatingZAxisSelect");
-    const mainZAxisSelect = $("zAxisSelect");
-    if (floatingZAxisSelect && mainZAxisSelect) {
-      floatingZAxisSelect.addEventListener("change", () => {
-        mainZAxisSelect.value = floatingZAxisSelect.value;
-        mainZAxisSelect.dispatchEvent(new Event("change"));
-      });
-      mainZAxisSelect.addEventListener("change", () => {
-        floatingZAxisSelect.value = mainZAxisSelect.value;
-      });
-      // Sync initial value
-      floatingZAxisSelect.value = mainZAxisSelect.value;
-    }
-
-    // Sync Settings checkboxes
-    const floatingPrefetch = $("floatingPrefetchChildren");
-    const mainPrefetch = $("prefetchChildren");
-    if (floatingPrefetch && mainPrefetch) {
-      floatingPrefetch.addEventListener("change", () => {
-        mainPrefetch.checked = floatingPrefetch.checked;
-        mainPrefetch.dispatchEvent(new Event("change"));
-      });
-      mainPrefetch.addEventListener("change", () => {
-        floatingPrefetch.checked = mainPrefetch.checked;
-      });
-      floatingPrefetch.checked = mainPrefetch.checked;
-    }
-
-    const floatingAutoConnect = $("floatingAutoConnect");
-    const mainAutoConnect = $("autoConnect");
-    if (floatingAutoConnect && mainAutoConnect) {
-      floatingAutoConnect.addEventListener("change", () => {
-        mainAutoConnect.checked = floatingAutoConnect.checked;
-        mainAutoConnect.dispatchEvent(new Event("change"));
-      });
-      mainAutoConnect.addEventListener("change", () => {
-        floatingAutoConnect.checked = mainAutoConnect.checked;
-      });
-      floatingAutoConnect.checked = mainAutoConnect.checked;
-    }
-  }
-
   // ===================== GRAPH INITIALIZATION =====================
   function initGraph() {
     const container = $("graph-container");
@@ -1583,6 +1469,92 @@ window.ViewportGizmo = ViewportGizmo;
     // Configure force simulation to increase node spacing
     graph.d3Force('link').distance(80); // Increase link distance from default ~30 to 80
     graph.d3Force('charge').strength(-120); // Increase repulsion from default -30 to -120
+
+    // Handle camera positioning when simulation has stabilized
+    let tickCount = 0;
+    const MIN_TICKS_FOR_CAMERA = 50; // Wait for simulation to settle
+    graph.onEngineTick(() => {
+      tickCount++;
+
+      // Case 1: Center on selected kitty (no explicit cam3d)
+      if (pendingCenterOnSelected && selectedNodeId && tickCount >= MIN_TICKS_FOR_CAMERA) {
+        const gData = graph.graphData();
+        const node = gData.nodes.find(n => n.id === selectedNodeId);
+        // Only proceed if node has been positioned by simulation
+        if (node && typeof node.x === 'number' && typeof node.y === 'number') {
+          pendingCenterOnSelected = false;
+          const distance = 200;
+          const camera = graph.camera();
+
+          // Camera above node looking down, up=+Z for proper kitty orientation
+          camera.up.set(0, 0, 1);
+          graph.cameraPosition(
+            { x: node.x, y: node.y + distance, z: node.z || 0 },
+            node,
+            1000
+          );
+          log("Camera centered on selected kitty (tick", tickCount, ")");
+        }
+      }
+
+      // Case 2: Apply explicit camera position from cam3d param
+      if (pendingCameraPos && tickCount >= MIN_TICKS_FOR_CAMERA) {
+        // For explicit cam3d, we can apply immediately but need node positions for controls.target
+        const gData = graph.graphData();
+        const hasPositions = gData.nodes.length === 0 ||
+          (gData.nodes[0] && typeof gData.nodes[0].x === 'number');
+
+        if (hasPositions) {
+          const camPos = pendingCameraPos;
+          pendingCameraPos = null; // Clear to prevent re-application
+
+          const camera = graph.camera();
+          const controls = graph.controls();
+
+          // Apply zoom if provided
+          if (camPos.zoom !== undefined) {
+            camera.zoom = camPos.zoom;
+            camera.updateProjectionMatrix();
+          }
+
+          // Set camera position
+          camera.position.set(camPos.x, camPos.y, camPos.z);
+
+          // Apply quaternion if provided (this fully defines orientation including roll)
+          if (camPos.quatW !== undefined) {
+            const quat = new THREE.Quaternion(camPos.quatX, camPos.quatY, camPos.quatZ, camPos.quatW);
+            camera.quaternion.copy(quat);
+
+            // Derive up vector from quaternion (transform local Y by quaternion)
+            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(quat);
+            camera.up.copy(up);
+          }
+
+          // Set controls target to selected node if we have one, otherwise look at origin
+          if (selectedNodeId) {
+            const node = gData.nodes.find(n => n.id === selectedNodeId);
+            if (node && typeof node.x === 'number') {
+              controls.target.set(node.x, node.y, node.z);
+            }
+          } else {
+            controls.target.set(0, 0, 0);
+          }
+
+          controls.update();
+          log("Camera position from query params applied (tick", tickCount, ")");
+
+          // Re-apply quaternion after controls.update() since it may override orientation
+          if (camPos.quatW !== undefined) {
+            requestAnimationFrame(() => {
+              const quat = new THREE.Quaternion(camPos.quatX, camPos.quatY, camPos.quatZ, camPos.quatW);
+              camera.quaternion.copy(quat);
+              camera.up.set(0, 1, 0).applyQuaternion(quat);
+              controls.update();
+            });
+          }
+        }
+      }
+    });
 
     // Allow full camera rotation (prevent gimbal lock at poles)
     const controls = graph.controls();
@@ -2014,8 +1986,8 @@ window.ViewportGizmo = ViewportGizmo;
       });
     }
 
-    // Z-axis selector
-    const zAxisSelect = $("zAxisSelect");
+    // Z-axis selector (floating panel)
+    const zAxisSelect = $("floatingZAxisSelect");
     if (zAxisSelect) {
       zAxisSelect.addEventListener("change", () => {
         zAxisMode = zAxisSelect.value;
@@ -2024,9 +1996,9 @@ window.ViewportGizmo = ViewportGizmo;
       });
     }
 
-    // Generation filter
-    const genMinInput = $("generationMin");
-    const genMaxInput = $("generationMax");
+    // Generation filter (floating panel)
+    const genMinInput = $("floatingGenerationMin");
+    const genMaxInput = $("floatingGenerationMax");
     const applyGenFilter = () => {
       const minVal = genMinInput ? genMinInput.value : "";
       const maxVal = genMaxInput ? genMaxInput.value : "";
@@ -2045,13 +2017,13 @@ window.ViewportGizmo = ViewportGizmo;
     if (genMinInput) genMinInput.addEventListener("input", applyGenFilter);
     if (genMaxInput) genMaxInput.addEventListener("input", applyGenFilter);
 
-    // Mewtation filter buttons
+    // Mewtation filter buttons (floating panel)
     const mewtationBtns = {
-      all: $("mewtationFilterAll"),
-      diamond: $("mewtationFilterDiamond"),
-      gold: $("mewtationFilterGold"),
-      silver: $("mewtationFilterSilver"),
-      bronze: $("mewtationFilterBronze")
+      all: $("floatingMewtationFilterAll"),
+      diamond: $("floatingMewtationFilterDiamond"),
+      gold: $("floatingMewtationFilterGold"),
+      silver: $("floatingMewtationFilterSilver"),
+      bronze: $("floatingMewtationFilterBronze")
     };
 
     const clearMewtationBtns = () => {
@@ -2095,16 +2067,14 @@ window.ViewportGizmo = ViewportGizmo;
       }
     });
 
-    // Clear filters button
-    const clearFiltersBtn = $("clearFiltersBtn");
+    // Clear filters button (floating panel)
+    const clearFiltersBtn = $("floatingClearFiltersBtn");
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener("click", () => {
         // Clear generation filters
         generationHighlightActive = false;
         generationRangeMin = null;
         generationRangeMax = null;
-        const genMinInput = $("generationMin");
-        const genMaxInput = $("generationMax");
         if (genMinInput) genMinInput.value = "";
         if (genMaxInput) genMaxInput.value = "";
 
@@ -2115,7 +2085,7 @@ window.ViewportGizmo = ViewportGizmo;
 
         // Clear shortest path
         shortestPathMode = false;
-        const shortestPathToggle = $("shortestPathMode");
+        const shortestPathToggle = $("floatingShortestPathMode");
         if (shortestPathToggle) shortestPathToggle.checked = false;
         lockedPathToId = null;
         clearPathHighlight();
@@ -2125,8 +2095,8 @@ window.ViewportGizmo = ViewportGizmo;
       });
     }
 
-    // Shortest path mode
-    const shortestPathToggle = $("shortestPathMode");
+    // Shortest path mode (floating panel)
+    const shortestPathToggle = $("floatingShortestPathMode");
     if (shortestPathToggle) {
       shortestPathToggle.addEventListener("change", () => {
         shortestPathMode = shortestPathToggle.checked;
@@ -2135,56 +2105,6 @@ window.ViewportGizmo = ViewportGizmo;
           clearPathHighlight();
         }
         log("Shortest path mode:", shortestPathMode);
-      });
-    }
-
-    // Settings panel toggle
-    const settingsToggle = $("settingsToggle");
-    const settingsBody = $("settingsBody");
-    if (settingsToggle && settingsBody) {
-      settingsToggle.addEventListener("click", () => {
-        const collapsed = settingsToggle.classList.toggle("collapsed");
-        settingsBody.style.display = collapsed ? "none" : "block";
-      });
-    }
-
-    // Examples panel toggle
-    const examplesToggle = $("examplesToggle");
-    const examplesBody = $("examplesBody");
-    if (examplesToggle && examplesBody) {
-      examplesToggle.addEventListener("click", () => {
-        const collapsed = examplesToggle.classList.toggle("collapsed");
-        examplesBody.style.display = collapsed ? "none" : "block";
-      });
-    }
-
-    // Selected Kitty panel toggle
-    const selectedToggle = $("selectedToggle");
-    const selectedBody = $("selectedBody");
-    if (selectedToggle && selectedBody) {
-      selectedToggle.addEventListener("click", () => {
-        const collapsed = selectedToggle.classList.toggle("collapsed");
-        selectedBody.style.display = collapsed ? "none" : "block";
-      });
-    }
-
-    // Z-Axis panel toggle
-    const zAxisToggle = $("zAxisToggle");
-    const zAxisBody = $("zAxisBody");
-    if (zAxisToggle && zAxisBody) {
-      zAxisToggle.addEventListener("click", () => {
-        const collapsed = zAxisToggle.classList.toggle("collapsed");
-        zAxisBody.style.display = collapsed ? "none" : "block";
-      });
-    }
-
-    // Filters panel toggle
-    const filtersToggle = $("filtersToggle");
-    const filtersBody = $("filtersBody");
-    if (filtersToggle && filtersBody) {
-      filtersToggle.addEventListener("click", () => {
-        const collapsed = filtersToggle.classList.toggle("collapsed");
-        filtersBody.style.display = collapsed ? "none" : "block";
       });
     }
 
@@ -2588,6 +2508,7 @@ window.ViewportGizmo = ViewportGizmo;
   let pendingPathFrom = null;
   let pendingPathTo = null;
   let pendingCameraPos = null;
+  let pendingCenterOnSelected = false; // Set true to center camera when simulation finishes
 
   function parseQueryParams() {
     const params = new URLSearchParams(location.search);
@@ -2600,7 +2521,7 @@ window.ViewportGizmo = ViewportGizmo;
     const shortestPathParam = params.get("shortestPath");
     if (shortestPathParam === "true") {
       shortestPathMode = true;
-      const toggle = $("shortestPathMode");
+      const toggle = $("floatingShortestPathMode");
       if (toggle) toggle.checked = true;
     }
 
@@ -2655,8 +2576,8 @@ window.ViewportGizmo = ViewportGizmo;
       generationHighlightActive = true;
       generationRangeMin = genMinParam ? Number(genMinParam) : null;
       generationRangeMax = genMaxParam ? Number(genMaxParam) : null;
-      const genMinInput = $("generationMin");
-      const genMaxInput = $("generationMax");
+      const genMinInput = $("floatingGenerationMin");
+      const genMaxInput = $("floatingGenerationMax");
       if (genMinInput && genMinParam) genMinInput.value = genMinParam;
       if (genMaxInput && genMaxParam) genMaxInput.value = genMaxParam;
     }
@@ -2667,28 +2588,21 @@ window.ViewportGizmo = ViewportGizmo;
       mewtationHighlightActive = true;
       if (mewtationsParam === "all") {
         highlightedGemTypes = new Set();
-        const allBtn = $("mewtationFilterAll");
+        const allBtn = $("floatingMewtationFilterAll");
         if (allBtn) allBtn.classList.add("active");
       } else {
         const types = mewtationsParam.split(",").map(s => s.trim().toLowerCase());
         highlightedGemTypes = new Set(types);
         types.forEach(t => {
-          const btn = $(`mewtationFilter${t.charAt(0).toUpperCase() + t.slice(1)}`);
+          const btn = $(`floatingMewtationFilter${t.charAt(0).toUpperCase() + t.slice(1)}`);
           if (btn) btn.classList.add("active");
         });
       }
     }
 
-    // Examples panel auto-open
+    // Examples panel auto-open (floating panel accordion)
     const examplesParam = params.get("examples");
     if (examplesParam === "open") {
-      const examplesToggle = $("examplesToggle");
-      const examplesBody = $("examplesBody");
-      if (examplesToggle && examplesBody) {
-        examplesToggle.classList.remove("collapsed");
-        examplesBody.style.display = "block";
-      }
-      // Also open floating panel examples accordion
       const floatingExamplesSection = $("floatingExamplesToggle")?.closest(".accordion-section");
       if (floatingExamplesSection) {
         floatingExamplesSection.classList.remove("collapsed");
@@ -2699,7 +2613,7 @@ window.ViewportGizmo = ViewportGizmo;
     const zAxisParam = params.get("zAxis");
     if (zAxisParam && ["generation", "birthday", "rarity", "flat"].includes(zAxisParam)) {
       zAxisMode = zAxisParam;
-      const zAxisSelect = $("zAxisSelect");
+      const zAxisSelect = $("floatingZAxisSelect");
       if (zAxisSelect) zAxisSelect.value = zAxisParam;
     }
 
@@ -2733,34 +2647,9 @@ window.ViewportGizmo = ViewportGizmo;
       selectedNodeId = pendingSelectedId;
       showSelected(pendingSelectedId);
 
-      // Focus camera on selected node after a short delay (unless custom camera position is set)
+      // Request camera centering when simulation finishes (unless custom camera position is set)
       if (!pendingCameraPos) {
-        setTimeout(() => {
-          const node = graphData.nodes.find(n => n.id === pendingSelectedId);
-          if (node && graph) {
-            const currentCamPos = graph.cameraPosition();
-            const distance = 200;
-
-            // Calculate direction from node to current camera
-            const dx = currentCamPos.x - (node.x || 0);
-            const dy = currentCamPos.y - (node.y || 0);
-            const dz = currentCamPos.z - (node.z || 0);
-            const currentDist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-
-            // Normalize direction and scale to desired distance
-            const scale = distance / currentDist;
-
-            // Set camera up vector to prevent upside-down orientation
-            const camera = graph.camera();
-            camera.up.set(0, 1, 0);
-
-            graph.cameraPosition(
-              { x: (node.x || 0) + dx * scale, y: (node.y || 0) + dy * scale, z: (node.z || 0) + dz * scale },
-              node,
-              1000
-            );
-          }
-        }, 500);
+        pendingCenterOnSelected = true;
       }
     }
 
@@ -2769,7 +2658,7 @@ window.ViewportGizmo = ViewportGizmo;
       shortestPathMode = true;
       selectedNodeId = pendingPathFrom;
       lockedPathToId = pendingPathTo;
-      const toggle = $("shortestPathMode");
+      const toggle = $("floatingShortestPathMode");
       if (toggle) toggle.checked = true;
       setTimeout(() => {
         highlightPath(pendingPathFrom, pendingPathTo);
@@ -2777,61 +2666,7 @@ window.ViewportGizmo = ViewportGizmo;
       }, 600);
     }
 
-    // Apply pending camera position if set (after selection/path to allow animation)
-    if (pendingCameraPos && graph) {
-      setTimeout(() => {
-        const camera = graph.camera();
-        const controls = graph.controls();
-
-        // Apply zoom if provided
-        if (pendingCameraPos.zoom !== undefined) {
-          camera.zoom = pendingCameraPos.zoom;
-          camera.updateProjectionMatrix();
-        }
-
-        // Set camera position
-        camera.position.set(pendingCameraPos.x, pendingCameraPos.y, pendingCameraPos.z);
-
-        // Apply quaternion if provided (this fully defines orientation including roll)
-        if (pendingCameraPos.quatW !== undefined) {
-          const quat = new THREE.Quaternion(
-            pendingCameraPos.quatX,
-            pendingCameraPos.quatY,
-            pendingCameraPos.quatZ,
-            pendingCameraPos.quatW
-          );
-          camera.quaternion.copy(quat);
-
-          // Derive up vector from quaternion (transform local Y by quaternion)
-          const up = new THREE.Vector3(0, 1, 0).applyQuaternion(quat);
-          camera.up.copy(up);
-        }
-
-        // Set controls target to selected node if we have one
-        if (pendingSelectedId) {
-          const node = graphData.nodes.find(n => n.id === pendingSelectedId);
-          if (node && node.x !== undefined) {
-            controls.target.set(node.x, node.y, node.z);
-          }
-        }
-
-        log("Camera position from query params:", pendingCameraPos);
-
-        // Update controls without letting it override our orientation
-        requestAnimationFrame(() => {
-          if (pendingCameraPos.quatW !== undefined) {
-            const quat = new THREE.Quaternion(
-              pendingCameraPos.quatX,
-              pendingCameraPos.quatY,
-              pendingCameraPos.quatZ,
-              pendingCameraPos.quatW
-            );
-            camera.quaternion.copy(quat);
-            camera.up.set(0, 1, 0).applyQuaternion(quat);
-          }
-        });
-      }, 700);
-    }
+    // Camera positioning is handled by onEngineTick when simulation stabilizes
 
     // Apply filters after data is loaded
     applyFilters();
@@ -2850,7 +2685,6 @@ window.ViewportGizmo = ViewportGizmo;
 
     // Setup floating panel controls (used in both modes for 3D viewer)
     setupFloatingPanel(showSwitcher, isEmbedMode);
-    setupFloatingFiltersPanel();
 
     // Set up CKGraph callbacks for state synchronization
     CKGraph.onDataLoaded = () => {

@@ -37,6 +37,7 @@ window.ViewportGizmo = ViewportGizmo;
   let generationRangeMax = null;
   let mewtationHighlightActive = false;
   let highlightedGemTypes = new Set();
+  let filterEdgeHighlight = false;
   let myKittyIds = new Set();
   let loadedFromDataUrl = null;
   let foreignCam2d = null; // Store 2D viewport for round-trip preservation
@@ -501,18 +502,43 @@ window.ViewportGizmo = ViewportGizmo;
   }
 
   function getLinkOpacity(link) {
-    const filterActive = generationHighlightActive || mewtationHighlightActive;
-    if (!filterActive) return 0.6;
+    // Note: linkOpacity may not work reliably in 3d-force-graph
+    // We use linkColor with darkening instead (see getLinkColor)
+    return 0.6;
+  }
 
-    const sourceNode = graphData.nodes.find(n => n.id === (typeof link.source === "object" ? link.source.id : link.source));
-    const targetNode = graphData.nodes.find(n => n.id === (typeof link.target === "object" ? link.target.id : link.target));
+  function getLinkColor(link) {
+    // Priority: path highlighting > filter edge highlighting > default
 
-    if (sourceNode && targetNode) {
-      const sourceMatch = CKGraph.doesKittyMatchFilters(sourceNode.kitty);
-      const targetMatch = CKGraph.doesKittyMatchFilters(targetNode.kitty);
-      if (sourceMatch && targetMatch) return 0.8;
+    // Path highlighting takes priority
+    if (highlightedPathLinks.size > 0) {
+      if (highlightedPathLinks.has(link)) {
+        return link.type === "matron" ? "#ff40a0" : "#40a0ff";
+      }
+      return darkenColor(link.color, 0.6);
     }
-    return 0.1;
+
+    // Filter edge highlighting (same style as shortest path mode)
+    const filterActive = generationHighlightActive || mewtationHighlightActive;
+    if (filterActive && filterEdgeHighlight) {
+      const srcId = Number(typeof link.source === "object" ? link.source.id : link.source);
+      const tgtId = Number(typeof link.target === "object" ? link.target.id : link.target);
+      const sourceNode = graphData.nodes.find(n => n.id === srcId);
+      const targetNode = graphData.nodes.find(n => n.id === tgtId);
+
+      if (sourceNode && targetNode) {
+        const sourceMatch = CKGraph.doesKittyMatchFilters(sourceNode.kitty);
+        const targetMatch = CKGraph.doesKittyMatchFilters(targetNode.kitty);
+        if (sourceMatch && targetMatch) {
+          // Brighten matching edges like shortest path mode
+          return link.type === "matron" ? "#ff40a0" : "#40a0ff";
+        }
+      }
+      // Dim non-matching edges like shortest path mode
+      return darkenColor(link.color, 0.6);
+    }
+
+    return link.color;
   }
 
   // ===================== TOOLTIP =====================
@@ -1761,10 +1787,10 @@ window.ViewportGizmo = ViewportGizmo;
     // Find links in path
     highlightedPathLinks = new Set();
     for (let i = 0; i < path.length - 1; i++) {
-      const a = path[i], b = path[i + 1];
+      const a = Number(path[i]), b = Number(path[i + 1]);
       for (const link of graphData.links) {
-        const srcId = typeof link.source === "object" ? link.source.id : link.source;
-        const tgtId = typeof link.target === "object" ? link.target.id : link.target;
+        const srcId = Number(typeof link.source === "object" ? link.source.id : link.source);
+        const tgtId = Number(typeof link.target === "object" ? link.target.id : link.target);
         if ((srcId === a && tgtId === b) || (srcId === b && tgtId === a)) {
           highlightedPathLinks.add(link);
         }
@@ -1772,13 +1798,7 @@ window.ViewportGizmo = ViewportGizmo;
     }
 
     // Update link colors for path
-    graph.linkColor(link => {
-      if (highlightedPathLinks.has(link)) {
-        return link.type === "matron" ? "#ff40a0" : "#40a0ff";
-      }
-      return highlightedPath.size > 0 ? darkenColor(link.color, 0.6) : link.color;
-    });
-
+    graph.linkColor(getLinkColor);
     graph.linkWidth(link => highlightedPathLinks.has(link) ? 4 : 2);
     graph.refresh();
   }
@@ -1786,7 +1806,7 @@ window.ViewportGizmo = ViewportGizmo;
   function clearPathHighlight() {
     highlightedPath = new Set();
     highlightedPathLinks = new Set();
-    graph.linkColor(link => link.color);
+    graph.linkColor(getLinkColor);
     graph.linkWidth(2);
     graph.refresh();
   }
@@ -1809,10 +1829,115 @@ window.ViewportGizmo = ViewportGizmo;
   }
 
   // ===================== FILTER UPDATES =====================
+  function syncFiltersToCKGraph() {
+    // Sync local filter state to CKGraph for doesKittyMatchFilters()
+    CKGraph.generationHighlightActive = generationHighlightActive;
+    CKGraph.generationRangeMin = generationRangeMin;
+    CKGraph.generationRangeMax = generationRangeMax;
+    CKGraph.mewtationHighlightActive = mewtationHighlightActive;
+    CKGraph.highlightedGemTypes = highlightedGemTypes;
+  }
+
+  function getAvailableGenerations() {
+    const gens = new Set();
+    for (const k of kittyById.values()) {
+      if (typeof k.generation === "number") {
+        gens.add(k.generation);
+      }
+    }
+    return Array.from(gens).sort((a, b) => a - b);
+  }
+
+  function getAvailableMewtationGems() {
+    const gems = new Set();
+    for (const k of kittyById.values()) {
+      const kittyGems = getMewtationGems(k);
+      for (const gem of kittyGems) {
+        gems.add(gem.gem);
+      }
+    }
+    return gems;
+  }
+
+  function updateMewtationFilterButtons() {
+    const availableGems = getAvailableMewtationGems();
+    const hasAnyGems = availableGems.size > 0;
+
+    const mewtationBtns = {
+      all: $("floatingMewtationFilterAll"),
+      diamond: $("floatingMewtationFilterDiamond"),
+      gold: $("floatingMewtationFilterGold"),
+      silver: $("floatingMewtationFilterSilver"),
+      bronze: $("floatingMewtationFilterBronze")
+    };
+
+    // Enable/disable "All" button based on whether any gems exist
+    if (mewtationBtns.all) {
+      mewtationBtns.all.disabled = !hasAnyGems;
+    }
+
+    // Enable/disable individual gem buttons based on availability
+    ["diamond", "gold", "silver", "bronze"].forEach(gemType => {
+      const btn = mewtationBtns[gemType];
+      if (btn) {
+        btn.disabled = !availableGems.has(gemType);
+        // If button was active but gem type no longer available, deactivate it
+        if (btn.disabled && btn.classList.contains("active")) {
+          btn.classList.remove("active");
+        }
+      }
+    });
+
+    log("updateMewtationFilterButtons:", { available: Array.from(availableGems) });
+  }
+
+  function updateFilterControls() {
+    // Update generation range placeholders
+    const gens = getAvailableGenerations();
+    const minGen = gens.length > 0 ? Math.min(...gens) : 0;
+    const maxGen = gens.length > 0 ? Math.max(...gens) : 0;
+
+    const genMinInput = $("floatingGenerationMin");
+    const genMaxInput = $("floatingGenerationMax");
+
+    if (genMinInput) {
+      genMinInput.placeholder = `Min (${minGen})`;
+      genMinInput.min = minGen;
+    }
+    if (genMaxInput) {
+      genMaxInput.placeholder = `Max (${maxGen})`;
+      genMaxInput.max = maxGen;
+    }
+
+    log("updateFilterControls:", { generations: gens, minGen, maxGen });
+
+    // Update mewtation filter buttons
+    updateMewtationFilterButtons();
+  }
+
   function applyFilters() {
+    syncFiltersToCKGraph();
     if (graph) {
       graph.nodeOpacity(getNodeOpacity);
-      graph.linkOpacity(getLinkOpacity);
+      graph.linkColor(getLinkColor);
+      // Thicker edges between filtered nodes (like shortest path mode)
+      const filterActive = generationHighlightActive || mewtationHighlightActive;
+      if (filterActive && filterEdgeHighlight) {
+        graph.linkWidth(link => {
+          const srcId = Number(typeof link.source === "object" ? link.source.id : link.source);
+          const tgtId = Number(typeof link.target === "object" ? link.target.id : link.target);
+          const sourceNode = graphData.nodes.find(n => n.id === srcId);
+          const targetNode = graphData.nodes.find(n => n.id === tgtId);
+          if (sourceNode && targetNode) {
+            const sourceMatch = CKGraph.doesKittyMatchFilters(sourceNode.kitty);
+            const targetMatch = CKGraph.doesKittyMatchFilters(targetNode.kitty);
+            if (sourceMatch && targetMatch) return 4;
+          }
+          return 2;
+        });
+      } else {
+        graph.linkWidth(2);
+      }
       graph.refresh();
     }
   }
@@ -1845,6 +1970,8 @@ window.ViewportGizmo = ViewportGizmo;
         url += `&mewtations=${Array.from(highlightedGemTypes).join(",")}`;
       }
     }
+
+    if (filterEdgeHighlight) url += `&filterEdgeHighlight=true`;
 
     if (selectedNodeId) url += `&selected=${selectedNodeId}`;
     if (shortestPathMode) url += `&shortestPath=true`;
@@ -2083,6 +2210,11 @@ window.ViewportGizmo = ViewportGizmo;
         highlightedGemTypes.clear();
         clearMewtationBtns();
 
+        // Clear edge highlight
+        filterEdgeHighlight = false;
+        const edgeHighlightCheckbox = $("floatingFilterEdgeHighlight");
+        if (edgeHighlightCheckbox) edgeHighlightCheckbox.checked = false;
+
         // Clear shortest path
         shortestPathMode = false;
         const shortestPathToggle = $("floatingShortestPathMode");
@@ -2105,6 +2237,16 @@ window.ViewportGizmo = ViewportGizmo;
           clearPathHighlight();
         }
         log("Shortest path mode:", shortestPathMode);
+      });
+    }
+
+    // Filter edge highlight checkbox (floating panel)
+    const filterEdgeHighlightCheckbox = $("floatingFilterEdgeHighlight");
+    if (filterEdgeHighlightCheckbox) {
+      filterEdgeHighlightCheckbox.addEventListener("change", () => {
+        filterEdgeHighlight = filterEdgeHighlightCheckbox.checked;
+        applyFilters();
+        log("Filter edge highlight:", filterEdgeHighlight);
       });
     }
 
@@ -2600,6 +2742,24 @@ window.ViewportGizmo = ViewportGizmo;
       }
     }
 
+    // Filter edge highlight
+    const filterEdgeHighlightParam = params.get("filterEdgeHighlight");
+    if (filterEdgeHighlightParam === "true") {
+      filterEdgeHighlight = true;
+      const checkbox = $("floatingFilterEdgeHighlight");
+      if (checkbox) checkbox.checked = true;
+    }
+
+    // If filters are active from query params, sync to CKGraph and expand filter pane
+    if (generationHighlightActive || mewtationHighlightActive) {
+      syncFiltersToCKGraph();
+      // Expand the Filters accordion section
+      const filtersSection = $("floatingFiltersToggle")?.closest(".accordion-section");
+      if (filtersSection) {
+        filtersSection.classList.remove("collapsed");
+      }
+    }
+
     // Examples panel auto-open (floating panel accordion)
     const examplesParam = params.get("examples");
     if (examplesParam === "open") {
@@ -2707,6 +2867,9 @@ window.ViewportGizmo = ViewportGizmo;
         initGraph();
       }
       setStats();
+
+      // Update filter controls (generation range, available gems)
+      updateFilterControls();
 
       // Refresh selected panel if a kitty is selected (e.g., after expand)
       if (selectedNodeId && kittyById.has(selectedNodeId)) {

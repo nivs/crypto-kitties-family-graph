@@ -498,19 +498,26 @@ window.CKGraph = CKGraph;
 function buildAdjacency() {
   const adj = new Map();
   const add = (a, b) => {
-    if (!adj.has(a)) adj.set(a, new Set());
-    if (!adj.has(b)) adj.set(b, new Set());
-    adj.get(a).add(b);
-    adj.get(b).add(a);
+    // Ensure IDs are Numbers for consistent Map keys
+    const numA = Number(a);
+    const numB = Number(b);
+    if (!adj.has(numA)) adj.set(numA, new Set());
+    if (!adj.has(numB)) adj.set(numB, new Set());
+    adj.get(numA).add(numB);
+    adj.get(numB).add(numA);
   };
   for (const k of CKGraph.kittyById.values()) {
-    if (k.matron_id) add(k.id, k.matron_id);
-    if (k.sire_id) add(k.id, k.sire_id);
+    const id = Number(k.id);
+    if (k.matron_id) add(id, Number(k.matron_id));
+    if (k.sire_id) add(id, Number(k.sire_id));
   }
   return adj;
 }
 
 function findShortestPath(fromId, toId) {
+  // Ensure IDs are Numbers
+  fromId = Number(fromId);
+  toId = Number(toId);
   if (fromId === toId) return [fromId];
   const adj = buildAdjacency();
   if (!adj.has(fromId) || !adj.has(toId)) return [];

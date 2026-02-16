@@ -1771,44 +1771,21 @@
   let mewtationHighlightActive = false;
   let highlightedGemTypes = new Set(); // empty = all gems
 
-  // Combined filter matching - returns true if kitty matches ALL active filters
-  function doesKittyMatchAllFilters(k) {
-    if (!k) return false;
-
-    // Check generation filter
-    if (generationHighlightActive) {
-      if (typeof k.generation !== "number") return false;
-      const inRange =
-        (generationRangeMin === null || k.generation >= generationRangeMin) &&
-        (generationRangeMax === null || k.generation <= generationRangeMax);
-      if (!inRange) return false;
-    }
-
-    // Check mewtation filter
-    if (mewtationHighlightActive) {
-      const gems = getMewtationGems(k);
-      if (gems.length === 0) return false;
-      if (highlightedGemTypes.size > 0) {
-        // Must have at least one matching gem type
-        let hasMatchingGem = false;
-        for (const gem of gems) {
-          if (highlightedGemTypes.has(gem.gem)) {
-            hasMatchingGem = true;
-            break;
-          }
-        }
-        if (!hasMatchingGem) return false;
-      }
-    }
-
-    return true;
+  // Sync local filter state to CKGraph for doesKittyMatchFilters()
+  function syncFiltersToCKGraph() {
+    CKGraph.generationHighlightActive = generationHighlightActive;
+    CKGraph.generationRangeMin = generationRangeMin;
+    CKGraph.generationRangeMax = generationRangeMax;
+    CKGraph.mewtationHighlightActive = mewtationHighlightActive;
+    CKGraph.highlightedGemTypes = highlightedGemTypes;
   }
 
   // Get all kitty IDs that match the combined active filters
   function getFilteredKittyIds() {
+    syncFiltersToCKGraph();
     const matchingIds = new Set();
     for (const [id, k] of kittyById.entries()) {
-      if (doesKittyMatchAllFilters(k)) {
+      if (CKGraph.doesKittyMatchFilters(k)) {
         matchingIds.add(id);
       }
     }
@@ -2041,6 +2018,8 @@
     const filterActive = generationHighlightActive || mewtationHighlightActive;
     if (!filterActive) return null;
 
+    syncFiltersToCKGraph(); // Ensure CKGraph state is current
+
     const base = nodeBaseStyle.get(nid);
     if (!base) return null;
 
@@ -2055,7 +2034,7 @@
     }
 
     // Check if kitty matches all active filters
-    const matches = doesKittyMatchAllFilters(k);
+    const matches = CKGraph.doesKittyMatchFilters(k);
 
     if (matches) {
       // Determine border color based on active filters

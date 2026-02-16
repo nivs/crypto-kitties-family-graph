@@ -324,7 +324,8 @@ window.ViewportGizmo = ViewportGizmo;
       roughness: 0.7
     };
 
-    // Apply highlighting: path mode > owner highlight > trait/gem hover > filters
+    // Apply highlighting: path mode > trait/gem hover > owner highlight > filters
+    // (trait/gem hover takes priority over owner to allow temporary exploration)
     if (isInPath) {
       // Brighten nodes in the path with strong emissive glow
       const rgb = hexToRgb(colors.background);
@@ -336,6 +337,17 @@ window.ViewportGizmo = ViewportGizmo;
       materialConfig.emissive = new THREE.Color(0, 0, 0);
       materialConfig.emissiveIntensity = 0;
       materialConfig.color = new THREE.Color(0.25, 0.25, 0.25);
+    } else if (isTraitGemHighlighted || (node.id === selectedNodeId && traitGemHoverActive)) {
+      // Brighten matching nodes with glow during trait/gem hover
+      const rgb = hexToRgb(colors.background);
+      materialConfig.emissive = new THREE.Color(rgb.r / 255, rgb.g / 255, rgb.b / 255);
+      materialConfig.emissiveIntensity = node.id === selectedNodeId ? 0.3 : 0.35;
+      materialConfig.color = new THREE.Color(1, 1, 1);
+    } else if (isTraitGemDimmed) {
+      // Dim non-matching nodes during trait/gem hover
+      materialConfig.emissive = new THREE.Color(0, 0, 0);
+      materialConfig.emissiveIntensity = 0;
+      materialConfig.color = new THREE.Color(0.3, 0.3, 0.3);
     } else if (isOwnedByHighlightedOwner) {
       // Brighten owned kitties with blue-tinted glow
       const rgb = hexToRgb(colors.background);
@@ -347,17 +359,6 @@ window.ViewportGizmo = ViewportGizmo;
       materialConfig.emissive = new THREE.Color(0, 0, 0);
       materialConfig.emissiveIntensity = 0;
       materialConfig.color = new THREE.Color(0.3, 0.3, 0.3);
-    } else if (isTraitGemDimmed) {
-      // Dim non-matching nodes during trait/gem hover
-      materialConfig.emissive = new THREE.Color(0, 0, 0);
-      materialConfig.emissiveIntensity = 0;
-      materialConfig.color = new THREE.Color(0.3, 0.3, 0.3);
-    } else if (isTraitGemHighlighted || (node.id === selectedNodeId && traitGemHoverActive)) {
-      // Brighten matching nodes with glow during trait/gem hover
-      const rgb = hexToRgb(colors.background);
-      materialConfig.emissive = new THREE.Color(rgb.r / 255, rgb.g / 255, rgb.b / 255);
-      materialConfig.emissiveIntensity = node.id === selectedNodeId ? 0.3 : 0.35;
-      materialConfig.color = new THREE.Color(1, 1, 1);
     } else if (isDimmed) {
       // Darken by applying a gray color tint (lighter so kitty is still visible)
       materialConfig.color = new THREE.Color(0x555555);
@@ -508,7 +509,7 @@ window.ViewportGizmo = ViewportGizmo;
   }
 
   function getLinkColor(link) {
-    // Priority: path highlighting > owner highlighting > filter edge highlighting > default
+    // Priority: path highlighting > trait/gem hover > owner highlighting > filter edge highlighting > default
 
     // Path highlighting takes priority
     if (highlightedPathLinks.size > 0) {
@@ -516,6 +517,12 @@ window.ViewportGizmo = ViewportGizmo;
         return link.type === "matron" ? "#ff40a0" : "#40a0ff";
       }
       return darkenColor(link.color, 0.6);
+    }
+
+    // Trait/gem hover highlighting (uses link.color set by highlightByTrait/highlightByGemType)
+    // This allows temporary exploration even when owner mode is active
+    if (highlightedTraitGemNodes.size > 0) {
+      return link.color; // Already set by highlightByTrait/highlightByGemType
     }
 
     // Owner highlighting (same style as shortest path mode)

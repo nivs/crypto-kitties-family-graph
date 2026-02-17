@@ -235,10 +235,158 @@ Interesting - Mulberry and Sis share ancestor #1461 with Dragon. That kitty must
 | File | Description | Path Demo |
 |------|-------------|-----------|
 | `dragon_siblings.json` | Dragon + siblings | `pathFrom=896775&pathTo=2025731` |
+| `dragon_1461_connection.json` | Dragon's full ancestry tree (142 kitties) | `selected=896775&pathTo=1461` |
 | `founders_descendants.json` | #4 and #18 family trees | `pathFrom=4&pathTo=18` or descendants |
 | `holiday_fancies.json` | Mistletoe + Santa ancestry | `pathFrom=174756&pathTo=275808` |
 | `nivs_simpatico_mulberry.json` | Your two cats | `pathFrom=68976&pathTo=149343` |
-| `nivs_plus_dragon.json` | All your cats + Dragon | `pathFrom=149343&pathTo=896775` (via #1461) |
+| `nivs_plus_dragon.json` | All your cats + Dragon (full, 1034 kitties) | `pathFrom=149343&pathTo=896775` |
+| `nivs_dragon_cluster.json` | Distilled: nivs → #1461 → Dragon (34 kitties) | `pathFrom=149343&pathTo=896775` |
+
+---
+
+## 6. Dragon → #1461 Ancestry
+
+**The story:** Dragon (#896775) sold for 600 ETH in September 2018. Trace its ancestry and you'll find kitty #1461 ("PO-838356"), a Gen 0 born December 2, 2017 - four days after CryptoKitties launched.
+
+Nine generations later, #1461's genes are in the most expensive CryptoKitty ever sold.
+
+```bash
+cd tools
+source .venv/bin/activate
+
+# Fetch Dragon's full ancestry tree
+python3 trace_dragon_ancestry.py
+
+# Prune to minimize file size
+python3 prune_json.py ../dist/examples/shortest_path/dragon_1461_connection.json -v
+```
+
+Output:
+```
+Fetched 142 ancestors
+✓ #1461 found in Dragon's ancestry!
+
+Shortest path (10 generations):
+  896775 -> 894625 -> 892412 -> 891975 -> 888532 -> 888385 -> 885311 -> 842791 -> 770170 -> 1461
+
+By generation: {0: 56, 1: 29, 2: 16, 3: 10, 4: 10, 5: 8, 6: 6, 7: 4, 8: 2, 9: 1}
+```
+
+**Visualizer URLs:**
+- [Dragon's ancestry tree](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775)
+- [Highlight path to #1461](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775&shortestPath=true&pathTo=1461)
+- [3D view](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775)
+
+---
+
+## 7. Nivs → Dragon Cluster (Distilled)
+
+**The story:** Your kitties Mulberry (#149343) and Sis (#329987) share a common ancestor with Dragon (#896775) - the Gen 0 kitty #1461 ("PO-838356").
+
+This distilled dataset (34 kitties) shows just the connection paths without the noise of full ancestry trees (vs 1034 in the full dataset).
+
+**Paths:**
+- Dragon → #1461: 10 generations
+- Mulberry → #1461: 7 generations
+- Sis → #1461: 8 generations (Sis is Mulberry's child)
+
+```bash
+cd tools
+source .venv/bin/activate
+
+# Extract paths from existing full dataset (requires nivs_plus_dragon.json)
+python3 -c "
+import json
+from collections import deque
+
+with open('../dist/examples/shortest_path/nivs_plus_dragon.json') as f:
+    data = json.load(f)
+
+kitty_map = {k['id']: k for k in data['kitties']}
+your_ids = [124653, 129868, 148439, 149343, 236402, 248667, 329987, 58820, 68976]
+
+def get_path_to_ancestor(start, target):
+    queue = deque([(start, [start])])
+    visited = {start}
+    while queue:
+        current, path = queue.popleft()
+        if current == target:
+            return path
+        if current not in kitty_map:
+            continue
+        k = kitty_map[current]
+        for parent_id in [k.get('matron_id'), k.get('sire_id')]:
+            if parent_id and parent_id not in visited:
+                visited.add(parent_id)
+                queue.append((parent_id, path + [parent_id]))
+    return None
+
+include_ids = set(your_ids)
+for kid in [896775, 149343, 329987]:
+    path = get_path_to_ancestor(kid, 1461)
+    if path:
+        include_ids.update(path)
+
+# Add parents for cluster context
+for kid in your_ids:
+    if kid in kitty_map:
+        k = kitty_map[kid]
+        for parent_id in [k.get('matron_id'), k.get('sire_id')]:
+            if parent_id and parent_id in kitty_map:
+                include_ids.add(parent_id)
+
+output = {
+    'root_ids': your_ids + [896775],
+    'notable_ancestor': 1461,
+    'kitties': [k for k in data['kitties'] if k['id'] in include_ids]
+}
+
+with open('../dist/examples/shortest_path/nivs_dragon_cluster.json', 'w') as f:
+    json.dump(output, f, indent=2)
+print(f'Wrote {len(output[\"kitties\"])} kitties')
+"
+
+# Prune to minimize size
+python3 prune_json.py ../dist/examples/shortest_path/nivs_dragon_cluster.json -v
+```
+
+**Visualizer URLs:**
+- [Full cluster](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json)
+- [Mulberry → Dragon](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&pathFrom=149343&pathTo=896775)
+- [Sis → Dragon](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&pathFrom=329987&pathTo=896775)
+- [Focus on #1461](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&selected=1461)
+
+---
+
+## Tools Reference
+
+| Script | Purpose |
+|--------|---------|
+| `find_shortest_path.py` | Find shortest path between two groups of kitties (bidirectional BFS) |
+| `trace_dragon_ancestry.py` | Fetch Dragon's full ancestry tree, highlight #1461 |
+| `prune_json.py` | Remove unused fields from kitty data (90%+ size reduction) |
+| `prune_to_ancestors.py` | Filter to only ancestor kitties of root IDs |
+| `ck_fetch.py` | Fetch kitties with configurable parent/child depth |
+
+### find_shortest_path.py
+
+```bash
+# Between two kitty IDs
+python3 find_shortest_path.py --from-ids 1461,896775 --to-ids 50,1003
+
+# From IDs to an existing JSON file
+python3 find_shortest_path.py --from-ids 1461,896775 --to-json holiday_fancies.json
+
+# Between two JSON files
+python3 find_shortest_path.py --from-json group_a.json --to-json group_b.json
+
+# Export the connected graph
+python3 find_shortest_path.py --from-ids 1461 --to-json holiday_fancies.json --out connected.json -v
+```
+
+Options:
+- `--max-depth N` - Maximum generations to search (default: 50)
+- `-v` / `-vv` - Verbose output
 
 ---
 

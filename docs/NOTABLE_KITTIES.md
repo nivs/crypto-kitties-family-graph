@@ -22,6 +22,7 @@ Example datasets are in `dist/examples/` for testing and demonstrating the analy
 |---------|---------|---------------|---------|------------|
 | **Dragon** (600 ETH kitty) | 3 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity) | [API](https://ck.innerlogics.com/?kitties=896775&selected=896775) |
 | **Dragon Extended** | 76 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity) | |
+| **#1461** (Dragon's Gen 0 ancestor) | 142 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=1461) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=1461) | Born Dec 2, 2017 |
 | **Founders** (#1, #4, #18) | 10 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation) | [API](https://ck.innerlogics.com/?kitties=1,4,18) |
 | **Founders Extended** | 26 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_extended.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_extended.json&zAxis=generation) | |
 | **Founders Connected** | 6 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_connected.json&zAxis=generation) | Filtered to connected nodes |
@@ -60,7 +61,8 @@ See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed examples.
 | Dataset | Description | View | 3D View |
 |---------|-------------|------|---------|
 | **Holiday Fancies** | Mistletoe → Santa Claws path | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&zAxis=rarity&cam2d=0.100_1.5_-4.6&cam3d=1.5_6845.3_63.2_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/holiday_fancies.json&pathFrom=174756&pathTo=275808&zAxis=rarity&cam2d=0.100_1.5_-4.6&cam3d=1.5_6845.3_63.2_-0.0975_0.6487_0.7490_-0.0930_1.00) |
-| **Nivs + Dragon** | Personal cats connecting to Dragon | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775&zAxis=rarity) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775&zAxis=rarity) |
+| **Dragon → #1461** | Dragon's ancestry to Gen 0 #1461 (142 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775&shortestPath=true&pathTo=1461) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775) |
+| **Nivs → Dragon** | Personal cats connecting to Dragon via #1461 (34 kitties) | [View path](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&pathFrom=149343&pathTo=896775) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&pathFrom=149343&pathTo=896775) |
 | **Dragon Ancestry** | Hover to see paths from Dragon (31 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true&zAxis=rarity&cam3d=6.6_311.1_45.0_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_connected.json&selected=896775&shortestPath=true&zAxis=rarity&cam3d=6.6_311.1_45.0_-0.0975_0.6487_0.7490_-0.0930_1.00) |
 | **Nivs Ancestry** | Hover to see paths between nivs cats (55 kitties) | [View](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&selected=149343&shortestPath=true&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&selected=149343&shortestPath=true&zAxis=generation) |
 
@@ -170,6 +172,8 @@ Kitty #896775 - Sold for 600 ETH (~$170k at the time), the most expensive Crypto
 | dragon_extended.json | Extended with 5 levels of ancestry | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00) |
 
 **Notable traits:** dragonwings (wild), secretgarden (environment)
+
+**Notable ancestor:** #1461 ("PO-838356") - A Gen 0 kitty born December 2, 2017 (4 days after CryptoKitties launched). Dragon descends from #1461 through 10 generations. See [dragon_1461_connection.json](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775&shortestPath=true&pathTo=1461).
 
 ---
 

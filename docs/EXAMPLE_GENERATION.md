@@ -212,6 +212,69 @@ OUT=../dist/examples/shortest_path
 python3 ck_fetch.py --ids-file $OUT/nivs_plus_dragon_ids.txt --parents 20 -v --out $OUT/nivs_plus_dragon.json
 ```
 
+### Distilled Nivs → Dragon Cluster
+
+Extract just the paths connecting your cats to Dragon through common ancestor #1461:
+
+```bash
+OUT=../dist/examples/shortest_path
+
+# Extract paths from existing full dataset
+python3 -c "
+import json
+from collections import deque
+
+with open('$OUT/nivs_plus_dragon.json') as f:
+    data = json.load(f)
+
+kitty_map = {k['id']: k for k in data['kitties']}
+your_ids = [124653, 129868, 148439, 149343, 236402, 248667, 329987, 58820, 68976]
+
+def get_path_to_ancestor(start, target):
+    queue = deque([(start, [start])])
+    visited = {start}
+    while queue:
+        current, path = queue.popleft()
+        if current == target:
+            return path
+        if current not in kitty_map:
+            continue
+        k = kitty_map[current]
+        for parent_id in [k.get('matron_id'), k.get('sire_id')]:
+            if parent_id and parent_id not in visited:
+                visited.add(parent_id)
+                queue.append((parent_id, path + [parent_id]))
+    return None
+
+include_ids = set(your_ids)
+for kid in [896775, 149343, 329987]:
+    path = get_path_to_ancestor(kid, 1461)
+    if path:
+        include_ids.update(path)
+
+# Add parents of your kitties for cluster context
+for kid in your_ids:
+    if kid in kitty_map:
+        k = kitty_map[kid]
+        for parent_id in [k.get('matron_id'), k.get('sire_id')]:
+            if parent_id and parent_id in kitty_map:
+                include_ids.add(parent_id)
+
+output = {
+    'root_ids': your_ids + [896775],
+    'notable_ancestor': 1461,
+    'kitties': [k for k in data['kitties'] if k['id'] in include_ids]
+}
+
+with open('$OUT/nivs_dragon_cluster.json', 'w') as f:
+    json.dump(output, f, indent=2)
+print(f'Wrote {len(output[\"kitties\"])} kitties')
+"
+
+# Prune to minimize size
+python3 prune_json.py $OUT/nivs_dragon_cluster.json -v
+```
+
 See [SHORTEST_PATH.md](./SHORTEST_PATH.md) for detailed path-finding workflows.
 
 ---

@@ -83,6 +83,16 @@ def prune_kitty(kitty):
             if value is not None:
                 pruned[key] = value
 
+    # Extract parent IDs from nested objects if flat fields not present
+    if 'matron_id' not in pruned:
+        matron = kitty.get('matron')
+        if isinstance(matron, dict) and matron.get('id'):
+            pruned['matron_id'] = matron['id']
+    if 'sire_id' not in pruned:
+        sire = kitty.get('sire')
+        if isinstance(sire, dict) and sire.get('id'):
+            pruned['sire_id'] = sire['id']
+
     return pruned
 
 

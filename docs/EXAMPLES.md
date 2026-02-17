@@ -169,13 +169,15 @@ Mistletoe → Santa Claws
 
 ### Nivs + Dragon Path
 
-Personal collection connecting to Dragon
+Personal collection connecting to Dragon via common ancestor #1461
 
-**[View →](https://ck.innerlogics.com?dataUrl=./examples/shortest_path/nivs_plus_dragon.json)**
+**[View →](https://ck.innerlogics.com?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json)**
 
 **Variations:**
 
-- **[View path](https://ck.innerlogics.com?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775)**
+- **[Distilled cluster (34 kitties)](https://ck.innerlogics.com?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&pathFrom=149343&pathTo=896775)** - *Mulberry → Dragon path*
+- **[Full dataset (1034 kitties)](https://ck.innerlogics.com?dataUrl=./examples/shortest_path/nivs_plus_dragon.json&pathFrom=149343&pathTo=896775)**
+- **[Focus on #1461](https://ck.innerlogics.com?dataUrl=./examples/shortest_path/nivs_dragon_cluster.json&selected=1461)** - *The Gen 0 common ancestor*
 
 ---
 

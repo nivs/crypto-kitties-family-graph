@@ -168,26 +168,26 @@ Kitty #896775 - Sold for 600 ETH (~$170k at the time), the most expensive Crypto
 
 | File | Description | View | 3D View |
 |------|-------------|------|---------|
-| dragon.json | Original 3 kitties | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity) |
+| dragon.json | Original 3 kitties | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity&cam2d=2.000_50.3_-191.7&cam3d=50.3_17.4_601.2_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon.json&selected=896775&zAxis=rarity&cam2d=2.000_50.3_-191.7&cam3d=50.3_17.4_601.2_0.7071_0.0000_0.0000_0.7071_1.00) |
 | dragon_extended.json | Extended with 5 levels of ancestry | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/dragon/dragon_extended.json&selected=896775&zAxis=rarity&cam3d=-208.3_480.1_58.1_-0.0975_0.6487_0.7490_-0.0930_1.00) |
 
 **Notable traits:** dragonwings (wild), secretgarden (environment)
 
-**Notable ancestor:** #1461 ("PO-838356") - A Gen 0 kitty born December 2, 2017 (4 days after CryptoKitties launched). Dragon descends from #1461 through 10 generations. See [dragon_1461_connection.json](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775&shortestPath=true&pathTo=1461).
+**Notable ancestor:** #1461 ("PO-838356") - A Gen 0 kitty born December 2, 2017 (4 days after CryptoKitties launched). Dragon descends from #1461 through 10 generations. See [dragon_1461_connection.json](https://ck.innerlogics.com/?dataUrl=./examples/shortest_path/dragon_1461_connection.json&selected=896775&shortestPath=true&pathTo=1461&cam2d=0.831_4.0_-25.4&cam3d=4.0_1949.5_748.2_0.7071_0.0000_0.0000_0.7071_1.00).
 
 ---
 
 ## Founders (`founders/`)
 
-**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json&zAxis=generation)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation)** ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
+**[View in Graph](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json&zAxis=generation&cam2d=0.692_-6.6_-35.8&cam3d=-6.6_538.8_70.3_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ **[3D View](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation&cam2d=0.692_-6.6_-35.8&cam3d=-6.6_538.8_70.3_-0.0975_0.6487_0.7490_-0.0930_1.00)** ・ [API](https://ck.innerlogics.com/?kitties=1,4,18)
 
 The original CryptoKitties founders.
 
 | File | Description | View | 3D View |
 |------|-------------|------|---------|
-| founders.json | Genesis (#1), Fluffy (#4), #18 with children | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation) |
+| founders.json | Genesis (#1), Fluffy (#4), #18 with children | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders.json&zAxis=generation&cam2d=0.692_-6.6_-35.8&cam3d=-6.6_538.8_70.3_-0.0975_0.6487_0.7490_-0.0930_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders.json&zAxis=generation&cam2d=0.692_-6.6_-35.8&cam3d=-6.6_538.8_70.3_-0.0975_0.6487_0.7490_-0.0930_1.00) |
 | founders_extended.json | Extended with more founder cats (26) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_extended.json&zAxis=generation&cam2d=0.518_17.9_-128.9&cam3d=17.9_1495.7_438.3_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_extended.json&zAxis=generation&cam2d=0.518_17.9_-128.9&cam3d=17.9_1495.7_438.3_0.7071_0.0000_0.0000_0.7071_1.00) |
-| founders_connected.json | Filtered to connected nodes only (6) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_connected.json&zAxis=generation) |
+| founders_connected.json | Filtered to connected nodes only (6) | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/founders/founders_connected.json&zAxis=generation&cam2d=0.767_30.6_-242.2&cam3d=30.6_974.2_0.0_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/founders/founders_connected.json&zAxis=generation&cam2d=0.767_30.6_-242.2&cam3d=30.6_974.2_0.0_0.7071_0.0000_0.0000_0.7071_1.00) |
 
 **Root Kitties:**
 - #1 Genesis - The first CryptoKitty ever ([View](https://ck.innerlogics.com/?kitties=1))
@@ -233,16 +233,16 @@ Personal collection with complete ancestry traced to Gen 0.
 
 | File | Kitties | View | 3D View |
 |------|---------|------|---------|
-| nivs.json | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation) |
-| nivs_full_parents.json | 878 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation) |
-| nivs_full_parents_plus_one_child.json | 894 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation) |
+| nivs.json | 15 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation&cam2d=1.683_28.9_-181.5&cam3d=28.9_895.0_232.9_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs.json&owner=nivs&zAxis=generation&cam2d=1.683_28.9_-181.5&cam3d=28.9_895.0_232.9_0.7071_0.0000_0.0000_0.7071_1.00) |
+| nivs_full_parents.json | 878 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation&cam2d=0.100_8.6_3.9&cam3d=8.6_19441.8_833.0_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&zAxis=generation&cam2d=0.100_8.6_3.9&cam3d=8.6_19441.8_833.0_0.7071_0.0000_0.0000_0.7071_1.00) |
+| nivs_full_parents_plus_one_child.json | 894 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation&cam2d=0.100_9.0_4.3&cam3d=9.0_56827.4_991.4_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_full_parents_plus_one_child.json&owner=nivs&zAxis=generation&cam2d=0.100_9.0_4.3&cam3d=9.0_56827.4_991.4_0.7071_0.0000_0.0000_0.7071_1.00) |
 | nivs_matron_line.json | 70 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs&zAxis=generation&cam2d=0.454_5.8_-32.2&cam3d=5.8_1967.5_497.7_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_matron_line.json&owner=nivs&zAxis=generation&cam2d=0.454_5.8_-32.2&cam3d=5.8_1967.5_497.7_0.7071_0.0000_0.0000_0.7071_1.00) |
 | nivs_sire_line.json | 51 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs&zAxis=generation&cam2d=0.821_12.7_-58.0&cam3d=12.7_1328.2_514.1_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_sire_line.json&owner=nivs&zAxis=generation&cam2d=0.821_12.7_-58.0&cam3d=12.7_1328.2_514.1_0.7071_0.0000_0.0000_0.7071_1.00) |
 | nivs_shortest_path.json | 55 | [Cached](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&zAxis=generation&cam2d=1.056_3.0_-43.5&cam3d=3.0_1363.2_504.5_0.7071_0.0000_0.0000_0.7071_1.00) | [3D](https://ck.innerlogics.com/3d.html?dataUrl=./examples/nivs/nivs_shortest_path.json&owner=nivs&zAxis=generation&cam2d=1.056_3.0_-43.5&cam3d=3.0_1363.2_504.5_0.7071_0.0000_0.0000_0.7071_1.00) |
 
 **Filtering examples:**
-- [Gen 0-5 only](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&genMin=0&genMax=5)
-- [All mewtation gems](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&mewtations=all)
+- [Gen 0-5 only](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&genMin=0&genMax=5&cam2d=0.100_8.6_3.9&cam3d=8.6_19441.8_833.0_0.7071_0.0000_0.0000_0.7071_1.00)
+- [All mewtation gems](https://ck.innerlogics.com/?dataUrl=./examples/nivs/nivs_full_parents.json&owner=nivs&mewtations=all&cam2d=0.100_8.6_3.9&cam3d=8.6_19441.8_833.0_0.7071_0.0000_0.0000_0.7071_1.00)
 
 ---
 

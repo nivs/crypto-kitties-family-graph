@@ -3806,6 +3806,7 @@
     const embedViewer = $("embedViewer");
     const embedSwitcher = $("embedSwitcher");
     const embedViewport = $("embedViewport");
+    const embedActivate = $("embedActivate");
     const embedWidth = $("embedWidth");
     const embedHeight = $("embedHeight");
     const embedCodeOutput = $("embedCodeOutput");
@@ -3835,6 +3836,7 @@
       if (embedViewer) embedViewer.addEventListener("change", generateEmbedCode);
       if (embedSwitcher) embedSwitcher.addEventListener("change", generateEmbedCode);
       if (embedViewport) embedViewport.addEventListener("change", generateEmbedCode);
+      if (embedActivate) embedActivate.addEventListener("change", generateEmbedCode);
       if (embedWidth) embedWidth.addEventListener("input", generateEmbedCode);
       if (embedHeight) embedHeight.addEventListener("input", generateEmbedCode);
 
@@ -3860,6 +3862,7 @@
       const viewer = embedViewer.value;
       const showSwitcher = embedSwitcher.checked;
       const preserveViewport = embedViewport ? embedViewport.checked : false;
+      const requireClick = embedActivate ? embedActivate.checked : false;
       const width = embedWidth.value.trim();
       const height = embedHeight.value.trim();
 
@@ -3875,6 +3878,11 @@
       // Add switcher parameter if disabled
       if (!showSwitcher) {
         url.searchParams.set("switcher", "false");
+      }
+
+      // Add activate=click if requiring click to interact
+      if (requireClick) {
+        url.searchParams.set("activate", "click");
       }
 
       // Remove viewport parameters if not preserving
@@ -4252,6 +4260,7 @@
     applyDefaultsToUI();
     wireControls();
     preloadGemImages(); // Load mewtation gem images
+    CKGraph.setupActivateOverlay(); // Click-to-activate for embeds
 
     // Keyboard shortcuts
     const panAmount = 100;

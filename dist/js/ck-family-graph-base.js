@@ -1053,6 +1053,40 @@ function applyFilterParams(genMin, genMax, mewtations) {
   }
 }
 
+// ===================== CLICK-TO-ACTIVATE OVERLAY =====================
+// For embeds: show overlay requiring click before scroll/zoom works
+// Controlled by ?activate=click parameter
+
+function setupActivateOverlay() {
+  const params = new URLSearchParams(location.search);
+  const isEmbedMode = params.get("embed") === "true" || params.get("embed") === "1";
+  const activateMode = params.get("activate");
+
+  // Only show overlay in embed mode with activate=click
+  if (!isEmbedMode || activateMode !== "click") {
+    return;
+  }
+
+  // Create overlay
+  const overlay = document.createElement("div");
+  overlay.className = "ck-activate-overlay";
+  overlay.innerHTML = `
+    <div class="ck-activate-overlay-content">
+      <div class="icon">👆</div>
+      <div class="label">Click to interact</div>
+    </div>
+  `;
+
+  // Click handler
+  overlay.addEventListener("click", () => {
+    overlay.classList.add("is-hidden");
+    // Remove after transition
+    setTimeout(() => overlay.remove(), 200);
+  });
+
+  document.body.appendChild(overlay);
+}
+
 // ===================== EXPOSE FUNCTIONS VIA CKGRAPH =====================
 CKGraph.loadJsonObject = loadJsonObject;
 CKGraph.loadJsonFromUrl = loadJsonFromUrl;
@@ -1068,4 +1102,5 @@ CKGraph.clearTraitGemHighlight = clearTraitGemHighlight;
 CKGraph.highlightOwnerKitties = highlightOwnerKitties;
 CKGraph.generatePermalinkParams = generatePermalinkParams;
 CKGraph.parseCommonQueryParams = parseCommonQueryParams;
+CKGraph.setupActivateOverlay = setupActivateOverlay;
 

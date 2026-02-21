@@ -42,6 +42,7 @@ The `cam3d` parameter encodes the full 3D camera state:
 |-----------|-------------|---------|
 | `embed` | Enable embed mode (full viewport, floating panel) | `?embed=true` |
 | `switcher` | Show/hide 2D↔3D switcher in embed mode (default: shown) | `?switcher=false` |
+| `activate` | Embed activation: `click` requires click overlay before scroll/zoom works (default: immediate) | `?activate=click` |
 | `svgBaseUrl` | Base URL for local SVG images | `?svgBaseUrl=./svg/` |
 | `layout` | Graph layout (2D only): `clustered`, `physics`, `barnesHut`, `repulsion`, `circle`, `hierarchicalUD`, `hierarchicalDU`, `hierarchicalLR` | `?layout=circle` |
 

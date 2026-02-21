@@ -21,7 +21,8 @@ Both viewers include an "Embed" button that opens a modal with options:
 1. **Viewer**: Choose 2D or 3D
 2. **Show 2D/3D switcher**: Toggle the switcher button (checked by default)
 3. **Preserve viewport**: Include current zoom/camera position (unchecked by default)
-4. **Width/Height**: Customize iframe dimensions (supports px or %)
+4. **Require click to interact**: Show overlay requiring click before scroll/zoom works (unchecked by default)
+5. **Width/Height**: Customize iframe dimensions (supports px or %)
 
 The generator creates an iframe code snippet with all current state preserved (filters, selections, data).
 
@@ -90,6 +91,22 @@ Add `&switcher=false` to hide the 2D↔3D toggle button:
   allowfullscreen>
 </iframe>
 ```
+
+## Click-to-Activate Overlay
+
+For embeds in scrollable pages, add `&activate=click` to prevent accidental scroll/zoom capture. This shows an overlay requiring users to click before interacting with the graph:
+
+```html
+<iframe
+  src="https://ck.innerlogics.com/?embed=true&kitties=124653&activate=click"
+  width="800"
+  height="600"
+  frameborder="0"
+  allowfullscreen>
+</iframe>
+```
+
+This is useful when the embed appears in a long article where visitors might scroll past and accidentally trigger zoom/pan interactions.
 
 ## Configuration for Embeds
 

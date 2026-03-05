@@ -8,8 +8,8 @@ Options -Indexes
 RewriteEngine On
 
 # Force HTTPS (uncomment if SSL is configured)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Remove www (optional - uncomment if desired)
 # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
